@@ -1,0 +1,456 @@
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+namespace Engine.Managers;
+
+/// <summary>
+/// Thread-safe singleton implementation for the Visual Layer manager
+/// </summary>
+public class VisualLayerManager
+{
+    private static volatile VisualLayerManager? _instance = null;
+    private static object syncRoot = new object();
+
+    private VisualLayerManager()
+    {
+
+    }
+
+    private SDL_Color[] _currentPalette = new SDL_Color[256];
+
+    private IntPtr _window;
+    private IntPtr _renderer;
+    private IntPtr _texture;
+    private IntPtr _screen;
+    private IntPtr _screenBuffer;
+    private uint _screenPitch;
+    private uint _bufferPitch;
+
+    private bool _screenFaded = false; // TODO: What is this all used for?
+
+    private uint[] _ylookup = new uint[Constants.ScreenHeight];
+
+    /// <summary>
+    /// The instance of the singleton
+    /// safe for multithreading
+    /// </summary>
+    public static VisualLayerManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                // only create a new instance if one doesn't already exist.
+                lock (syncRoot)
+                {
+                    // use this lock to ensure that only one thread can access
+                    // this block of code at once.
+                    if (_instance == null)
+                    {
+                        _instance = new VisualLayerManager();
+                    }
+                }
+            }
+
+            return _instance;
+        }
+    }
+
+    public void Start()
+    {
+        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0)
+        {
+            Console.WriteLine($"There was an issue initilizing SDL. {SDL_GetError()}");
+        }
+    }
+
+    public void Initialize(bool fullscreen = false)
+    {
+        // Create a new window given a title, size, and passes it a flag indicating it should be shown.
+        _window = SDL.SDL_CreateWindow("Wolfenstein 3-D", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, Constants.ScreenWidth, Constants.ScreenHeight, (fullscreen ? SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0) | SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
+
+        if (_window == IntPtr.Zero)
+        {
+            Console.WriteLine($"There was an issue creating the window. {SDL_GetError()}");
+        }
+
+        SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ARGB8888, out var screenBits, out var r, out var g, out var b, out var a);
+
+        _screen = SDL.SDL_CreateRGBSurface(0, Constants.ScreenWidth, Constants.ScreenHeight, screenBits, r, g, b, a);
+        if (_screen == IntPtr.Zero)
+        {
+            Console.WriteLine($"There was an issue creating the screen. {SDL_GetError()}");
+        }
+
+        // Creates a new SDL hardware renderer using the default graphics device with VSYNC enabled.
+        _renderer = SDL.SDL_CreateRenderer(_window,
+                                                -1,
+                                                SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED |
+                                                SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
+
+        if (_renderer == IntPtr.Zero)
+        {
+            Console.WriteLine($"There was an issue creating the renderer. {SDL.SDL_GetError()}");
+        }
+
+        SDL_SetRenderDrawBlendMode(_renderer, SDL_BlendMode.SDL_BLENDMODE_BLEND);
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+
+        SDL_ShowCursor(SDL_DISABLE);
+        SDL_Surface sdl_screen = (SDL_Surface)Marshal.PtrToStructure(_screen, typeof(SDL_Surface));
+        SDL_PixelFormat sdl_screen_format = (SDL_PixelFormat)Marshal.PtrToStructure(sdl_screen.format, typeof(SDL_PixelFormat));
+
+        SDL_SetPaletteColors(sdl_screen_format.palette, GamePal.BasePalette, 0, 256);
+
+        // Set palette global variable
+        Array.Copy(GamePal.BasePalette, _currentPalette, 256);
+
+        _screenBuffer = SDL.SDL_CreateRGBSurface(0, Constants.ScreenWidth, Constants.ScreenHeight, 8, 0, 0, 0, 0);
+        if (_screenBuffer == IntPtr.Zero)
+        {
+            Console.WriteLine($"There was an issue creating the screenbuffer. {SDL.SDL_GetError()}");
+        }
+        SDL_Surface sdl_screenbuffer = (SDL_Surface)Marshal.PtrToStructure(_screenBuffer, typeof(SDL_Surface));
+        SDL_PixelFormat sdl_screenbuffer_format = (SDL_PixelFormat)Marshal.PtrToStructure(sdl_screenbuffer.format, typeof(SDL_PixelFormat));
+
+        SDL_SetPaletteColors(sdl_screenbuffer_format.palette, GamePal.BasePalette, 0, 256);
+
+        _texture = SDL_CreateTexture(
+            _renderer,
+            SDL_PIXELFORMAT_ARGB8888,
+            (int)SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING,
+            Constants.ScreenWidth, Constants.ScreenHeight);
+
+        _bufferPitch = (uint)sdl_screenbuffer.pitch;
+        Globals.ScaleFactor = Constants.ScreenWidth / 320;
+
+        for (var i = 0; i < Constants.ScreenHeight; i++)
+            _ylookup[i] = (uint)(i * _bufferPitch);
+    }
+
+    public void WaitVBL(uint a)
+    {
+        SDL_Delay((a) * 8);
+    }
+
+    public void FadeOut()
+    {
+        FadeOut(steps: 30);
+    }
+    public void FadeOut(int steps)
+    {
+        FadeOut(start: 0, end: 255, red: 0, green: 0, blue: 0, steps);
+    }    
+
+    public void FadeIn()
+    {
+        FadeIn(30);
+    }
+    public void FadeIn(int steps)
+    {
+        FadeIn(0, 255, GamePal.BasePalette, steps);
+    }
+
+    public void UpdateScreen()
+    {
+        UpdateScreen(_screenBuffer);
+    }
+
+    public void DrawPic(int x, int y, string picName)
+    {
+        var chunknum = 0;
+
+        switch (picName)
+        {
+            case "PG13":
+                chunknum = 88;
+                break;
+            case "TITLE":
+                chunknum = 87;
+                break;
+        }
+        int picnum = chunknum - Constants.StartPics;
+        short width, height;
+
+        x &= ~7;
+
+        var pictable = DataFileManager.Instance.pictable;
+        var grsegs = DataFileManager.Instance.grsegs;
+
+        width = pictable[picnum].width;
+        height = pictable[picnum].height;
+
+        MemToScreen(grsegs[chunknum], width, height, x, y);
+    }
+
+    // TODO: This should not be public as a byte[], only an "asset", which this handles
+    public void MemToScreen(byte[] source, int width, int height, int x, int y)
+    {
+        MemToScreenScaledCoord(_screenBuffer, source, width, height, Globals.ScaleFactor * x, Globals.ScaleFactor * y);
+    }
+
+    // TODO: This should not obe public as a byte[], only an "asset lookup", which this handles
+    public void MemToScreenScaledCoord(IntPtr screenBuffer, byte[] source, int width, int height, int destx, int desty)
+    {
+        byte[] dest;
+        int i, j, sci, scj;
+        uint m, n;
+
+        IntPtr dest_ptr = LockSurface(screenBuffer);
+        if (dest_ptr == IntPtr.Zero) return;
+
+        int size = Constants.ScreenWidth * Constants.ScreenHeight; // screen size
+        dest = new byte[size];
+        Marshal.Copy(dest_ptr, dest, 0, size);
+
+        for (j = 0, scj = 0; j < height; j++, scj += Globals.ScaleFactor)
+        {
+            for (i = 0, sci = 0; i < width; i++, sci += Globals.ScaleFactor)
+            {
+                byte col = source[(j * width) + i];
+                for (m = 0; m < Globals.ScaleFactor; m++)
+                {
+                    for (n = 0; n < Globals.ScaleFactor; n++)
+                    {
+                        dest[_ylookup[scj + m + desty] + sci + n + destx] = col;
+                    }
+                }
+            }
+        }
+
+        SDL_Surface sdl_screenbuffer = (SDL_Surface)Marshal.PtrToStructure(screenBuffer, typeof(SDL_Surface));
+        GCHandle pinnedArray = GCHandle.Alloc(dest, GCHandleType.Pinned);
+        IntPtr dest_pointer = pinnedArray.AddrOfPinnedObject();
+        sdl_screenbuffer.pixels = dest_pointer;
+        Marshal.StructureToPtr(sdl_screenbuffer, screenBuffer, false);
+
+        UnlockSurface(screenBuffer);
+    }
+
+    public void DrawRectangle(int x, int y, int width, int height, byte color)
+    {
+        DrawRectangleScaledCoord(Globals.ScaleFactor * x, Globals.ScaleFactor * y, Globals.ScaleFactor * width, Globals.ScaleFactor * height, color);
+    }
+
+    public void DrawRectangleScaledCoord(int scx, int scy, int scwidth, int scheight, byte color)
+    {
+        byte[] dest;
+        IntPtr dest_ptr = LockSurface(_screenBuffer);
+        if (dest_ptr == IntPtr.Zero) return;
+
+        int size = Constants.ScreenWidth * Constants.ScreenHeight; // screen size
+        dest = new byte[size];
+        Marshal.Copy(dest_ptr, dest, 0, size);
+
+        var firstPosition = _ylookup[scy] + scx;
+        var position = firstPosition;
+
+        for (int i = 0; i < scheight; i++)
+        {
+            //memset(dest, color, scwidth);
+            for (int scw = 0; scw < scwidth; scw++)
+            {
+                dest[position + scw] = color;
+            }
+
+            position += _bufferPitch;
+        }
+
+        SDL_Surface sdl_screenbuffer = (SDL_Surface)Marshal.PtrToStructure(_screenBuffer, typeof(SDL_Surface));
+        GCHandle pinnedArray = GCHandle.Alloc(dest, GCHandleType.Pinned);
+        IntPtr dest_pointer = pinnedArray.AddrOfPinnedObject();
+        sdl_screenbuffer.pixels = dest_pointer;
+        Marshal.StructureToPtr(sdl_screenbuffer, _screenBuffer, false);
+        UnlockSurface(_screenBuffer);
+    }
+
+    public void Shutdown() // Dispose?
+    {
+        // Clean up the resources that were created.
+        SDL_FreeSurface(_screen);
+        SDL_FreeSurface(_screenBuffer);
+        SDL.SDL_DestroyTexture(_texture);
+        SDL.SDL_DestroyRenderer(_renderer);
+        SDL.SDL_DestroyWindow(_window);
+    }
+
+    #region Private Methods
+    /// <summary>
+    /// Fills the palette with a single color
+    /// </summary>
+    /// <param name="red"></param>
+    /// <param name="green"></param>
+    /// <param name="blue"></param>
+    private void FillPalette(byte red, byte green, byte blue)
+    {
+        int i;
+        SDL_Color[] pal = new SDL_Color[256];
+
+        for (i = 0; i < 256; i++)
+        {
+            pal[i].r = red;
+            pal[i].g = green;
+            pal[i].b = blue;
+        }
+
+        SetPalette(pal, true);
+    }
+
+    private void SetPalette(SDL_Color[] palette, bool forceupdate)
+    {
+        Array.Copy(palette, _currentPalette, 256);
+
+        if (Constants.ScreenBits == 8) // This shouldn't be a constant, it should be a gamesetting
+        {
+            // TODO: Null checking on these
+            SDL_Surface sdl_screen = (SDL_Surface)Marshal.PtrToStructure(_screen, typeof(SDL_Surface));
+            SDL_PixelFormat sdl_screen_format = (SDL_PixelFormat)Marshal.PtrToStructure(sdl_screen.format, typeof(SDL_PixelFormat));
+
+            SDL_SetPaletteColors(sdl_screen_format.palette, palette, 0, 256);
+        }
+
+        SDL_Surface sdl_screenBuffer = (SDL_Surface)Marshal.PtrToStructure(_screenBuffer, typeof(SDL_Surface));
+        SDL_PixelFormat sdl_screenBuffer_format = (SDL_PixelFormat)Marshal.PtrToStructure(sdl_screenBuffer.format, typeof(SDL_PixelFormat));
+
+        SDL_SetPaletteColors(sdl_screenBuffer_format.palette, palette, 0, 256);
+
+        if (forceupdate)
+        {
+            UpdateScreen(_screenBuffer);
+        }
+    }
+
+    private void UpdateScreen(IntPtr surface)
+    {
+        SDL_BlitSurface(surface, ref Unsafe.NullRef<SDL_Rect>(), _screen, ref Unsafe.NullRef<SDL_Rect>());
+
+        Present(_screen);
+    }
+
+    private void Present(IntPtr screen)
+    {
+        SDL_Surface sdl_screen = (SDL_Surface)Marshal.PtrToStructure(screen, typeof(SDL_Surface));
+        SDL_UpdateTexture(_texture, ref Unsafe.NullRef<SDL_Rect>(), sdl_screen.pixels, Constants.ScreenWidth * sizeof(uint));
+        SDL_RenderClear(_renderer);
+        SDL_RenderCopy(_renderer, _texture, ref Unsafe.NullRef<SDL_Rect>(), ref Unsafe.NullRef<SDL_Rect>());
+        SDL_RenderPresent(_renderer);
+    }
+    private IntPtr LockSurface(IntPtr surface)
+    {
+        if (SDL_MUSTLOCK(surface))
+        {
+            if (SDL_LockSurface(surface) < 0)
+                return IntPtr.Zero;
+        }
+
+        SDL_Surface sdl_surface = (SDL_Surface)Marshal.PtrToStructure(surface, typeof(SDL_Surface));
+        return sdl_surface.pixels;
+    }
+
+    private void UnlockSurface(IntPtr surface)
+    {
+        if (SDL_MUSTLOCK(surface))
+        {
+            SDL_UnlockSurface(surface);
+        }
+    }
+    private byte GetPixel(int x, int y)
+    {
+        byte col;
+
+        IntPtr dest_ptr = LockSurface(_screenBuffer);
+        if (dest_ptr == IntPtr.Zero)
+            return 0;
+
+        int size = Constants.ScreenWidth * Constants.ScreenHeight; // screen size
+        var dest = new byte[size];
+        Marshal.Copy(dest_ptr, dest, 0, size);
+        col = dest[_ylookup[y] + x];
+
+        UnlockSurface(_screenBuffer);
+
+        return col;
+    }
+
+    private void FadeOut(int start, int end, byte red, byte green, byte blue, int steps)
+    {
+        int i, j, orig, delta;
+        SDL_Color[] palette1 = new SDL_Color[256];
+        SDL_Color[] palette2 = new SDL_Color[256];
+
+        WaitVBL(1); // wait 8 tics
+
+        Array.Copy(_currentPalette, palette1, 256);
+        Array.Copy(palette1, palette2, 256);
+
+        //
+        // fade through intermediate frames
+        //
+        for (i = 0; i < steps; i++)
+        {
+            // start and end are 0 to 255
+            // its possible to only fade out specific colors of the palette
+            for (j = start; j <= end; j++)
+            {
+                var originalColor = palette1[j];
+                orig = originalColor.r;
+                delta = red - orig;
+                palette2[j].r = (byte)(orig + delta * i / steps);
+                orig = originalColor.g;
+                delta = green - orig;
+                palette2[j].g = (byte)(orig + delta * i / steps);
+                orig = originalColor.b;
+                delta = blue - orig;
+                palette2[j].b = (byte)(orig + delta * i / steps);
+            }
+
+            if (!Constants.UseDoubleBuffering || Constants.ScreenBits == 8) WaitVBL(1);
+            SetPalette(palette2, true);
+        }
+
+        //
+        // final color
+        //
+        FillPalette(red, green, blue);
+
+        _screenFaded = true;
+    }
+
+    private void FadeIn(int start, int end, SDL_Color[] palette, int steps)
+    {
+        int i, j, delta;
+        SDL_Color[] palette1 = new SDL_Color[256];
+        SDL_Color[] palette2 = new SDL_Color[256];
+
+        WaitVBL(1);
+        Array.Copy(_currentPalette, palette1, 256);
+        Array.Copy(palette1, palette2, 256);
+
+        //
+        // fade through intermediate frames
+        //
+        for (i = 0; i < steps; i++)
+        {
+            for (j = start; j <= end; j++)
+            {
+                delta = palette[j].r - palette1[j].r;
+                palette2[j].r = (byte)(palette1[j].r + delta * i / steps);
+                delta = palette[j].g - palette1[j].g;
+                palette2[j].g = (byte)(palette1[j].g + delta * i / steps);
+                delta = palette[j].b - palette1[j].b;
+                palette2[j].b = (byte)(palette1[j].b + delta * i / steps);
+            }
+
+            if (!Constants.UseDoubleBuffering || Constants.ScreenBits == 8) WaitVBL(1);
+            SetPalette(palette2, true);
+        }
+
+        //
+        // final color
+        //
+        SetPalette(palette, true);
+        _screenFaded = false;
+    }
+
+    #endregion
+}
