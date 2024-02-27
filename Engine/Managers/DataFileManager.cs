@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Compression;
+using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -38,12 +39,6 @@ public class DataFileManager
         }
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    struct huffnode
-    {
-        public ushort bit0;
-        public ushort bit1;
-    }
 
     public struct pictabletype
     {
@@ -64,23 +59,6 @@ public class DataFileManager
         // Load dictionary
         byte[] dictionaryFile = File.ReadAllBytes($"{tempDirectory}{graphicsDictionaryFileName}.{fileExtension}");
 
-        var grHuffman = new huffnode[255];
-        var grHuffmanSize = (Marshal.SizeOf(typeof(huffnode)) * grHuffman.Length);
-        int i, j;
-        for (i = 0, j = 0; i < grHuffmanSize; j++, i += Marshal.SizeOf(typeof(huffnode)))
-        {
-            var huffBytes = dictionaryFile.Skip(i).Take(Marshal.SizeOf(typeof(huffnode))).ToArray();
-            IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(huffnode)));
-            try
-            {
-                Marshal.Copy(huffBytes, 0, ptr, Marshal.SizeOf(typeof(huffnode)));
-                grHuffman[j] = (huffnode)Marshal.PtrToStructure(ptr, typeof(huffnode));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(ptr);
-            } 
-        }
 
         // Load header
         var headerLength = new FileInfo($"{tempDirectory}{graphicsHeaderFileName}.{fileExtension}").Length;
@@ -97,7 +75,7 @@ public class DataFileManager
 
         byte[] headerFile = File.ReadAllBytes($"{tempDirectory}{graphicsHeaderFileName}.{fileExtension}");
 
-        for (i = 0; i != grstarts.Length; i++)
+        for (var i = 0; i != grstarts.Length; i++)
         {
             var d0 = headerFile[i * magic3];
             var d1 = headerFile[i * magic3 + 1];
@@ -118,69 +96,18 @@ public class DataFileManager
 
 
         var pictableSize = (Marshal.SizeOf(typeof(pictabletype)) * pictable.Length);
-        var destTable = CAL_HuffExpand(compseg, pictableSize, grHuffman);
 
+        var compression = new HuffmanCompression(dictionaryFile);
+        var destTable = compression.Expand(compseg, pictableSize);
+            
         pictable = ByteArrayToStuctureArray<pictabletype>(destTable, pictable.Length);
         //free(compseg);
 
-        CA_CacheGrChunks(grstarts, grsegs, graphicsFile, grHuffman);
+        CA_CacheGrChunks(grstarts, grsegs, graphicsFile, compression);
 
     }
 
-    byte[] CAL_HuffExpand(byte[] source, int length, huffnode[] hufftable)
-    {
-        byte[] dest = new byte[length];
-
-        if (length == 0)
-        {
-            throw new Exception("CAL_HuffExpand: length or pictableLength is 0");
-        }
-
-        // Set the head node to the last index of the hufftable
-        var headptr = hufftable[254];        // head node is always node 254
-
-        // set the end value
-        var destIndex = 0;
-
-        // take the next value from source
-        int sourceIndex = 0;
-        byte val = source[sourceIndex++];
-        byte mask = 1;
-        ushort nodeval;
-
-        // Set the huffptr to the head of the tree
-        var huffptr = headptr;
-        while (true)
-        {
-            // check if the val matches the mask bit (2^n)
-            if ((val & mask) == 0)
-                nodeval = huffptr.bit0;
-            else
-                nodeval = huffptr.bit1;
-            if (mask == 0x80) // if mask is 128, 2^7
-            {
-                val = source[sourceIndex++]; // get next source void
-                mask = 1;           // start mask back to 1
-            }
-            else mask <<= 1; // bit shift mask left by 1
-
-            if (nodeval < 256)
-            {
-                dest[destIndex++] = (byte)nodeval;
-                huffptr = headptr; // start huffptr back at head
-                if (destIndex >= length) break; // if end is reached, done
-            }
-            else
-            {
-                // set ptr to table[nodeval- 256]
-                huffptr = hufftable[nodeval - 256];
-            }
-        }
-
-        return dest;
-    }
-
-    void CA_CacheGrChunks(int[] grstarts, byte[][] grsegs, byte[] graphicsFile, huffnode[] grHuffman)
+    void CA_CacheGrChunks(int[] grstarts, byte[][] grsegs, byte[] graphicsFile, ICompression compression)
     {
         int pos, compressed;
         //int* bufferseg;
@@ -217,7 +144,7 @@ public class DataFileManager
 
             //read(grhandle, source, compressed);
 
-            CAL_ExpandGrChunk(chunk, source, grHuffman);
+            CAL_ExpandGrChunk(chunk, source, compression);
 
             if (chunk >= Constants.StartPics && chunk < Constants.StartExterns)
                 CAL_DeplaneGrChunk(chunk);
@@ -225,7 +152,7 @@ public class DataFileManager
             //free(bufferseg);
         }
     }
-    void CAL_ExpandGrChunk(int chunk, byte[] source, huffnode[] grHuffman)
+    void CAL_ExpandGrChunk(int chunk, byte[] source, ICompression compression)
     {
         int expanded;
         int sourceIndex = 0;
@@ -265,7 +192,7 @@ const int MASKBLOCK    =   128;
         //
         //grsegs[chunk] = new byte[expanded];// SafeMalloc(expanded);
 
-        grsegs[chunk] = CAL_HuffExpand(source.Skip(4).ToArray(), expanded, grHuffman);
+        grsegs[chunk] = compression.Expand(source.Skip(4).ToArray(), expanded);
     }
     void CAL_DeplaneGrChunk(int chunk)
     {
