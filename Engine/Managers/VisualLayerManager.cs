@@ -168,6 +168,9 @@ public class VisualLayerManager
             case "TITLE":
                 chunknum = 87;
                 break;
+            case "CREDITS":
+                chunknum = 89;
+                break;
         }
         int picnum = chunknum - Constants.StartPics;
         short width, height;
