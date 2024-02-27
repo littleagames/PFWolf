@@ -50,27 +50,27 @@ void InitGame() {
 
 void SignonScreen()
 {
-    VisualLayerManager.Instance.Initialize(fullscreen: false);
-
-    VisualLayerManager.Instance.MemToScreen(Signon.SignOn, 320, 200, 0, 0);
-
-    VisualLayerManager.Instance.UpdateScreen();
+    var vl = VisualLayerManager.Instance;
+    vl.Initialize(fullscreen: false);
+    vl.MemToScreen(Signon.SignOn, 320, 200, 0, 0);
+    vl.UpdateScreen();
 }
 
 void FinishSignon()
 {
-    VisualLayerManager.Instance.DrawRectangle(0, 189, 300, 11, 0x29);
+    var vl = VisualLayerManager.Instance;
+    vl.DrawRectangle(0, 189, 300, 11, 0x29);
 
     //US_CPrint("Press a key");
-    VisualLayerManager.Instance.UpdateScreen();
+    vl.UpdateScreen();
 
-    VisualLayerManager.Instance.WaitVBL(70 * 3);
+    vl.WaitVBL(70 * 3);
 
     //US_CPrint("Working...");
     //ID_VL.VW_UpdateScreen();
 
     // This should be the end of the "Signon" screen
-    VisualLayerManager.Instance.FadeOut();
+    vl.FadeOut();
     /*
      
     WindowX = 0;
@@ -114,36 +114,52 @@ void FinishSignon()
 
 void DemoLoop()
 {
+    //NonShareware();
     PG13();
     TitleScreen();
+    Credits();
+    //Demo?
 }
 
 void PG13()
 {
-    VisualLayerManager.Instance.DrawRectangle(0, 0, 320, 200, 0x82); // background
+    var vl = VisualLayerManager.Instance;
+    // draw
+    vl.DrawRectangle(0, 0, 320, 200, 0x82); // background
 
-    VisualLayerManager.Instance.DrawPic(216, 110, "PG13");
-    VisualLayerManager.Instance.UpdateScreen();
+    vl.DrawPic(216, 110, "PG13");
+    vl.UpdateScreen();
 
-    VisualLayerManager.Instance.FadeIn();
+    // OnStart
+    vl.FadeIn();
 
-    VisualLayerManager.Instance.WaitVBL(70 * 7);
+    // ??? OnKeyPress, or in Update
+    vl.WaitVBL(70 * 7);
     //IN_UserInput(TickBase * 7);
 
-    VisualLayerManager.Instance.FadeOut();
+    // OnLeave
+    vl.FadeOut();
 }
 
 void TitleScreen()
 {
-    VisualLayerManager.Instance.DrawRectangle(0, 0, 320, 200, 0x01); // background
+    var vl = VisualLayerManager.Instance;
 
-    VisualLayerManager.Instance.DrawPic(0, 0, "TITLE");
+    vl.DrawRectangle(0, 0, 320, 200, 0x01); // background
+    vl.DrawPic(0, 0, "TITLE");
+    vl.UpdateScreen();
+    vl.FadeIn();
+    vl.WaitVBL(70 * 7);
+    vl.FadeOut();
+}
+void Credits()
+{
+    var vl = VisualLayerManager.Instance;
 
-    VisualLayerManager.Instance.UpdateScreen();
-
-    VisualLayerManager.Instance.FadeIn();
-
-    VisualLayerManager.Instance.WaitVBL(70 * 7);
-
-    VisualLayerManager.Instance.FadeOut();
+    vl.DrawRectangle(0, 0, 320, 200, 0x01); // background
+    vl.DrawPic(0, 0, "CREDITS");
+    vl.UpdateScreen();
+    vl.FadeIn();
+    vl.WaitVBL(70 * 7);
+    vl.FadeOut();
 }
