@@ -1,6 +1,7 @@
 ﻿// Initializes SDL.
 using Engine;
 using Engine.Managers;
+using Engine.Managers.Graphics;
 
 InitGame();
 
@@ -27,19 +28,19 @@ while (running)
 }
 
 // Clean up the resources that were created.
-VisualLayerManager.Instance.Shutdown();
+VideoLayerManager.Instance.Shutdown();
 SDL.SDL_Quit();
 
 // END
 
 void InitGame() {
-    VisualLayerManager.Instance.Start();
+    VideoLayerManager.Instance.Start();
 
     // TODO: Joystick setup
 
     SignonScreen();
 
-    DataFileManager.Instance.LoadDataFiles();
+    VgaGraphicsManager.Instance.LoadDataFiles();
 
     // TODO:
     // ID startups
@@ -50,7 +51,7 @@ void InitGame() {
 
 void SignonScreen()
 {
-    var vl = VisualLayerManager.Instance;
+    var vl = VideoLayerManager.Instance;
     vl.Initialize(fullscreen: false);
     vl.MemToScreen(Signon.SignOn, 320, 200, 0, 0);
     vl.UpdateScreen();
@@ -58,7 +59,7 @@ void SignonScreen()
 
 void FinishSignon()
 {
-    var vl = VisualLayerManager.Instance;
+    var vl = VideoLayerManager.Instance;
     vl.DrawRectangle(0, 189, 300, 11, 0x29);
 
     //US_CPrint("Press a key");
@@ -123,7 +124,7 @@ void DemoLoop()
 
 void PG13()
 {
-    var vl = VisualLayerManager.Instance;
+    var vl = VideoLayerManager.Instance;
     // draw
     vl.DrawRectangle(0, 0, 320, 200, 0x82); // background
 
@@ -143,7 +144,7 @@ void PG13()
 
 void TitleScreen()
 {
-    var vl = VisualLayerManager.Instance;
+    var vl = VideoLayerManager.Instance;
 
     vl.DrawRectangle(0, 0, 320, 200, 0x01); // background
     vl.DrawPic(0, 0, "TITLE");
@@ -154,7 +155,7 @@ void TitleScreen()
 }
 void Credits()
 {
-    var vl = VisualLayerManager.Instance;
+    var vl = VideoLayerManager.Instance;
 
     vl.DrawRectangle(0, 0, 320, 200, 0x01); // background
     vl.DrawPic(0, 0, "CREDITS");

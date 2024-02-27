@@ -3,21 +3,24 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace Engine.Managers;
+namespace Engine.Managers.Graphics;
 
-public class DataFileManager
+/// <summary>
+/// Handles the work of reading the base files and loading those into a basic format to be consumed
+/// </summary>
+public class VgaGraphicsManager
 {
-    private static volatile DataFileManager? _instance = null;
+    private static volatile VgaGraphicsManager? _instance = null;
     private static object syncRoot = new object();
 
     public byte[][] grsegs = new byte[Constants.NumChunks][];
     public pictabletype[] pictable = new pictabletype[Constants.NumPics];
 
-    private DataFileManager()
-    {   
+    private VgaGraphicsManager()
+    {
     }
 
-    public static DataFileManager Instance
+    public static VgaGraphicsManager Instance
     {
         get
         {
@@ -30,7 +33,7 @@ public class DataFileManager
                     // this block of code at once.
                     if (_instance == null)
                     {
-                        _instance = new DataFileManager();
+                        _instance = new VgaGraphicsManager();
                     }
                 }
             }
@@ -68,7 +71,7 @@ public class DataFileManager
         var grstarts = new int[Constants.NumChunks + 1];
         var expectedSize = grstarts.Length; // NUMCHUNKS
 
-        if ((headerLength / magic3) != expectedSize) // What does the 3 mean? Why 3?
+        if (headerLength / magic3 != expectedSize) // What does the 3 mean? Why 3?
         {
             throw new Exception("VGA File is not right");
         }
@@ -81,7 +84,7 @@ public class DataFileManager
             var d1 = headerFile[i * magic3 + 1];
             var d2 = headerFile[i * magic3 + 2];
             int val = d0 | d1 << 8 | d2 << 16;
-            grstarts[i] = (val == 0x00FFFFFF ? -1 : val);
+            grstarts[i] = val == 0x00FFFFFF ? -1 : val;
         }
 
         // Expand and Load graphics
@@ -92,14 +95,14 @@ public class DataFileManager
 
         //chunkexplen = BitConverter.ToInt32(graphicsFile.Skip(filePos).Take(4).ToArray(), 0);
         chunkcomplen = grstarts[Constants.StructPic + 1] - grstarts[Constants.StructPic] - 4;
-        var compseg = graphicsFile.Skip(filePos+4).Take(chunkcomplen).ToArray();
+        var compseg = graphicsFile.Skip(filePos + 4).Take(chunkcomplen).ToArray();
 
 
-        var pictableSize = (Marshal.SizeOf(typeof(pictabletype)) * pictable.Length);
+        var pictableSize = Marshal.SizeOf(typeof(pictabletype)) * pictable.Length;
 
         var compression = new HuffmanCompression(dictionaryFile);
         var destTable = compression.Expand(compseg, pictableSize);
-            
+
         pictable = ByteArrayToStuctureArray<pictabletype>(destTable, pictable.Length);
         //free(compseg);
 
@@ -163,8 +166,8 @@ public class DataFileManager
             // expanded sizes of tile8/16/32 are implicit
             //
 
-const int BLOCK        =   64;
-const int MASKBLOCK    =   128;
+            const int BLOCK = 64;
+            const int MASKBLOCK = 128;
 
             //if (chunk < STARTTILE8M)          // tile 8s are all in one chunk!
             //    expanded = BLOCK * NUMTILE8;
@@ -177,7 +180,7 @@ const int MASKBLOCK    =   128;
             //else if (chunk < STARTTILE32M)
             //    expanded = BLOCK * 16;
             //else
-                expanded = MASKBLOCK * 16;
+            expanded = MASKBLOCK * 16;
         }
         else
         {
@@ -241,7 +244,7 @@ const int MASKBLOCK    =   128;
             for (y = 0; y < height; y++)
             {
                 for (x = 0; x < pwidth; x++)
-                    dest[(width * y) + ((x << 2) + plane)] = srcline[srcLineIndex++];
+                    dest[width * y + (x << 2) + plane] = srcline[srcLineIndex++];
             }
         }
 
@@ -254,7 +257,7 @@ const int MASKBLOCK    =   128;
     private static T[] ByteArrayToStuctureArray<T>(byte[] bytes, int lengthOfT) where T : struct
     {
         var outT = new T[lengthOfT];
-        var grHuffmanSize = (Marshal.SizeOf(typeof(T)) * lengthOfT);
+        var grHuffmanSize = Marshal.SizeOf(typeof(T)) * lengthOfT;
         int i, j;
         for (i = 0, j = 0; i < grHuffmanSize; j++, i += Marshal.SizeOf(typeof(T)))
         {

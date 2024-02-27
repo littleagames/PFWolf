@@ -1,17 +1,18 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Engine.Managers.Graphics;
 
 namespace Engine.Managers;
 
 /// <summary>
 /// Thread-safe singleton implementation for the Visual Layer manager
 /// </summary>
-public class VisualLayerManager
+public class VideoLayerManager
 {
-    private static volatile VisualLayerManager? _instance = null;
+    private static volatile VideoLayerManager? _instance = null;
     private static object syncRoot = new object();
 
-    private VisualLayerManager()
+    private VideoLayerManager()
     {
 
     }
@@ -34,7 +35,7 @@ public class VisualLayerManager
     /// The instance of the singleton
     /// safe for multithreading
     /// </summary>
-    public static VisualLayerManager Instance
+    public static VideoLayerManager Instance
     {
         get
         {
@@ -47,7 +48,7 @@ public class VisualLayerManager
                     // this block of code at once.
                     if (_instance == null)
                     {
-                        _instance = new VisualLayerManager();
+                        _instance = new VideoLayerManager();
                     }
                 }
             }
@@ -177,8 +178,8 @@ public class VisualLayerManager
 
         x &= ~7;
 
-        var pictable = DataFileManager.Instance.pictable;
-        var grsegs = DataFileManager.Instance.grsegs;
+        var pictable = VgaGraphicsManager.Instance.pictable;
+        var grsegs = VgaGraphicsManager.Instance.grsegs;
 
         width = pictable[picnum].width;
         height = pictable[picnum].height;
