@@ -1,4 +1,5 @@
 ﻿using Engine.Compression;
+using Engine.DataModels;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -8,13 +9,14 @@ namespace Engine.Managers.Graphics;
 /// <summary>
 /// Handles the work of reading the base files and loading those into a basic format to be consumed
 /// </summary>
-public class VgaGraphicsManager
+public class VgaGraphicsManager : IGraphicsManager
 {
     private static volatile VgaGraphicsManager? _instance = null;
     private static object syncRoot = new object();
 
-    public byte[][] grsegs = new byte[Constants.NumChunks][];
-    public pictabletype[] pictable = new pictabletype[Constants.NumPics];
+    // TODO: Turn this into an object that can be read by other things
+    private byte[][] grsegs = new byte[Constants.NumChunks][];
+    private pictabletype[] pictable = new pictabletype[Constants.NumPics];
 
     private VgaGraphicsManager()
     {
@@ -42,8 +44,28 @@ public class VgaGraphicsManager
         }
     }
 
+    public Graphic GetGraphic(string name)
+    {
+        var chunkNum = LookupChunkByName(name);
+        var picdata = pictable[chunkNum - Constants.StartPics];
 
-    public struct pictabletype
+        return new Graphic
+        {
+            Data = grsegs[chunkNum],
+            Width = (ushort)picdata.width,
+            Height = (ushort)picdata.height
+        };
+    }
+
+    private int LookupChunkByName(string name)
+    {
+        if (!GraphicNameChunkMapping.TryGetValue(name.ToLowerInvariant(), out var mapping))
+            throw new KeyNotFoundException(name);
+
+        return mapping;
+    }
+
+    private struct pictabletype
     {
         public short width, height;
     }
@@ -110,7 +132,7 @@ public class VgaGraphicsManager
 
     }
 
-    void CA_CacheGrChunks(int[] grstarts, byte[][] grsegs, byte[] graphicsFile, ICompression compression)
+    private void CA_CacheGrChunks(int[] grstarts, byte[][] grsegs, byte[] graphicsFile, ICompression compression)
     {
         int pos, compressed;
         //int* bufferseg;
@@ -155,7 +177,7 @@ public class VgaGraphicsManager
             //free(bufferseg);
         }
     }
-    void CAL_ExpandGrChunk(int chunk, byte[] source, ICompression compression)
+    private void CAL_ExpandGrChunk(int chunk, byte[] source, ICompression compression)
     {
         int expanded;
         int sourceIndex = 0;
@@ -197,7 +219,7 @@ public class VgaGraphicsManager
 
         grsegs[chunk] = compression.Expand(source.Skip(4).ToArray(), expanded);
     }
-    void CAL_DeplaneGrChunk(int chunk)
+    private void CAL_DeplaneGrChunk(int chunk)
     {
         int i;
         short width, height;
@@ -217,7 +239,7 @@ public class VgaGraphicsManager
             VL_DePlaneVGA(grsegs[chunk], width, height);
         }
     }
-    void VL_DePlaneVGA(byte[] source, int width, int height)
+    private void VL_DePlaneVGA(byte[] source, int width, int height)
     {
         int x, y, plane;
         ushort size, pwidth;
@@ -276,4 +298,140 @@ public class VgaGraphicsManager
 
         return outT;
     }
+
+    private Dictionary<string, int> GraphicNameChunkMapping = new Dictionary<string, int>
+    {
+        { "readthis/bj",3 },
+        { "readthis/castle", 4 },
+        { "readthis/blaze", 5 },
+        { "readthis/topwindow", 6 },
+        { "readthis/leftwindow", 7 },
+        { "readthis/rightwindow", 8 },
+        { "readthis/bottominfo", 9 },
+        { "menus/options", 10 },
+        { "menus/cursor1", 11 },
+        { "menus/cursor2", 12 },
+        { "menus/notselected", 13 },
+        { "menus/selected", 14 },
+        { "menus/fxtitle", 15 },
+        { "menus/digititle", 16 },
+        { "menus/musictitle", 17 },
+        { "menus/mouselback", 18 },
+        { "menus/babymode", 19 },
+        { "menus/easymode", 20 },
+        { "menus/normalmode", 21 },
+        { "menus/hardmode", 22 },
+        { "menus/loadsavedisk", 23 },
+        { "menus/diskloading1", 24 },
+        { "menus/diskloading2", 25 },
+        { "menus/control", 26 },
+        { "menus/customize", 27 },
+        { "menus/loadgame", 28 },
+        { "menus/savegame", 29 },
+        { "menus/episode1", 30 },
+        { "menus/episode2", 31 },
+        { "menus/episode3", 32 },
+        { "menus/episode4", 33 },
+        { "menus/episode5", 34 },
+        { "menus/episode6", 35 },
+        { "menus/code", 36 },
+        { "menus/timecode", 37 },
+        { "menus/level", 38 },
+        { "menus/name", 39 },
+        { "menus/score", 40 },
+        { "menus/joy1", 41 },
+        { "menus/joy2", 42 },
+        { "intermission/guy", 43 },
+        { "intermission/colon", 44 },
+        { "intermission/num0", 45 },
+        { "intermission/num1", 46 },
+        { "intermission/num2", 47 },
+        { "intermission/num3", 48 },
+        { "intermission/num4", 49 },
+        { "intermission/num5", 50 },
+        { "intermission/num6", 51 },
+        { "intermission/num7", 52 },
+        { "intermission/num8", 53 },
+        { "intermission/num9", 54 },
+        { "intermission/percent", 55 },
+        { "intermission/a", 56 },
+        { "intermission/b", 57 },
+        { "intermission/c", 58 },
+        { "intermission/d", 59 },
+        { "intermission/e", 60 },
+        { "intermission/f", 61 },
+        { "intermission/g", 62 },
+        { "intermission/h", 63 },
+        { "intermission/i", 64 },
+        { "intermission/j", 65 },
+        { "intermission/k", 66 },
+        { "intermission/l", 67 },
+        { "intermission/m", 68 },
+        { "intermission/n", 69 },
+        { "intermission/o", 70 },
+        { "intermission/p", 71 },
+        { "intermission/q", 72 },
+        { "intermission/r", 73 },
+        { "intermission/s", 74 },
+        { "intermission/t", 75 },
+        { "intermission/u", 76 },
+        { "intermission/v", 77 },
+        { "intermission/w", 78 },
+        { "intermission/x", 79 },
+        { "intermission/y", 80 },
+        { "intermission/z", 81 },
+        { "intermission/expoint", 82 },
+        { "intermission/apostrophe", 83 },
+        { "intermission/guy2", 84 },
+        { "intermission/bjwins", 85 },
+        { "hud/statusbar", 86 },
+        { "title", 87 },
+        { "pg13", 88 },
+        { "credits", 89 },
+        { "highscores", 90 },
+        { "hud/knife", 91 },
+        { "hud/pistol", 92 },
+        { "hud/machinegun", 93 },
+        { "hud/chaingun", 94 },
+        { "hud/nokey", 95 },
+        { "hud/goldkey", 96 },
+        { "hud/silverkey", 97 },
+        { "hud/num_blank", 98 },
+        { "hud/num0", 99 },
+        { "hud/num1", 100 },
+        { "hud/num2", 101 },
+        { "hud/num3", 102 },
+        { "hud/num4", 103 },
+        { "hud/num5", 104 },
+        { "hud/num6", 105 },
+        { "hud/num7", 106 },
+        { "hud/num8", 107 },
+        { "hud/num9", 108 },
+        { "hud/face1a", 109 },
+        { "hud/face1b", 110 },
+        { "hud/face1c", 111 },
+        { "hud/face2a", 112 },
+        { "hud/face2b", 113 },
+        { "hud/face2c", 114 },
+        { "hud/face3a", 115 },
+        { "hud/face3b", 116 },
+        { "hud/face3c", 117 },
+        { "hud/face4a", 118 },
+        { "hud/face4b", 119 },
+        { "hud/face4c", 120 },
+        { "hud/face5a", 121 },
+        { "hud/face5b", 122 },
+        { "hud/face5c", 123 },
+        { "hud/face6a", 124 },
+        { "hud/face6b", 125 },
+        { "hud/face6c", 126 },
+        { "hud/face7a", 127 },
+        { "hud/face7b", 128 },
+        { "hud/face7c", 129 },
+        { "hud/face8a", 130 },
+        { "hud/face_gotgatling", 131 },
+        { "hud/face_mutant", 132 },
+        { "paused", 133 },
+        { "getpsyched", 134 }
+    };
 }

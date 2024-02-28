@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Engine.Managers.Graphics;
 
@@ -159,32 +160,13 @@ public class VideoLayerManager
 
     public void DrawPic(int x, int y, string picName)
     {
-        var chunknum = 0;
-
-        switch (picName)
-        {
-            case "PG13":
-                chunknum = 88;
-                break;
-            case "TITLE":
-                chunknum = 87;
-                break;
-            case "CREDITS":
-                chunknum = 89;
-                break;
-        }
-        int picnum = chunknum - Constants.StartPics;
-        short width, height;
-
-        x &= ~7;
-
-        var pictable = VgaGraphicsManager.Instance.pictable;
-        var grsegs = VgaGraphicsManager.Instance.grsegs;
-
-        width = pictable[picnum].width;
-        height = pictable[picnum].height;
-
-        MemToScreen(grsegs[chunknum], width, height, x, y);
+        var gfxManager = GraphicsManager.Instance;
+        var graphic = gfxManager.GetGraphic(picName);
+        
+        //Remove this restriction.I want to be free to put in on any pixel I please
+        //x &= ~7;
+        
+        MemToScreen(graphic.Data, graphic.Width, graphic.Height, x, y);
     }
 
     // TODO: This should not be public as a byte[], only an "asset", which this handles

@@ -40,7 +40,7 @@ void InitGame() {
 
     SignonScreen();
 
-    VgaGraphicsManager.Instance.LoadDataFiles();
+    GraphicsManager.Instance.LoadDataFiles();
 
     // TODO:
     // ID startups
