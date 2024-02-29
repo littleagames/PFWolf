@@ -1,4 +1,7 @@
-﻿using System.Runtime.CompilerServices;
+﻿using SDL2;
+using static SDL2.SDL;
+
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Engine.Managers.Graphics;
 
@@ -271,6 +274,7 @@ public class VideoLayerManager
         SDL.SDL_DestroyTexture(_texture);
         SDL.SDL_DestroyRenderer(_renderer);
         SDL.SDL_DestroyWindow(_window);
+        SDL.SDL_Quit();
     }
 
     #region Private Methods

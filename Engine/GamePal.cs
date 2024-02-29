@@ -1,4 +1,7 @@
-﻿namespace Engine;
+﻿using SDL2;
+using static SDL2.SDL;
+
+namespace Engine;
 
 // TODO: Convert this to a PLAYPAL file
 internal static class GamePal

@@ -7,29 +7,9 @@ InitGame();
 
 DemoLoop();
 
-
-// START TEST
-var running = true;
-
-// Main loop for the program
-while (running)
-{
-    // Check to see if there are any events and continue to do so until the queue is empty.
-    while (SDL.SDL_PollEvent(out SDL.SDL_Event e) == 1)
-    {
-        switch (e.type)
-        {
-            case SDL.SDL_EventType.SDL_QUIT:
-                running = false;
-                break;
-        }
-    }
-
-}
-
 // Clean up the resources that were created.
 VideoLayerManager.Instance.Shutdown();
-SDL.SDL_Quit();
+
 
 // END
 
