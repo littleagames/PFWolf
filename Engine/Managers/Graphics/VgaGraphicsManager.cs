@@ -1,7 +1,5 @@
 ﻿using Engine.Compression;
 using Engine.DataModels;
-using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.Managers.Graphics;
@@ -15,8 +13,8 @@ public class VgaGraphicsManager : IGraphicsManager
     private static object syncRoot = new object();
 
     // TODO: Turn this into an object that can be read by other things
-    private byte[][] grsegs = new byte[Constants.NumChunks][];
-    private pictabletype[] pictable = new pictabletype[Constants.NumPics];
+    private byte[][] grsegs = new byte[NumChunks][];
+    private pictabletype[] pictable = new pictabletype[NumPics];
 
     private VgaGraphicsManager()
     {
@@ -47,7 +45,7 @@ public class VgaGraphicsManager : IGraphicsManager
     public Graphic GetGraphic(string name)
     {
         var chunkNum = LookupChunkByName(name);
-        var picdata = pictable[chunkNum - Constants.StartPics];
+        var picdata = pictable[chunkNum - StartPics];
 
         return new Graphic
         {
@@ -90,7 +88,7 @@ public class VgaGraphicsManager : IGraphicsManager
 
         const int magic3 = 3;
 
-        var grstarts = new int[Constants.NumChunks + 1];
+        var grstarts = new int[NumChunks + 1];
         var expectedSize = grstarts.Length; // NUMCHUNKS
 
         if (headerLength / magic3 != expectedSize) // What does the 3 mean? Why 3?
@@ -112,11 +110,11 @@ public class VgaGraphicsManager : IGraphicsManager
         // Expand and Load graphics
         byte[] graphicsFile = File.ReadAllBytes($"{tempDirectory}{graphicsFileName}.{fileExtension}");
 
-        var filePos = grstarts[Constants.StructPic];
+        var filePos = grstarts[StructPic];
         int chunkcomplen;//, chunkexplen;
 
         //chunkexplen = BitConverter.ToInt32(graphicsFile.Skip(filePos).Take(4).ToArray(), 0);
-        chunkcomplen = grstarts[Constants.StructPic + 1] - grstarts[Constants.StructPic] - 4;
+        chunkcomplen = grstarts[StructPic + 1] - grstarts[StructPic] - 4;
         var compseg = graphicsFile.Skip(filePos + 4).Take(chunkcomplen).ToArray();
 
 
@@ -139,7 +137,7 @@ public class VgaGraphicsManager : IGraphicsManager
         //int* source;
         int chunk, next;
 
-        for (chunk = Constants.StructPic + 1; chunk < Constants.NumChunks; chunk++)
+        for (chunk = StructPic + 1; chunk < NumChunks; chunk++)
         {
             // If there is data in the grsegs chunk, skip it
             if (grsegs[chunk] != null && grsegs[chunk].Length > 0)
@@ -171,7 +169,7 @@ public class VgaGraphicsManager : IGraphicsManager
 
             CAL_ExpandGrChunk(chunk, source, compression);
 
-            if (chunk >= Constants.StartPics && chunk < Constants.StartExterns)
+            if (chunk >= StartPics && chunk < StartExterns)
                 CAL_DeplaneGrChunk(chunk);
 
             //free(bufferseg);
@@ -182,7 +180,7 @@ public class VgaGraphicsManager : IGraphicsManager
         int expanded;
         int sourceIndex = 0;
 
-        if (chunk >= Constants.StartTile8s && chunk < Constants.StartExterns)
+        if (chunk >= StartTile8s && chunk < StartExterns)
         {
             //
             // expanded sizes of tile8/16/32 are implicit
@@ -215,8 +213,6 @@ public class VgaGraphicsManager : IGraphicsManager
         //
         // allocate final space and decompress it
         //
-        //grsegs[chunk] = new byte[expanded];// SafeMalloc(expanded);
-
         grsegs[chunk] = compression.Expand(source.Skip(4).ToArray(), expanded);
     }
     private void CAL_DeplaneGrChunk(int chunk)
@@ -224,17 +220,17 @@ public class VgaGraphicsManager : IGraphicsManager
         int i;
         short width, height;
 
-        if (chunk == Constants.StartTile8s)
+        if (chunk == StartTile8s)
         {
             width = height = 8;
 
-            for (i = 0; i < Constants.NumTile8; i++)
-                VL_DePlaneVGA(grsegs[chunk]/*[(i * (width * height))]*/, width, height);
+            for (i = 0; i < NumTile8; i++)
+                VL_DePlaneVGA(grsegs[chunk], width, height);
         }
         else
         {
-            width = pictable[chunk - Constants.StartPics].width;
-            height = pictable[chunk - Constants.StartPics].height;
+            width = pictable[chunk - StartPics].width;
+            height = pictable[chunk - StartPics].height;
 
             VL_DePlaneVGA(grsegs[chunk], width, height);
         }
@@ -250,7 +246,7 @@ public class VgaGraphicsManager : IGraphicsManager
         if ((width & 3) != 0)
             throw new Exception("DePlaneVGA: width not divisible by 4!");
 
-        temp = new byte[size];// SafeMalloc(size);
+        temp = new byte[size];
 
         //
         // munge pic into the temp buffer
@@ -434,4 +430,14 @@ public class VgaGraphicsManager : IGraphicsManager
         { "paused", 133 },
         { "getpsyched", 134 }
     };
+
+
+    // gfx constants
+    private const int StructPic = 0;
+    private const int StartPics = 3;
+    private const int StartTile8s = 135;
+    private const int NumTile8 = 35;
+    private const int StartExterns = 136;
+    private const int NumChunks = 149;
+    private const int NumPics = 132;
 }

@@ -126,7 +126,7 @@ void PG13()
 {
     var vl = VideoLayerManager.Instance;
     // draw
-    vl.DrawRectangle(0, 0, 320, 200, 0x82); // background
+    vl.DrawBackground(0x82); // background
 
     vl.DrawPic(216, 110, "PG13");
     vl.UpdateScreen();
@@ -145,8 +145,7 @@ void PG13()
 void TitleScreen()
 {
     var vl = VideoLayerManager.Instance;
-
-    vl.DrawRectangle(0, 0, 320, 200, 0x01); // background
+    vl.DrawBackground(0x00);
     vl.DrawPic(0, 0, "TITLE");
     vl.UpdateScreen();
     vl.FadeIn();
@@ -157,7 +156,7 @@ void Credits()
 {
     var vl = VideoLayerManager.Instance;
 
-    vl.DrawRectangle(0, 0, 320, 200, 0x01); // background
+    vl.DrawBackground(0x00);
     vl.DrawPic(0, 0, "CREDITS");
     vl.UpdateScreen();
     vl.FadeIn();

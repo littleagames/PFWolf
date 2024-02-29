@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Engine.Managers.Graphics;
 
@@ -13,10 +12,20 @@ public class VideoLayerManager
     private static volatile VideoLayerManager? _instance = null;
     private static object syncRoot = new object();
 
+    public int ScreenWidth { get; private set; } = 960;
+    public int ScreenHeight { get; private set; } = 600;
+    public int ScreenBits { get; private set; } = 8;
+    public bool FullScreen { get; private set; } = false;
+    public bool UseDoubleBuffering { get; private set; } = false;
+    internal static bool ScreenFaded { get; private set; } = false;
+
     private VideoLayerManager()
     {
-
+        _ylookup = new uint[ScreenHeight];
     }
+
+    private static int _scaleFactorX;
+    private static int _scaleFactorY;
 
     private SDL_Color[] _currentPalette = new SDL_Color[256];
 
@@ -28,9 +37,7 @@ public class VideoLayerManager
     private uint _screenPitch;
     private uint _bufferPitch;
 
-    private bool _screenFaded = false; // TODO: What is this all used for?
-
-    private uint[] _ylookup = new uint[Constants.ScreenHeight];
+    private uint[] _ylookup = null!;
 
     /// <summary>
     /// The instance of the singleton
@@ -69,7 +76,7 @@ public class VideoLayerManager
     public void Initialize(bool fullscreen = false)
     {
         // Create a new window given a title, size, and passes it a flag indicating it should be shown.
-        _window = SDL.SDL_CreateWindow("Wolfenstein 3-D", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, Constants.ScreenWidth, Constants.ScreenHeight, (fullscreen ? SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0) | SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
+        _window = SDL.SDL_CreateWindow("Wolfenstein 3-D", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ScreenWidth, ScreenHeight, (fullscreen ? SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0) | SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
 
         if (_window == IntPtr.Zero)
         {
@@ -78,7 +85,7 @@ public class VideoLayerManager
 
         SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ARGB8888, out var screenBits, out var r, out var g, out var b, out var a);
 
-        _screen = SDL.SDL_CreateRGBSurface(0, Constants.ScreenWidth, Constants.ScreenHeight, screenBits, r, g, b, a);
+        _screen = SDL.SDL_CreateRGBSurface(0, ScreenWidth, ScreenHeight, screenBits, r, g, b, a);
         if (_screen == IntPtr.Zero)
         {
             Console.WriteLine($"There was an issue creating the screen. {SDL_GetError()}");
@@ -107,7 +114,7 @@ public class VideoLayerManager
         // Set palette global variable
         Array.Copy(GamePal.BasePalette, _currentPalette, 256);
 
-        _screenBuffer = SDL.SDL_CreateRGBSurface(0, Constants.ScreenWidth, Constants.ScreenHeight, 8, 0, 0, 0, 0);
+        _screenBuffer = SDL.SDL_CreateRGBSurface(0, ScreenWidth, ScreenHeight, 8, 0, 0, 0, 0);
         if (_screenBuffer == IntPtr.Zero)
         {
             Console.WriteLine($"There was an issue creating the screenbuffer. {SDL.SDL_GetError()}");
@@ -121,12 +128,13 @@ public class VideoLayerManager
             _renderer,
             SDL_PIXELFORMAT_ARGB8888,
             (int)SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING,
-            Constants.ScreenWidth, Constants.ScreenHeight);
+            ScreenWidth, ScreenHeight);
 
         _bufferPitch = (uint)sdl_screenbuffer.pitch;
-        Globals.ScaleFactor = Constants.ScreenWidth / 320;
+        _scaleFactorX = ScreenWidth / 320;
+        _scaleFactorY = ScreenHeight / 200;
 
-        for (var i = 0; i < Constants.ScreenHeight; i++)
+        for (var i = 0; i < ScreenHeight; i++)
             _ylookup[i] = (uint)(i * _bufferPitch);
     }
 
@@ -172,7 +180,7 @@ public class VideoLayerManager
     // TODO: This should not be public as a byte[], only an "asset", which this handles
     public void MemToScreen(byte[] source, int width, int height, int x, int y)
     {
-        MemToScreenScaledCoord(_screenBuffer, source, width, height, Globals.ScaleFactor * x, Globals.ScaleFactor * y);
+        MemToScreenScaledCoord(_screenBuffer, source, width, height, _scaleFactorX * x, _scaleFactorY * y);
     }
 
     // TODO: This should not obe public as a byte[], only an "asset lookup", which this handles
@@ -185,18 +193,18 @@ public class VideoLayerManager
         IntPtr dest_ptr = LockSurface(screenBuffer);
         if (dest_ptr == IntPtr.Zero) return;
 
-        int size = Constants.ScreenWidth * Constants.ScreenHeight; // screen size
+        int size = ScreenWidth * ScreenHeight; // screen size
         dest = new byte[size];
         Marshal.Copy(dest_ptr, dest, 0, size);
 
-        for (j = 0, scj = 0; j < height; j++, scj += Globals.ScaleFactor)
+        for (j = 0, scj = 0; j < height; j++, scj += _scaleFactorY)
         {
-            for (i = 0, sci = 0; i < width; i++, sci += Globals.ScaleFactor)
+            for (i = 0, sci = 0; i < width; i++, sci += _scaleFactorX)
             {
                 byte col = source[(j * width) + i];
-                for (m = 0; m < Globals.ScaleFactor; m++)
+                for (m = 0; m < _scaleFactorY; m++)
                 {
-                    for (n = 0; n < Globals.ScaleFactor; n++)
+                    for (n = 0; n < _scaleFactorX; n++)
                     {
                         dest[_ylookup[scj + m + desty] + sci + n + destx] = col;
                     }
@@ -213,28 +221,33 @@ public class VideoLayerManager
         UnlockSurface(screenBuffer);
     }
 
-    public void DrawRectangle(int x, int y, int width, int height, byte color)
+    public void DrawBackground(byte color)
     {
-        DrawRectangleScaledCoord(Globals.ScaleFactor * x, Globals.ScaleFactor * y, Globals.ScaleFactor * width, Globals.ScaleFactor * height, color);
+        DrawRectangleScaledCoord(0, 0, ScreenWidth, ScreenHeight, color);
     }
 
-    public void DrawRectangleScaledCoord(int scx, int scy, int scwidth, int scheight, byte color)
+    public void DrawRectangle(int x, int y, int width, int height, byte color)
+    {
+        DrawRectangleScaledCoord(_scaleFactorX * x, _scaleFactorY * y, _scaleFactorX * width, _scaleFactorY * height, color);
+    }
+
+    public void DrawRectangleScaledCoord(int scaledX, int scaledY, int scaledWidth, int scaledHeight, byte color)
     {
         byte[] dest;
         IntPtr dest_ptr = LockSurface(_screenBuffer);
         if (dest_ptr == IntPtr.Zero) return;
 
-        int size = Constants.ScreenWidth * Constants.ScreenHeight; // screen size
+        int size = ScreenWidth * ScreenHeight; // screen size
         dest = new byte[size];
         Marshal.Copy(dest_ptr, dest, 0, size);
 
-        var firstPosition = _ylookup[scy] + scx;
+        var firstPosition = _ylookup[scaledY] + scaledX;
         var position = firstPosition;
 
-        for (int i = 0; i < scheight; i++)
+        for (int i = 0; i < scaledHeight; i++)
         {
             //memset(dest, color, scwidth);
-            for (int scw = 0; scw < scwidth; scw++)
+            for (int scw = 0; scw < scaledWidth; scw++)
             {
                 dest[position + scw] = color;
             }
@@ -286,7 +299,7 @@ public class VideoLayerManager
     {
         Array.Copy(palette, _currentPalette, 256);
 
-        if (Constants.ScreenBits == 8) // This shouldn't be a constant, it should be a gamesetting
+        if (ScreenBits == 8) // This shouldn't be a constant, it should be a gamesetting
         {
             // TODO: Null checking on these
             SDL_Surface sdl_screen = (SDL_Surface)Marshal.PtrToStructure(_screen, typeof(SDL_Surface));
@@ -316,7 +329,7 @@ public class VideoLayerManager
     private void Present(IntPtr screen)
     {
         SDL_Surface sdl_screen = (SDL_Surface)Marshal.PtrToStructure(screen, typeof(SDL_Surface));
-        SDL_UpdateTexture(_texture, ref Unsafe.NullRef<SDL_Rect>(), sdl_screen.pixels, Constants.ScreenWidth * sizeof(uint));
+        SDL_UpdateTexture(_texture, ref Unsafe.NullRef<SDL_Rect>(), sdl_screen.pixels, ScreenWidth * sizeof(uint));
         SDL_RenderClear(_renderer);
         SDL_RenderCopy(_renderer, _texture, ref Unsafe.NullRef<SDL_Rect>(), ref Unsafe.NullRef<SDL_Rect>());
         SDL_RenderPresent(_renderer);
@@ -348,7 +361,7 @@ public class VideoLayerManager
         if (dest_ptr == IntPtr.Zero)
             return 0;
 
-        int size = Constants.ScreenWidth * Constants.ScreenHeight; // screen size
+        int size = ScreenWidth * ScreenHeight; // screen size
         var dest = new byte[size];
         Marshal.Copy(dest_ptr, dest, 0, size);
         col = dest[_ylookup[y] + x];
@@ -390,7 +403,7 @@ public class VideoLayerManager
                 palette2[j].b = (byte)(orig + delta * i / steps);
             }
 
-            if (!Constants.UseDoubleBuffering || Constants.ScreenBits == 8) WaitVBL(1);
+            if (!UseDoubleBuffering || ScreenBits == 8) WaitVBL(1);
             SetPalette(palette2, true);
         }
 
@@ -399,7 +412,7 @@ public class VideoLayerManager
         //
         FillPalette(red, green, blue);
 
-        _screenFaded = true;
+        ScreenFaded = true;
     }
 
     private void FadeIn(int start, int end, SDL_Color[] palette, int steps)
@@ -427,7 +440,7 @@ public class VideoLayerManager
                 palette2[j].b = (byte)(palette1[j].b + delta * i / steps);
             }
 
-            if (!Constants.UseDoubleBuffering || Constants.ScreenBits == 8) WaitVBL(1);
+            if (!UseDoubleBuffering || ScreenBits == 8) WaitVBL(1);
             SetPalette(palette2, true);
         }
 
@@ -435,7 +448,7 @@ public class VideoLayerManager
         // final color
         //
         SetPalette(palette, true);
-        _screenFaded = false;
+        ScreenFaded = false;
     }
 
     #endregion
