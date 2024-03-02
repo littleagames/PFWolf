@@ -16,6 +16,9 @@ VideoLayerManager.Instance.Shutdown();
 void InitGame() {
     VideoLayerManager.Instance.Start();
 
+    // Do I need to set up the menus here?
+    MenuManager.Instance.CreateMenus();
+
     // TODO: Joystick setup
 
     SignonScreen();
@@ -96,10 +99,24 @@ void FinishSignon()
 void DemoLoop()
 {
     //NonShareware();
-    PG13();
-    TitleScreen();
-    Credits();
-    //Demo?
+    //PG13();
+    var vl = VideoLayerManager.Instance;
+
+    //while(true)
+    {
+        //while(!inputGiven /*!nowait*/)
+        {
+            //TitleScreen();
+            //Credits();
+            //HighScores();
+            //PlayDemo()
+        }
+
+        vl.FadeOut();
+
+        MenuManager.Instance.Start();
+        // US_ControlPanel(0);
+    }
 }
 
 void PG13()
@@ -108,7 +125,7 @@ void PG13()
     // draw
     vl.DrawBackground(0x82); // background
 
-    vl.DrawPic(216, 110, "PG13");
+    vl.DrawPic(216, 110, "pg13");
     vl.UpdateScreen();
 
     // OnStart
@@ -126,18 +143,21 @@ void TitleScreen()
 {
     var vl = VideoLayerManager.Instance;
     vl.DrawBackground(0x00);
-    vl.DrawPic(0, 0, "TITLE");
+    vl.DrawPic(0, 0, "title");
     vl.UpdateScreen();
     vl.FadeIn();
     vl.WaitVBL(70 * 7);
     vl.FadeOut();
+
+    // TODO: On keypress
+    //       Change "GameLoopState" from "IdleLoop" to "Menu"
 }
 void Credits()
 {
     var vl = VideoLayerManager.Instance;
 
     vl.DrawBackground(0x00);
-    vl.DrawPic(0, 0, "CREDITS");
+    vl.DrawPic(0, 0, "credits");
     vl.UpdateScreen();
     vl.FadeIn();
     vl.WaitVBL(70 * 7);

@@ -1,5 +1,4 @@
 ﻿using Engine.Compression;
-using Engine.DataModels;
 using System.Runtime.InteropServices;
 
 namespace Engine.Managers.Graphics;
@@ -42,6 +41,19 @@ public class VgaGraphicsManager : IGraphicsManager
         }
     }
 
+    public Font GetFont(string fontName)
+    {
+        var chunkNum = LookupChunkByName(fontName);
+
+        fontstruct font = ByteToStructHelpers.ByteArrayToStucture<fontstruct>(grsegs[chunkNum]);
+        return new Font
+        {
+            Height = font.height,
+            //Width = font.width
+            //Data = font.,
+        };
+    }
+
     public Graphic GetGraphic(string name)
     {
         var chunkNum = LookupChunkByName(name);
@@ -67,6 +79,14 @@ public class VgaGraphicsManager : IGraphicsManager
     {
         public short width, height;
     }
+
+    private struct fontstruct
+    {
+        public short height;
+        public short[] location;// = new short[256];
+        public byte[] width;// = new byte[256];
+    };
+
 
     public void LoadDataFiles()
     {
@@ -111,9 +131,8 @@ public class VgaGraphicsManager : IGraphicsManager
         byte[] graphicsFile = File.ReadAllBytes($"{tempDirectory}{graphicsFileName}.{fileExtension}");
 
         var filePos = grstarts[StructPic];
-        int chunkcomplen;//, chunkexplen;
+        int chunkcomplen;
 
-        //chunkexplen = BitConverter.ToInt32(graphicsFile.Skip(filePos).Take(4).ToArray(), 0);
         chunkcomplen = grstarts[StructPic + 1] - grstarts[StructPic] - 4;
         var compseg = graphicsFile.Skip(filePos + 4).Take(chunkcomplen).ToArray();
 
@@ -123,8 +142,7 @@ public class VgaGraphicsManager : IGraphicsManager
         var compression = new HuffmanCompression(dictionaryFile);
         var destTable = compression.Expand(compseg, pictableSize);
 
-        pictable = ByteArrayToStuctureArray<pictabletype>(destTable, pictable.Length);
-        //free(compseg);
+        pictable = ByteToStructHelpers.ByteArrayToStuctureArray<pictabletype>(destTable, pictable.Length);
 
         CA_CacheGrChunks(grstarts, grsegs, graphicsFile, compression);
 
@@ -133,8 +151,6 @@ public class VgaGraphicsManager : IGraphicsManager
     private void CA_CacheGrChunks(int[] grstarts, byte[][] grsegs, byte[] graphicsFile, ICompression compression)
     {
         int pos, compressed;
-        //int* bufferseg;
-        //int* source;
         int chunk, next;
 
         for (chunk = StructPic + 1; chunk < NumChunks; chunk++)
@@ -156,23 +172,14 @@ public class VgaGraphicsManager : IGraphicsManager
             while (grstarts[next] == -1)           // skip past any sparse tiles
                 next++;
 
-            compressed = grstarts[next] - pos; // TODO: I'm off by 4 each time
+            compressed = grstarts[next] - pos;
 
-            // load into source, an int32 worth of byte data (so 4?)
-            //var source = BitConverter.ToInt32(graphicsFile.Skip(pos).Take(4).ToArray(), 0);
             var source = graphicsFile.Skip(pos).Take(compressed).ToArray();
-
-            var bufferseg = new int[compressed];// SafeMalloc(compressed);
-            //source = bufferseg;
-
-            //read(grhandle, source, compressed);
 
             CAL_ExpandGrChunk(chunk, source, compression);
 
             if (chunk >= StartPics && chunk < StartExterns)
                 CAL_DeplaneGrChunk(chunk);
-
-            //free(bufferseg);
         }
     }
     private void CAL_ExpandGrChunk(int chunk, byte[] source, ICompression compression)
@@ -207,7 +214,7 @@ public class VgaGraphicsManager : IGraphicsManager
             //
             // everything else has an explicit size longword
             //
-            expanded = BitConverter.ToInt32(source.Skip(sourceIndex++).Take(4).ToArray()); // TODO: This needs 4 bytes into expanded
+            expanded = BitConverter.ToInt32(source.Skip(sourceIndex++).Take(4).ToArray());
         }
 
         //
@@ -272,31 +279,12 @@ public class VgaGraphicsManager : IGraphicsManager
         Array.Copy(temp, source, size);
     }
 
-    private static T[] ByteArrayToStuctureArray<T>(byte[] bytes, int lengthOfT) where T : struct
-    {
-        var outT = new T[lengthOfT];
-        var grHuffmanSize = Marshal.SizeOf(typeof(T)) * lengthOfT;
-        int i, j;
-        for (i = 0, j = 0; i < grHuffmanSize; j++, i += Marshal.SizeOf(typeof(T)))
-        {
-            var huffBytes = bytes.Skip(i).Take(Marshal.SizeOf(typeof(T))).ToArray();
-            IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(T)));
-            try
-            {
-                Marshal.Copy(huffBytes, 0, ptr, Marshal.SizeOf(typeof(T)));
-                outT[j] = (T)Marshal.PtrToStructure(ptr, typeof(T));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(ptr);
-            }
-        }
 
-        return outT;
-    }
 
     private Dictionary<string, int> GraphicNameChunkMapping = new Dictionary<string, int>
     {
+        { "font/smallfont", 1 },
+        { "font/bigfont", 2 },
         { "readthis/bj",3 },
         { "readthis/castle", 4 },
         { "readthis/blaze", 5 },
