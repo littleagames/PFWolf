@@ -1,4 +1,5 @@
-﻿using SDL2;
+﻿using Engine.DataModels;
+using SDL2;
 using static SDL2.SDL;
 
 namespace Engine.Managers;
@@ -43,16 +44,18 @@ internal class MenuManager
 
     public void CreateMenus()
     {
+        const byte MENU_X = 76;
+        const byte MENU_Y = 55;
         _mainMenu = new Menu();
-        _mainMenu.AddItem(new MenuSwitcherItem("New Game", null));
-        _mainMenu.AddItem(new MenuSwitcherItem("Sound", null));
-        _mainMenu.AddItem(new MenuSwitcherItem("Control", null));
-        _mainMenu.AddItem(new MenuSwitcherItem("Load Game", null));
-        _mainMenu.AddItem(new MenuSwitcherItem("Save Game", null));
-        _mainMenu.AddItem(new MenuSwitcherItem("Read This!", null));
-        _mainMenu.AddItem(new MenuSwitcherItem("View Scores", null));
-        _mainMenu.AddItem(new MenuSwitcherItem("Back to Demo", null));
-        _mainMenu.AddItem(new MenuSwitcherItem("Quit", null));
+        _mainMenu.AddItem(new MenuSwitcherItem(MENU_X, MENU_Y, "New Game", null));
+        _mainMenu.AddItem(new MenuSwitcherItem(MENU_X, MENU_Y + (13 * 1), "Sound", null));
+        _mainMenu.AddItem(new MenuSwitcherItem(MENU_X, MENU_Y + (13 * 2), "Control", null));
+        _mainMenu.AddItem(new MenuSwitcherItem(MENU_X, MENU_Y + (13 * 3), "Load Game", null));
+        _mainMenu.AddItem(new MenuSwitcherItem(MENU_X, MENU_Y + (13 * 4), "Save Game", null));
+        _mainMenu.AddItem(new MenuSwitcherItem(MENU_X, MENU_Y + (13 * 5), "Read This!", null));
+        _mainMenu.AddItem(new MenuSwitcherItem(MENU_X, MENU_Y + (13 * 6), "View Scores", null));
+        _mainMenu.AddItem(new MenuSwitcherItem(MENU_X, MENU_Y + (13 * 7), "Back to Demo", null));
+        _mainMenu.AddItem(new MenuSwitcherItem(MENU_X, MENU_Y + (13 * 8), "Quit", null));
     }
 
     public void Start()

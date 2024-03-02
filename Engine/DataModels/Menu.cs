@@ -36,15 +36,15 @@ internal class Menu : IMenu
         // Draw gfx
         vl.DrawPic(112, 184, "menus/mouselback"); // bottom centered (need tools to do that)
         DrawStripes(10);
-        vl.DrawPic(84, 0, "menus/options");
+        vl.DrawPic(84, 0, "menus/mainmenu");
 
         // Draw window
         DrawWindow(MENU_X - 8, MENU_Y - 3, MENU_W, MENU_H, BKGDCOLOR, BORD2COLOR, DEACTIVE);
 
-        vl.DrawTextString(MENU_X, MENU_Y, "New Game", new FontName("font/bigfont"), new FontColor(0x17));
-        vl.DrawTextString(MENU_X, MENU_Y + 13, "Sound", new FontName("font/bigfont"), new FontColor(0x17));
-        vl.DrawTextString(MENU_X, MENU_Y + (13 * 2), "Controls", new FontName("font/bigfont"), new FontColor(0x17));
-        vl.DrawTextString(MENU_X, MENU_Y + (13 * 3), "Load Game", new FontName("font/bigfont"), new FontColor(0x17));
+        foreach (var menuItem in MenuItems)
+        {
+            vl.DrawTextString(menuItem.PositionX, menuItem.PositionY, menuItem.Text, new FontName("font/bigfont"), new FontColor(0x17));
+        }
 
         vl.UpdateScreen();
     }
@@ -76,6 +76,13 @@ internal class Menu : IMenu
 
 internal abstract class MenuItem
 {
+    protected MenuItem(int positionX, int positionY, string text)
+    {
+        PositionX = positionX;
+        PositionY = positionY;
+        Text = text;
+    }
+
     public string Text { get; set; } = string.Empty;
     public bool Enabled { get; set; } = false;
     public bool IsHighlighted { get; set; } = false;
@@ -87,8 +94,8 @@ internal abstract class MenuItem
 
 internal class MenuSwitcherItem : MenuItem
 {
-    public MenuSwitcherItem(string text, Func<Menu, int> listener)
+    public MenuSwitcherItem(int positionX, int positionY, string text, Func<Menu, int> listener)
+        :base (positionX, positionY, text)
     {
-        Text = text;
     }
 }

@@ -319,7 +319,7 @@ public class VgaGraphicsManager : IGraphicsManager
         { "readthis/leftwindow", 7 },
         { "readthis/rightwindow", 8 },
         { "readthis/bottominfo", 9 },
-        { "menus/options", 10 },
+        { "menus/mainmenu", 10 },
         { "menus/cursor1", 11 },
         { "menus/cursor2", 12 },
         { "menus/notselected", 13 },
