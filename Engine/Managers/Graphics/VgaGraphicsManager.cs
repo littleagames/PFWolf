@@ -41,17 +41,36 @@ public class VgaGraphicsManager : IGraphicsManager
         }
     }
 
-    public Font GetFont(string fontName)
+    public Font GetFont(FontName fontName)
     {
-        var chunkNum = LookupChunkByName(fontName);
+        var chunkNum = LookupChunkByName(fontName.Value);
 
-        fontstruct font = ByteToStructHelpers.ByteArrayToStucture<fontstruct>(grsegs[chunkNum]);
-        return new Font
+        short height = BitConverter.ToInt16(grsegs[chunkNum], 0);
+
+        short[] location = new short[256];
+        Buffer.BlockCopy(grsegs[chunkNum],sizeof(short), location, 0, sizeof(short) * 256);
+
+        byte[] width = new byte[256];
+        Buffer.BlockCopy(grsegs[chunkNum], sizeof(short) + sizeof(short) * 256, width, 0, sizeof(byte) * 256);
+
+        //var data = grsegs[chunkNum].Skip(sizeof(short) + sizeof(short) * 256 + sizeof(byte) * 256).ToArray();
+
+        var font = new MonochromaticFont
         {
-            Height = font.height,
-            //Width = font.width
-            //Data = font.,
+            Height = height
         };
+
+        for(var i = 0; i < 256; i++)
+        {
+            font.Characters[i] = new FontCharacter
+            {
+                Width = width[i],
+                Height = height,
+                Data = grsegs[chunkNum].Skip(location[i]).Take(sizeof(byte) * width[i] * height).ToArray()
+            };
+        }
+
+        return font;
     }
 
     public Graphic GetGraphic(string name)
@@ -75,16 +94,24 @@ public class VgaGraphicsManager : IGraphicsManager
         return mapping;
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct pictabletype
     {
         public short width, height;
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct fontstruct
     {
         public short height;
-        public short[] location;// = new short[256];
-        public byte[] width;// = new byte[256];
+        public short[] location;
+        public byte[] width;
+
+        public fontstruct()
+        {
+            location = new short[256];
+            width = new byte[256];
+        }
     };
 
 

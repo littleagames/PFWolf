@@ -45,55 +45,17 @@ void FinishSignon()
     var vl = VideoLayerManager.Instance;
     vl.DrawRectangle(0, 189, 300, 11, 0x29);
 
-    //US_CPrint("Press a key");
+    vl.DrawTextString(100, 190, "Press a Key", new FontName("font/smallfont"), new FontColor(14)); // TODO: Centered
     vl.UpdateScreen();
 
     vl.WaitVBL(70 * 3);
 
-    //US_CPrint("Working...");
-    //ID_VL.VW_UpdateScreen();
+    vl.DrawRectangle(0, 189, 300, 11, 0x29);
+    vl.DrawTextString(100, 190, "Working...", new FontName("font/smallfont"), new FontColor(10)); // TODO: Centered
+    vl.UpdateScreen();
 
     // This should be the end of the "Signon" screen
-    vl.FadeOut();
-    /*
-     
-    WindowX = 0;
-    WindowW = 320;
-    PrintY = 190;
-
-    #ifndef JAPAN
-    SETFONTCOLOR(14,4);
-
-    #ifdef SPANISH
-    US_CPrint ("Oprima una tecla");
-    #else
-    US_CPrint ("Press a key");
-    #endif
-
-    #endif
-
-    VW_UpdateScreen();
-
-    if (!param_nowait)
-        IN_Ack ();
-
-    #ifndef JAPAN
-    VW_Bar (0,189,300,11,VL_GetPixel(0,0));
-
-    PrintY = 190;
-    SETFONTCOLOR(10,4);
-
-    #ifdef SPANISH
-    US_CPrint ("pensando...");
-    #else
-    US_CPrint ("Working...");
-    #endif
-
-    VW_UpdateScreen();
-    #endif
-
-    SETFONTCOLOR(0,15);
-     */
+    vl.FadeOut();    
 }
 
 void DemoLoop()

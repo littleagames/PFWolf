@@ -54,4 +54,9 @@ internal class GraphicsManager : IGraphicsManager
         // TODO: from list of available graphic packs (pk3, vgagraph), search in priority order,
         // call that manager, and return the graphic in a manageable format
     }
+
+    public Font GetFont(FontName fontName)
+    {
+        return vgaGraphicsManager.GetFont(fontName);
+    }
 }

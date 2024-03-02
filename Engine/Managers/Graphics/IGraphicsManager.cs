@@ -1,10 +1,8 @@
-﻿using Engine.DataModels;
+﻿namespace Engine.Managers.Graphics;
 
-namespace Engine.Managers.Graphics
+internal interface IGraphicsManager
 {
-    internal interface IGraphicsManager
-    {
-        void LoadDataFiles();
-        Graphic GetGraphic(string name);
-    }
+    void LoadDataFiles();
+    Graphic GetGraphic(string name);
+    Font GetFont(FontName fontName);
 }

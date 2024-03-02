@@ -41,7 +41,11 @@ internal class Menu : IMenu
         // Draw window
         DrawWindow(MENU_X - 8, MENU_Y - 3, MENU_W, MENU_H, BKGDCOLOR, BORD2COLOR, DEACTIVE);
 
-        
+        vl.DrawTextString(MENU_X, MENU_Y, "New Game", new FontName("font/bigfont"), new FontColor(0x17));
+        vl.DrawTextString(MENU_X, MENU_Y + 13, "Sound", new FontName("font/bigfont"), new FontColor(0x17));
+        vl.DrawTextString(MENU_X, MENU_Y + (13 * 2), "Controls", new FontName("font/bigfont"), new FontColor(0x17));
+        vl.DrawTextString(MENU_X, MENU_Y + (13 * 3), "Load Game", new FontName("font/bigfont"), new FontColor(0x17));
+
         vl.UpdateScreen();
     }
 

@@ -180,6 +180,51 @@ public class VideoLayerManager
         MemToScreen(graphic.Data, graphic.Width, graphic.Height, x, y);
     }
 
+    public void DrawTextString(int startX, int startY, string text, FontName fontName, FontColor color)
+    {
+        var gfxManager = GraphicsManager.Instance;
+        var font = gfxManager.GetFont(fontName);
+
+        var printX = startX;
+        var printY = startY;
+
+        foreach(char textChar in text)
+        {
+            var asciiIndex = (int)textChar;
+            var fontChar = font.Characters[asciiIndex];
+
+            if (fontChar.Data.Length > 0)
+            {
+                var modifiedFontData = new byte[fontChar.Data.Length];
+                for (var i = 0; i < fontChar.Data.Length; i++)
+                {
+                    var fontFlag = fontChar.Data[i] > 0;
+                    modifiedFontData[i] = fontFlag ? (byte)color.Value : (byte)0xff;
+                }
+
+                MemToScreen(modifiedFontData, fontChar.Width, fontChar.Height, printX, printY);
+            }
+
+            if (textChar == '\n')
+            {
+                printX = startX;
+                printY = printY + fontChar.Height;
+                continue;
+            }
+
+            printX += fontChar.Width;
+        }
+
+        // TODO: Loop through each character in "text"
+        // Or I can build the text in byte array size
+        //      can send that once to MemToScreen
+
+        //MemToScreen(colorizedFont)
+
+        // get each character and print it to the byte[] pixels
+
+    }
+
     // TODO: This should not be public as a byte[], only an "asset", which this handles
     public void MemToScreen(byte[] source, int width, int height, int x, int y)
     {
@@ -209,6 +254,8 @@ public class VideoLayerManager
                 {
                     for (n = 0; n < _scaleFactorX; n++)
                     {
+                        if (col == 0xff) continue;
+
                         dest[_ylookup[scj + m + desty] + sci + n + destx] = col;
                     }
                 }
