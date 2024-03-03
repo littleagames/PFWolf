@@ -1,5 +1,4 @@
 ﻿using Engine.Managers;
-using System.Drawing;
 
 namespace Engine.DataModels;
 
@@ -10,41 +9,24 @@ internal interface IMenu
 
 internal class Menu : IMenu
 {
-    const byte BORDCOLOR = 0x29;
-    const byte BORD2COLOR = 0x23;
-    const byte DEACTIVE = 0x2b;
-    const byte BKGDCOLOR = 0x2d;
-    const byte STRIPE = 0x2c;
+    public FontColor BackgroundColor { get; private set; } = new FontColor(0x00);
+    public List<MenuComponent> MenuComponents { get; private set; } = new List<MenuComponent>();
 
-    const byte MENU_X = 76;
-    const byte MENU_Y = 55;
-    const byte MENU_W = 178;
-    const byte MENU_H = 13 * 10 + 6;
-
-    public List<MenuItem> MenuItems { get; private set; } = new List<MenuItem>();
-
-    public void AddItem(MenuItem item)
+    public void SetBackgroundColor(FontColor backgroundColor)
     {
-        MenuItems.Add(item);
+        BackgroundColor = backgroundColor;
+    }
+
+    public void AddItem(MenuComponent component)
+    {
+        MenuComponents.Add(component);
     }
 
     public void Draw()
     {
         var vl = VideoLayerManager.Instance;
-        vl.DrawBackground(BORDCOLOR);
-
-        // Draw gfx
-        vl.DrawPic(112, 184, "menus/mouselback"); // bottom centered (need tools to do that)
-        DrawStripes(10);
-        vl.DrawPic(84, 0, "menus/mainmenu");
-
-        // Draw window
-        DrawWindow(MENU_X - 8, MENU_Y - 3, MENU_W, MENU_H, BKGDCOLOR, BORD2COLOR, DEACTIVE);
-
-        foreach (var menuItem in MenuItems)
-        {
-            vl.DrawTextString(menuItem.PositionX, menuItem.PositionY, menuItem.Text, new FontName("font/bigfont"), new FontColor(0x17));
-        }
+        vl.DrawBackground(BackgroundColor.GetByte());
+        MenuComponents.ForEach(component => component.Draw());
 
         vl.UpdateScreen();
     }
@@ -53,49 +35,113 @@ internal class Menu : IMenu
     {
         return -1;
     }
-
-    private void DrawStripes(int y)
-    {
-        var vl = VideoLayerManager.Instance;
-        vl.DrawRectangle(0, y, 320, 24, 0x00);
-        vl.DrawRectangle(0, y+22, 320, 1, STRIPE);
-    }
-
-    private void DrawWindow(int x, int y, int width, int height, byte color, byte color1, byte color2)
-    {
-        var vl = VideoLayerManager.Instance;
-        vl.DrawRectangle(x, y, width, height, color); // background
-        
-        vl.DrawRectangle(x, y, width, 1, color2); // top
-        vl.DrawRectangle(x, y, 1, height, color2); // left
-        vl.DrawRectangle(x, y+height, width, 1, color1); // bottom
-        vl.DrawRectangle(x+width, y, 1, height, color1); // right
-
-    }
 }
 
-internal abstract class MenuItem
+internal abstract class MenuItem : MenuComponent
 {
-    protected MenuItem(int positionX, int positionY, string text)
+    protected MenuItem(int positionX, int positionY, string text, FontColor textColor)
+        : base(positionX, positionY)
     {
-        PositionX = positionX;
-        PositionY = positionY;
         Text = text;
+        TextColor = textColor;
     }
 
-    public string Text { get; set; } = string.Empty;
+    public string Text { get; } = string.Empty;
+    public FontColor TextColor { get; }
     public bool Enabled { get; set; } = false;
     public bool IsHighlighted { get; set; } = false;
     public bool Visible { get; set; } = false;
-    public int PositionX { get; set; } = 0;
-    public int PositionY { get; set; } = 0;
     public Func<Menu, int> Listener { get; } = null!;
 }
 
 internal class MenuSwitcherItem : MenuItem
 {
-    public MenuSwitcherItem(int positionX, int positionY, string text, Func<Menu, int> listener)
-        :base (positionX, positionY, text)
+    public MenuSwitcherItem(int positionX, int positionY, string text, FontColor textColor, Func<Menu, int>? listener = null)
+        :base (positionX, positionY, text, textColor)
     {
     }
+
+    public override void Draw()
+    {
+        var vl = VideoLayerManager.Instance;
+        vl.DrawTextString(PositionX, PositionY, Text, new FontName("font/bigfont"), TextColor);
+    }
+}
+
+internal class MenuWindow : MenuComponent
+{
+    public int Width { get; } = 0;
+    public int Height { get; } = 0;
+    public FontColor Color { get; }
+    public byte Color1 { get; }
+    public byte Color2 { get; }
+
+    public MenuWindow(int positionX, int positionY, int width, int height, FontColor color, byte color1, byte color2)
+        : base(positionX, positionY)
+    {
+        Width = width;
+        Height = height;
+        Color = color;
+        Color1 = color1;
+        Color2 = color2;
+    }
+
+    public override void Draw()
+    {
+        var vl = VideoLayerManager.Instance;
+        vl.DrawRectangle(PositionX, PositionY, Width, Height, Color.GetByte()); // background
+        vl.DrawRectangle(PositionX, PositionY, Width, 1, Color2); // top
+        vl.DrawRectangle(PositionX, PositionY, 1, Height, Color2); // left
+        vl.DrawRectangle(PositionX, PositionY + Height, Width, 1, Color1); // bottom
+        vl.DrawRectangle(PositionX + Width, PositionY, 1, Height, Color1); // right
+    }
+}
+
+internal class MenuStripe : MenuComponent
+{
+    public MenuStripe(int positionY, FontColor stripeColor)
+        : base(0, positionY)
+    {
+        StripeColor = stripeColor;
+    }
+
+    public FontColor StripeColor { get; }
+
+    public override void Draw()
+    {
+        var vl = VideoLayerManager.Instance;
+        vl.DrawRectangle(PositionX, PositionY, 320, 24, 0x00);
+        vl.DrawRectangle(PositionX, PositionY + 22, 320, 1, StripeColor.GetByte());
+    }
+}
+
+internal class MenuGraphic : MenuComponent
+{
+    public string Graphic { get; private set; }
+
+    public MenuGraphic(int positionX, int positionY, string graphic)
+        : base(positionX, positionY)
+    {
+        Graphic = graphic;
+    }
+
+    public override void Draw()
+    {
+        var vl = VideoLayerManager.Instance;
+        vl.DrawPic(PositionX, PositionY, Graphic);
+    }
+}
+
+internal abstract class MenuComponent
+{
+    public int PositionX { get; set; } = 0;
+    public int PositionY { get; set; } = 0;
+
+    public MenuComponent(int positionX, int positionY)
+    {
+        PositionX = positionX;
+        PositionY = positionY;
+    }
+
+    public abstract void Draw();
 }

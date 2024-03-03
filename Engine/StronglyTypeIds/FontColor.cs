@@ -5,4 +5,9 @@
 public partial struct FontColor
 {
     public FontColor(byte color) { Value = color; }
+
+    public byte GetByte()
+    {
+        return (byte)Value;
+    }
 }
