@@ -1,0 +1,3 @@
+texture optional C_CURSOR
+	pic C_CURSOR1 tics 35
+	pic C_CURSOR2 tics 4

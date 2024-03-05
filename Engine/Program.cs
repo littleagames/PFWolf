@@ -17,7 +17,7 @@ void InitGame() {
     VideoLayerManager.Instance.Start();
 
     // Do I need to set up the menus here?
-    MenuManager.Instance.CreateMenus();
+    MenuManager.Instance.Init();
 
     // TODO: Joystick setup
 

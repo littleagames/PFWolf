@@ -1,0 +1,55 @@
+//-------------------------------------------------------------------------------------------
+//
+// Note:
+// Much of the menu structure defined here is accessed internally by CCMDs
+// and menu generation code. If you want to design your own menus make sure
+// that they are named identically and that links to all important submenus
+// are present.
+//
+//-------------------------------------------------------------------------------------------
+
+DEFAULTLISTMENU
+{
+	Font "BigFont", "Untranslated"
+	LineSpacing 15
+	IfGame(Wolf3D)
+	{
+		Selector "C_CURSOR1", -24, 0
+		Font "BigUpper", "Gray"
+		LineSpacing 13
+	}
+}
+
+//-------------------------------------------------------------------------------------------
+//
+// Text only variant of the main menu for Doom, Strife and Chex Quest to be used with localized content.
+//
+//-------------------------------------------------------------------------------------------
+
+LISTMENU "MainMenu"
+{
+	IfGame(Wolf3D,Spear)
+	{
+		StaticPatch 84, 0, "C_OPTIONS"
+		Stripe 10
+		StaticPatch 112, 184, "C_MOUSELBACK"
+		Window 68, 52, 178, 136
+		Position 76, 55
+		IfOption(ReadThis)
+		{
+			Position 100, 110
+		}
+	}
+	
+	TextItem "$MNU_NEWGAME", "n", "PlayerclassMenu"
+	TextItem "$MNU_OPTIONS", "o", "OptionsMenu"
+	TextItem "$MNU_LOADGAME", "l", "LoadGameMenu"
+	TextItem "$MNU_SAVEGAME", "s", "SaveGameMenu"
+	IfOption(ReadThis)
+	{
+		TextItem "$MNU_READTHIS", "i", "ReadThisMenu"
+	}
+	TextItem "$MNU_VIEWSCORES", "v", "ViewScores"
+	TextItem "$MNU_BACKTOGAME", "g", "BackToGame"
+	TextItem "$MNU_QUITGAME", "q", "QuitMenu"
+}

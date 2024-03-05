@@ -1,0 +1,16 @@
+/* DEFAULT ENGLISH TRANSLATION */
+
+[eng default]
+
+MNU_NEWGAME = "New Game"
+MNU_OPTIONS = "Options"
+MNU_SOUND = "Sound"
+MNU_CONTROL = "Controls"
+MNU_LOADGAME = "Load Game"
+MNU_SAVEGAME = "Save Game"
+MNU_READTHIS = "Read This!"
+MNU_VIEWSCORES = "View Scores"
+MNU_ENDGAME = "End Game"
+MNU_BACKTOGAME = "Back to Game"
+MNU_BACKTODEMO = "Back to Demo"
+MNU_QUITGAME = "Quit Game"

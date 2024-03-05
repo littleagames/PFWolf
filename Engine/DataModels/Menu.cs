@@ -11,6 +11,19 @@ internal class Menu : IMenu
 {
     public FontColor BackgroundColor { get; private set; } = new FontColor(0x00);
     public List<MenuComponent> MenuComponents { get; private set; } = new List<MenuComponent>();
+    public List<MenuItem> MenuItems { get { return MenuComponents.Where(mc => mc is MenuItem).Select(mc => (MenuItem)mc).ToList(); } }
+
+    private int _cursorPosition = -1;
+    private string _cursorGraphic;
+    private int _offsetX = 0;
+    private int _offsetY = 0;
+
+    public void SetCursor(string cursorPic, int offsetX, int offsetY)
+    {
+        _cursorGraphic = cursorPic;
+        _offsetX = offsetX;
+        _offsetY = offsetY;
+    }
 
     public void SetBackgroundColor(FontColor backgroundColor)
     {
@@ -28,44 +41,109 @@ internal class Menu : IMenu
         vl.DrawBackground(BackgroundColor.GetByte());
         MenuComponents.ForEach(component => component.Draw());
 
+        var firstItem = MenuItems.FirstOrDefault(); // this skips the menuswitcheritems
+        // cursor
+        if (firstItem != null)
+        {
+            vl.DrawPic(
+                firstItem.PositionX + _offsetX,
+                firstItem.PositionY + _offsetY,
+                _cursorGraphic);
+        }
+
         vl.UpdateScreen();
     }
 
     public int Handle()
     {
+        //var exit = 0;
+
+        //do
+        //{
+        //    if (_indent > 0) // and lastblinktime
+        //    {
+        //        // TODO: This is the cursor animation
+        //        _cursorGraphic = "menus/cursor1";
+        //        Draw();
+        //    }
+
+        //    // if (key == enter) exit = 1;
+        //    // else if (key == esc exit = 2;
+
+        //} while (exit == 0);
         return -1;
     }
 }
 
-internal abstract class MenuItem : MenuComponent
+internal class MenuItem : MenuComponent
 {
-    protected MenuItem(int positionX, int positionY, string text, FontColor textColor)
+    internal MenuItem(
+        int positionX,
+        int positionY,
+        string text,
+        FontColor textColor,
+        FontColor disabledTextColor,
+        FontColor highlightedTextColor,
+        Func<int, bool>? listener = null)
         : base(positionX, positionY)
     {
         Text = text;
         TextColor = textColor;
+        DisabledTextColor = disabledTextColor;
+        HighlightedTextColor = highlightedTextColor;
+        Listener = listener;
     }
 
     public string Text { get; } = string.Empty;
     public FontColor TextColor { get; }
-    public bool Enabled { get; set; } = false;
-    public bool IsHighlighted { get; set; } = false;
-    public bool Visible { get; set; } = false;
-    public Func<Menu, int> Listener { get; } = null!;
-}
+    public FontColor DisabledTextColor { get; }
+    public FontColor HighlightedTextColor { get; }
 
-internal class MenuSwitcherItem : MenuItem
-{
-    public MenuSwitcherItem(int positionX, int positionY, string text, FontColor textColor, Func<Menu, int>? listener = null)
-        :base (positionX, positionY, text, textColor)
-    {
-    }
+    /// <summary>
+    /// Menu item is able to be selected, and the action (if applicable) can be performed
+    /// </summary>
+    public bool Enabled { get; set; } = false;
+
+    /// <summary>
+    /// The menu item is currently selected
+    /// </summary>
+    public bool IsHighlighted { get; set; } = false;
+
+    /// <summary>
+    /// The menu item will not be visible or counted in the displayed list
+    /// </summary>
+    public bool Visible { get; set; } = false;
+    public Func<int, bool>? Listener { get; } = null!;
 
     public override void Draw()
     {
         var vl = VideoLayerManager.Instance;
-        vl.DrawTextString(PositionX, PositionY, Text, new FontName("font/bigfont"), TextColor);
+
+        FontColor color;
+        if (!Enabled)
+            color = DisabledTextColor;
+        if (IsHighlighted)
+            color = HighlightedTextColor;
+        else
+            color = TextColor;
+
+        vl.DrawTextString(PositionX, PositionY, Text, new FontName("font/bigfont"), color);
     }
+}
+
+internal class MenuSwitcherItem : MenuItem
+{
+    public MenuSwitcherItem(int positionX, int positionY, string text, FontColor textColor,
+        FontColor disabledTextColor,
+        FontColor highlightedTextColor,
+        Menu menu,
+        Func<int, bool>? listener = null)
+        :base (positionX, positionY, text, textColor, disabledTextColor, highlightedTextColor, listener)
+    {
+        Menu = menu;
+    }
+
+    public Menu Menu { get; }
 }
 
 internal class MenuWindow : MenuComponent
@@ -73,10 +151,10 @@ internal class MenuWindow : MenuComponent
     public int Width { get; } = 0;
     public int Height { get; } = 0;
     public FontColor Color { get; }
-    public byte Color1 { get; }
-    public byte Color2 { get; }
+    public FontColor Color1 { get; }
+    public FontColor Color2 { get; }
 
-    public MenuWindow(int positionX, int positionY, int width, int height, FontColor color, byte color1, byte color2)
+    public MenuWindow(int positionX, int positionY, int width, int height, FontColor color, FontColor color1, FontColor color2)
         : base(positionX, positionY)
     {
         Width = width;
@@ -90,10 +168,10 @@ internal class MenuWindow : MenuComponent
     {
         var vl = VideoLayerManager.Instance;
         vl.DrawRectangle(PositionX, PositionY, Width, Height, Color.GetByte()); // background
-        vl.DrawRectangle(PositionX, PositionY, Width, 1, Color2); // top
-        vl.DrawRectangle(PositionX, PositionY, 1, Height, Color2); // left
-        vl.DrawRectangle(PositionX, PositionY + Height, Width, 1, Color1); // bottom
-        vl.DrawRectangle(PositionX + Width, PositionY, 1, Height, Color1); // right
+        vl.DrawRectangle(PositionX, PositionY, Width, 1, Color2.GetByte()); // top
+        vl.DrawRectangle(PositionX, PositionY, 1, Height, Color2.GetByte()); // left
+        vl.DrawRectangle(PositionX, PositionY + Height, Width, 1, Color1.GetByte()); // bottom
+        vl.DrawRectangle(PositionX + Width, PositionY, 1, Height, Color1.GetByte()); // right
     }
 }
 

@@ -256,6 +256,9 @@ public class VideoLayerManager
                     {
                         if (col == 0xff) continue;
 
+                        var xlength = sci + n + destx;
+                        var ylength = scj + m + desty;
+                        if (ylength > _ylookup.Length || (_ylookup[scj + m + desty] + xlength) > dest.Length) return;
                         dest[_ylookup[scj + m + desty] + sci + n + destx] = col;
                     }
                 }
@@ -291,6 +294,7 @@ public class VideoLayerManager
         dest = new byte[size];
         Marshal.Copy(dest_ptr, dest, 0, size);
 
+        if (scaledY > _ylookup.Length) return;
         var firstPosition = _ylookup[scaledY] + scaledX;
         var position = firstPosition;
 
@@ -299,6 +303,8 @@ public class VideoLayerManager
             //memset(dest, color, scwidth);
             for (int scw = 0; scw < scaledWidth; scw++)
             {
+                if (position + scw > dest.Length) continue;
+
                 dest[position + scw] = color;
             }
 

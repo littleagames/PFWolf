@@ -53,8 +53,6 @@ public class VgaGraphicsManager : IGraphicsManager
         byte[] width = new byte[256];
         Buffer.BlockCopy(grsegs[chunkNum], sizeof(short) + sizeof(short) * 256, width, 0, sizeof(byte) * 256);
 
-        //var data = grsegs[chunkNum].Skip(sizeof(short) + sizeof(short) * 256 + sizeof(byte) * 256).ToArray();
-
         var font = new MonochromaticFont
         {
             Height = height
@@ -120,18 +118,16 @@ public class VgaGraphicsManager : IGraphicsManager
         // Try loading the VGA files
         const string fileExtension = "wl6";
 
-        const string tempDirectory = "D:\\PFWolf-CSharp\\";
-
         const string graphicsFileName = "vgagraph";
         const string graphicsHeaderFileName = "vgahead";
         const string graphicsDictionaryFileName = "vgadict";
 
         // Load dictionary
-        byte[] dictionaryFile = File.ReadAllBytes($"{tempDirectory}{graphicsDictionaryFileName}.{fileExtension}");
+        byte[] dictionaryFile = File.ReadAllBytes($"{Constants.GameFilesDirectory}{graphicsDictionaryFileName}.{fileExtension}");
 
 
         // Load header
-        var headerLength = new FileInfo($"{tempDirectory}{graphicsHeaderFileName}.{fileExtension}").Length;
+        var headerLength = new FileInfo($"{Constants.GameFilesDirectory}{graphicsHeaderFileName}.{fileExtension}").Length;
 
         const int magic3 = 3;
 
@@ -143,7 +139,7 @@ public class VgaGraphicsManager : IGraphicsManager
             throw new Exception("VGA File is not right");
         }
 
-        byte[] headerFile = File.ReadAllBytes($"{tempDirectory}{graphicsHeaderFileName}.{fileExtension}");
+        byte[] headerFile = File.ReadAllBytes($"{Constants.GameFilesDirectory}{graphicsHeaderFileName}.{fileExtension}");
 
         for (var i = 0; i != grstarts.Length; i++)
         {
@@ -155,7 +151,7 @@ public class VgaGraphicsManager : IGraphicsManager
         }
 
         // Expand and Load graphics
-        byte[] graphicsFile = File.ReadAllBytes($"{tempDirectory}{graphicsFileName}.{fileExtension}");
+        byte[] graphicsFile = File.ReadAllBytes($"{Constants.GameFilesDirectory}{graphicsFileName}.{fileExtension}");
 
         var filePos = grstarts[StructPic];
         int chunkcomplen;
@@ -320,7 +316,7 @@ public class VgaGraphicsManager : IGraphicsManager
         { "readthis/rightwindow", 8 },
         { "readthis/bottominfo", 9 },
         { "menus/mainmenu", 10 },
-        { "menus/cursor1", 11 },
+        { "c_cursor1", 11 },
         { "menus/cursor2", 12 },
         { "menus/notselected", 13 },
         { "menus/selected", 14 },
