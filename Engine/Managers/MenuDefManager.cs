@@ -125,8 +125,11 @@ internal class MenuDefManager
         string? line;
         while (((line = sr.ReadLine()) != null) && !line.Trim(new char[] {'\t'}).Equals("}")) // TODO: The } check won't work if it has tabs before
         {
+            if (line.StartsWith("\\\\")) continue; // commented line
+
             line = line.Replace("\t", string.Empty); // Strip starting tabs
-            if (line.Equals(string.Empty)) continue;
+            
+            if (line.Equals(string.Empty)) continue; // skip empty lines
 
             if (line.StartsWith("else", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -197,10 +200,10 @@ internal class MenuDefManager
                 //sc.MustGetFloat();
                 //desc->mYpos = sc.Float;
             }
-            else if (line.StartsWith("Stripe", StringComparison.InvariantCultureIgnoreCase))
-            {
-                // TODO: Set stripe? stuff
-            }
+            //else if (line.StartsWith("Stripe", StringComparison.InvariantCultureIgnoreCase))
+            //{
+            //    // TODO: Set stripe? stuff
+            //}
             else if (line.StartsWith("Font", StringComparison.InvariantCultureIgnoreCase))
             {
                 // TODO: Set font stuff

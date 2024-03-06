@@ -6,6 +6,9 @@ namespace Engine.DataModels;
 
 public abstract class ListMenuItem
 {
+    public int PositionX { get; set; }
+    public int PositionY { get; set; }
+
     public abstract void Draw(VideoLayerManager manager);
 }
 
@@ -16,8 +19,6 @@ public abstract class ListMenuItemSelectable : ListMenuItem
 
 public class ListMenuItemTextItem : ListMenuItemSelectable
 {
-    public int PositionX { get; set; }
-    public int PositionY { get; set; }
     public FontColor TextColor { get; set; }
     public FontName FontName { get; set; }
 
@@ -44,6 +45,20 @@ public class ListMenuItemPatchItem : ListMenuItemSelectable
     public override void Draw(VideoLayerManager manager)
     {
         //throw new NotImplementedException();
+    }
+}
+
+public class ListMenuItemStripe : ListMenuItem
+{
+    public ListMenuItemStripe(int y)
+    {
+        PositionY = y;
+    }
+
+    public override void Draw(VideoLayerManager vl)
+    {
+        vl.DrawRectangle(PositionX, PositionY, 320, 24, 0x00);
+        vl.DrawRectangle(PositionX, PositionY + 22, 320, 1, 0x29);
     }
 }
 

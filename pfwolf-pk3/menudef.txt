@@ -31,8 +31,8 @@ LISTMENU "MainMenu"
 {
 	IfGame(Wolf3D,Spear)
 	{
-		StaticPatch 84, 0, "C_OPTIONS"
 		Stripe 10
+		StaticPatch 84, 0, "C_OPTIONS"
 		StaticPatch 112, 184, "C_MOUSELBACK"
 		Window 68, 52, 178, 136, 45, 35, 43
 		Position 100, 55
@@ -42,8 +42,9 @@ LISTMENU "MainMenu"
 		}
 	}
 	
-	TextItem "$MNU_NEWGAME", "n", "PlayerclassMenu"
-	TextItem "$MNU_OPTIONS", "o", "OptionsMenu"
+	//TextItem "$MNU_NEWGAME", "n", "PlayerclassMenu"
+	TextItem "New Game", "n", "PlayerclassMenu"
+	TextItem "Options", "o", "OptionsMenu"
 	TextItem "$MNU_LOADGAME", "l", "LoadGameMenu"
 	TextItem "$MNU_SAVEGAME", "s", "SaveGameMenu"
 	IfOption(ReadThis)
