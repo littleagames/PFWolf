@@ -1,5 +1,4 @@
-﻿using Engine.DataModels;
-
+﻿
 namespace Engine.Managers;
 
 internal class MenuManager
@@ -7,19 +6,7 @@ internal class MenuManager
     private static volatile MenuManager? _instance = null;
     private static object syncRoot = new object();
 
-    private Menu _mainMenu = new();
-    private Menu _newGame = null!;
-    private Menu _soundMenu = null!;
-    private Menu _controlMenu = null!;
-    private Menu _loadGameMenu = null!;
-
-    private readonly FontColor TextColor = new FontColor(0x17);
-    private readonly FontColor Highlight = new FontColor(0x13);
-    private readonly FontColor BORDCOLOR = new FontColor(0x29);
-    private readonly FontColor BORD2COLOR = new FontColor(0x23);
-    private readonly FontColor Deactive = new FontColor(0x2b);
-    private readonly FontColor WindowBackgroundColor = new FontColor(0x2d);
-    private readonly FontColor STRIPE = new FontColor(0x2c);
+    private ListMenuDescriptor _mainMenu = new();
 
     private MenuManager()
     {
@@ -54,7 +41,7 @@ internal class MenuManager
     public void Init()
     {
         MenuDefManager.Instance.ParseMenuDefs();
-        SetMenu(MenuName.FromString("MainMenu"), _mainMenu);
+        _mainMenu = SetMenu(MenuName.FromString("MainMenu"));
         //CreateMenus();
         /*
 	if (!batchrun) Printf("M_Init: Init menus.\n");
@@ -63,31 +50,36 @@ internal class MenuManager
 	M_CreateGameMenus();*/
     }
 
-    public void SetMenu(MenuName menuName, Menu menu)
+    public ListMenuDescriptor SetMenu(MenuName menuName)
     {
         var menuDefs = MenuDefManager.Instance;
-        var menuDescriptor = menuDefs.GetMenu(menuName);
-        int menuX = (int)menuDescriptor.XPosition;
-        int menuY = (int)menuDescriptor.YPosition;
-        int linespacing = menuDescriptor.LineSpacing;
+        return menuDefs.GetMenu(menuName);
+        //int menuX = (int)menuDescriptor.XPosition;
+        //int menuY = (int)menuDescriptor.YPosition;
+        //int linespacing = menuDescriptor.LineSpacing;
 
-        const byte MENU_W = 178;
-        byte MENU_H = (byte)(linespacing * 10 + 6);
-        menu.SetCursor(menuDescriptor.Selector, (int)menuDescriptor.SelectorOffsetX, (int)menuDescriptor.SelectorOffsetY);
-        menu.SetBackgroundColor(BORDCOLOR);
-        menu.AddItem(new MenuGraphic(112, 184, "menus/mouselback")); // bottom centered (need tools to do that)
-        menu.AddItem(new MenuWindow(menuX - 8, menuY - 3, MENU_W, MENU_H, WindowBackgroundColor, BORD2COLOR, Deactive));
-        menu.AddItem(new MenuStripe(10, STRIPE));
-        menu.AddItem(new MenuGraphic(84, 0, "menus/mainmenu"));
-        menu.AddItem(new MenuSwitcherItem(menuX, menuY + (linespacing * 0), "New Game", TextColor, Deactive, Highlight, _newGame));
-        menu.AddItem(new MenuSwitcherItem(menuX, menuY + (linespacing * 1), "Sound", TextColor, Deactive, Highlight, _soundMenu));
-        menu.AddItem(new MenuSwitcherItem(menuX, menuY + (linespacing * 2), "Control", TextColor, Deactive, Highlight, _controlMenu));
-        menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 3), "Load Game", TextColor, Deactive, Highlight));
-        menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 4), "Save Game", TextColor, Deactive, Highlight));
-        menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 5), "Read This!", TextColor, Deactive, Highlight));
-        menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 6), "View Scores", TextColor, Deactive, Highlight));
-        menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 7), "Back to Demo", TextColor, Deactive, Highlight));
-        menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 8), "Quit", TextColor, Deactive, Highlight, (which) => { SDL2.SDL.SDL_Quit(); return false; }));
+        //const byte MENU_W = 178;
+        //byte MENU_H = (byte)(linespacing * 10 + 6);
+        //menu.SetCursor(menuDescriptor.Selector, (int)menuDescriptor.SelectorOffsetX, (int)menuDescriptor.SelectorOffsetY);
+        //menu.SetBackgroundColor(BORDCOLOR);
+
+        //foreach (var md in menuDescriptor.Items)
+        //{
+        //    menu.AddItem()
+        //}
+        //menu.AddItem(new MenuGraphic(112, 184, "menus/mouselback")); // bottom centered (need tools to do that)
+        //menu.AddItem(new MenuWindow(menuX - 8, menuY - 3, MENU_W, MENU_H, WindowBackgroundColor, BORD2COLOR, Deactive));
+        //menu.AddItem(new MenuStripe(10, STRIPE));
+        //menu.AddItem(new MenuGraphic(84, 0, "menus/mainmenu"));
+        //menu.AddItem(new MenuSwitcherItem(menuX, menuY + (linespacing * 0), "New Game", TextColor, Deactive, Highlight, _newGame));
+        //menu.AddItem(new MenuSwitcherItem(menuX, menuY + (linespacing * 1), "Sound", TextColor, Deactive, Highlight, _soundMenu));
+        //menu.AddItem(new MenuSwitcherItem(menuX, menuY + (linespacing * 2), "Control", TextColor, Deactive, Highlight, _controlMenu));
+        //menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 3), "Load Game", TextColor, Deactive, Highlight));
+        //menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 4), "Save Game", TextColor, Deactive, Highlight));
+        //menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 5), "Read This!", TextColor, Deactive, Highlight));
+        //menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 6), "View Scores", TextColor, Deactive, Highlight));
+        //menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 7), "Back to Demo", TextColor, Deactive, Highlight));
+        //menu.AddItem(new MenuItem(menuX, menuY + (linespacing * 8), "Quit", TextColor, Deactive, Highlight, (which) => { SDL2.SDL.SDL_Quit(); return false; }));
     }
 
     public void CreateMenus()
@@ -109,7 +101,7 @@ internal class MenuManager
 
         var exit = false;
 
-        _mainMenu.Draw();
+        _mainMenu.Draw(VideoLayerManager.Instance);
         VideoLayerManager.Instance.FadeIn(10);
         int which;
 

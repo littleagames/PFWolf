@@ -4,7 +4,8 @@
 [StronglyTypedId(generateJsonConverter: true, StronglyTypedIdBackingType.Int, StronglyTypedIdJsonConverter.SystemTextJson)]
 public partial struct FontColor
 {
-    public FontColor(byte color) { Value = color; }
+    public static FontColor FromByte(byte value) => new FontColor(value);
+    public static FontColor FromString(string value) => FromByte(Convert.ToByte(value));
 
     public byte GetByte()
     {

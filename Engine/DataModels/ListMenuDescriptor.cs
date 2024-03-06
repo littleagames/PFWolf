@@ -1,4 +1,6 @@
-﻿namespace Engine.DataModels;
+﻿using Engine.Managers;
+
+namespace Engine.DataModels;
 
 public class ListMenuDescriptor
 {
@@ -15,9 +17,26 @@ public class ListMenuDescriptor
     /// Texture name for the selector/cursor of the menu
     /// </summary>
     public string Selector { get; set; } = null!;
-    public float SelectorOffsetX { get; set; } = 0;
-    public float SelectorOffsetY { get; set; } = 0;
+    public int SelectorOffsetX { get; set; } = 0;
+    public int SelectorOffsetY { get; set; } = 0;
     public int LineSpacing { get; set; } = 0;
-    public float XPosition { get; set; } = 0;
-    public float YPosition { get; set; } = 0;
+    public int XPosition { get; set; } = 0;
+    public int YPosition { get; set; } = 0;
+    public FontColor BackgroundColor { get;set; } = FontColor.FromByte(0x00);
+    public FontColor TextColor { get; set; } = FontColor.FromByte(0x00);
+    public FontName Font { get; set; } = FontName.Empty;
+    public List<ListMenuItem> Items { get; set; } = [];
+
+    public void Draw(VideoLayerManager vl)
+    {
+        vl.DrawBackground(BackgroundColor.GetByte());
+        Items.ForEach(component => component.Draw(vl));
+
+        vl.DrawPic(
+            (int)(XPosition + SelectorOffsetX),
+            (int)(YPosition + SelectorOffsetY),
+            Selector);
+
+        vl.UpdateScreen();
+    }
 }

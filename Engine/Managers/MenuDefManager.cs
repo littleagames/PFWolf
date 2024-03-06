@@ -1,4 +1,6 @@
-﻿namespace Engine.Managers;
+﻿using System.Reflection;
+
+namespace Engine.Managers;
 
 internal class MenuDefManager
 {
@@ -81,7 +83,10 @@ internal class MenuDefManager
             Selector = _defaultListMenuSettings.Selector,
             XPosition = _defaultListMenuSettings.XPosition,
             YPosition = _defaultListMenuSettings.YPosition,
-            LineSpacing = _defaultListMenuSettings.LineSpacing
+            LineSpacing = _defaultListMenuSettings.LineSpacing,
+            Font = _defaultListMenuSettings.Font,
+            TextColor = _defaultListMenuSettings.TextColor,
+            BackgroundColor = _defaultListMenuSettings.BackgroundColor
         };
 
         DoParseListMenuBody(sr, menuDescriptor, insertIndex: -1);
@@ -156,8 +161,8 @@ internal class MenuDefManager
                 var splitLine = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 var textureName = splitLine[1].Replace("\"", string.Empty).ToString();
 
-                var xOffset = float.Parse(splitLine[2]);
-                var yOffset = float.Parse(splitLine[3]);
+                var xOffset = int.Parse(splitLine[2]);
+                var yOffset = int.Parse(splitLine[3]);
 
                 menuDescriptor.Selector = textureName;
                 menuDescriptor.SelectorOffsetX = xOffset;
@@ -182,8 +187,8 @@ internal class MenuDefManager
             else if (line.StartsWith("Position", StringComparison.InvariantCultureIgnoreCase))
             {
                 var splitLine = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                var xPos = float.Parse(splitLine[1]);
-                var yPos = float.Parse(splitLine[2]);
+                var xPos = int.Parse(splitLine[1]);
+                var yPos = int.Parse(splitLine[2]);
                 menuDescriptor.XPosition = xPos;
                 menuDescriptor.YPosition = yPos;
                 //sc.MustGetFloat();
@@ -199,6 +204,14 @@ internal class MenuDefManager
             else if (line.StartsWith("Font", StringComparison.InvariantCultureIgnoreCase))
             {
                 // TODO: Set font stuff
+                var splitLine = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                menuDescriptor.Font = FontName.FromString(splitLine[1].Trim('\"'));
+                menuDescriptor.TextColor = FontColor.FromString(splitLine[2]);
+            }
+            else if (line.StartsWith("Background", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var splitLine = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                menuDescriptor.BackgroundColor = FontColor.FromString(splitLine[1]);
             }
             else
             {
@@ -216,11 +229,54 @@ internal class MenuDefManager
                 // I want the first word only
                 var splitLine = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 var word = splitLine[0];
-                bool success = false;
-                var buildName = $"ListMenuItem{word}";
-                var type = Type.GetType($"Engine.DataModels.{buildName}");
-                var myObject = (ListMenuItem)Activator.CreateInstance(type);
 
+                bool success = false;
+                
+                var type = Type.GetType($"Engine.DataModels.ListMenuItem{word}");
+                var args = splitLine.Skip(1).ToArray();
+                if (type != null)
+                {
+                    // TODO: Only pick the one matching constructor, not a loop
+                    // Not just length matching, but arg type matching
+                    // (how to do without actually performing the action?)
+                    foreach (var ci in type.GetConstructors())
+                    {
+                        var typedArgs = new List<object>();
+
+                        var ctorParams = ci.GetParameters();
+                        if (ctorParams.Length != args.Length)
+                        {
+                            continue;
+                        }
+
+                        for (var p = 0; p < ctorParams.Length; p++)
+                        {
+                            var param = ctorParams[p];
+                            if (param.ParameterType == typeof(string))
+                            {
+                                args[p] = args[p].Trim('\"');
+                            }
+                            var newTypeArg = Convert.ChangeType(args[p], param.ParameterType);
+                            typedArgs.Add(newTypeArg);
+                        }
+
+                        var myObject = (ListMenuItem)ci.Invoke(typedArgs.ToArray());
+                        
+                        // Handle additional properties
+                        if (myObject is ListMenuItemTextItem)
+                        {
+                            ((ListMenuItemTextItem)myObject).PositionX = menuDescriptor.XPosition;
+                            var index = menuDescriptor.Items.Count(md => md is ListMenuItemSelectable);
+                            ((ListMenuItemTextItem)myObject).PositionY = menuDescriptor.YPosition + menuDescriptor.LineSpacing * index;
+                            ((ListMenuItemTextItem)myObject).FontName = menuDescriptor.Font;
+                            ((ListMenuItemTextItem)myObject).TextColor = menuDescriptor.TextColor;
+                        }
+
+                        menuDescriptor.Items.Add(myObject);
+                        break;
+                    }
+
+                }
             }
         }
     }

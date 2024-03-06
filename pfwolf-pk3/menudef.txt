@@ -10,12 +10,13 @@
 
 DEFAULTLISTMENU
 {
-	Font "BigFont", "Untranslated"
+	Font "font/bigfont", 0
+	BackgroundColor 41
 	LineSpacing 15
 	IfGame(Wolf3D)
 	{
 		Selector "C_CURSOR1", -24, 0
-		Font "BigUpper", "Gray"
+		Font "font/bigfont", 23
 		LineSpacing 13
 	}
 }
@@ -33,8 +34,8 @@ LISTMENU "MainMenu"
 		StaticPatch 84, 0, "C_OPTIONS"
 		Stripe 10
 		StaticPatch 112, 184, "C_MOUSELBACK"
-		Window 68, 52, 178, 136
-		Position 76, 55
+		Window 68, 52, 178, 136, 45, 35, 43
+		Position 100, 55
 		IfOption(ReadThis)
 		{
 			Position 100, 110
@@ -47,7 +48,7 @@ LISTMENU "MainMenu"
 	TextItem "$MNU_SAVEGAME", "s", "SaveGameMenu"
 	IfOption(ReadThis)
 	{
-		TextItem "$MNU_READTHIS", "i", "ReadThisMenu"
+		TextItem "$MNU_READTHIS", "r", "ReadThisMenu"
 	}
 	TextItem "$MNU_VIEWSCORES", "v", "ViewScores"
 	TextItem "$MNU_BACKTOGAME", "g", "BackToGame"
