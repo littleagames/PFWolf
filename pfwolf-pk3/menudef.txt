@@ -42,8 +42,8 @@ LISTMENU "MainMenu"
 		}
 	}
 	
-	//TextItem "$MNU_NEWGAME", "n", "PlayerclassMenu"
-	TextItem "New Game", "n", "PlayerclassMenu"
+	TextItem "$MNU_NEWGAME", "n", "PlayerclassMenu"
+	//TextItem "New Game", "n", "PlayerclassMenu"
 	TextItem "Options", "o", "OptionsMenu"
 	TextItem "$MNU_LOADGAME", "l", "LoadGameMenu"
 	TextItem "$MNU_SAVEGAME", "s", "SaveGameMenu"

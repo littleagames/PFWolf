@@ -54,15 +54,13 @@ internal class MenuDefManager
         Scanner sr = new Scanner(streamReader.ReadToEnd());
         
         string? line;
-        while ((line = sr.ReadLine()) != null)
+        while (sr.GetString() != null)
         {
-            // TODO: This should get the next "Word"
-            var splitLine = line.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            if (splitLine.Any() && (splitLine[0]?.StartsWith("LISTMENU", StringComparison.InvariantCultureIgnoreCase) ?? false))
+            if (sr.Compare("LISTMENU"))
             {
-                ParseListMenu(splitLine[1], sr);
+                ParseListMenu(sr);
             }
-            else if (line?.StartsWith("DEFAULTLISTMENU", StringComparison.InvariantCultureIgnoreCase) ?? false)
+            else if (sr.Compare("DEFAULTLISTMENU"))
             {
                 DoParseListMenuBody(sr, _defaultListMenuSettings, insertIndex: -1);
                 //if (DefaultListMenuSettings->mItems.Size() > 0)
@@ -73,11 +71,12 @@ internal class MenuDefManager
         }
     }
 
-    public void ParseListMenu(string line, Scanner sr)
+    public void ParseListMenu(Scanner sr)
     {
+        sr.MustGetString();
         var menuDescriptor = new ListMenuDescriptor
         {
-            MenuName = MenuName.FromString(line.Trim('\"')), // TODO: Get "string", aka, check for quotations on start and end
+            MenuName = MenuName.FromString(sr.String),
             SelectorOffsetX = _defaultListMenuSettings.SelectorOffsetX,
             SelectorOffsetY = _defaultListMenuSettings.SelectorOffsetY,
             Selector = _defaultListMenuSettings.Selector,
@@ -116,26 +115,17 @@ internal class MenuDefManager
 
     public void DoParseListMenuBody(Scanner sr, ListMenuDescriptor menuDescriptor, int insertIndex)
     {
-        var openBracketLine = sr.ReadLine()?.Replace("\t", string.Empty);
-        if (!openBracketLine?.Equals("{") ?? false)
+        sr.MustGetString("{");
+
+        while (!sr.CheckString("}"))
         {
-            throw new Exception("DoParseMenuListBody: Missing { to start body");
-        }
+            sr.MustGetString();
 
-        string? line;
-        while (((line = sr.ReadLine()) != null) && !line.Trim(new char[] {'\t'}).Equals("}")) // TODO: The } check won't work if it has tabs before
-        {
-            if (line.StartsWith("\\\\")) continue; // commented line
-
-            line = line.Replace("\t", string.Empty); // Strip starting tabs
-            
-            if (line.Equals(string.Empty)) continue; // skip empty lines
-
-            if (line.StartsWith("else", StringComparison.InvariantCultureIgnoreCase))
+            if (sr.Compare("else"))
             {
                 SkipSubBlock(sr);
             }
-            else if (line.StartsWith("ifgame", StringComparison.InvariantCultureIgnoreCase))
+            else if (sr.Compare("ifgame"))
             {
                 if (!CheckSkipGameBlock(sr))
                 {
@@ -143,7 +133,7 @@ internal class MenuDefManager
                     DoParseListMenuBody(sr, menuDescriptor, insertIndex);
                 }
             }
-            else if (line.StartsWith("ifnotgame", StringComparison.InvariantCultureIgnoreCase))
+            else if (sr.Compare("ifnotgame"))
             {
                 if (!CheckSkipGameBlock(sr, yes: false))
                 {
@@ -151,7 +141,7 @@ internal class MenuDefManager
                     DoParseListMenuBody(sr, menuDescriptor, insertIndex);
                 }
             }
-            else if (line.StartsWith("ifoption", StringComparison.InvariantCultureIgnoreCase))
+            else if (sr.Compare("ifoption"))
             {
                 if (!CheckSkipOptionBlock(sr))
                 {
@@ -159,62 +149,46 @@ internal class MenuDefManager
                     DoParseListMenuBody(sr, menuDescriptor, insertIndex);
                 }
             }
-            else if (line.StartsWith("Selector", StringComparison.InvariantCultureIgnoreCase))
+            else if (sr.Compare("Class"))
             {
-                var splitLine = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                var textureName = splitLine[1].Replace("\"", string.Empty).ToString();
-
-                var xOffset = int.Parse(splitLine[2]);
-                var yOffset = int.Parse(splitLine[3]);
-
-                menuDescriptor.Selector = textureName;
-                menuDescriptor.SelectorOffsetX = xOffset;
-                menuDescriptor.SelectorOffsetY = yOffset;
-                //sc.MustGetString();
-                //desc->mSelector = GetMenuTexture(sc.String);
-                //sc.MustGetStringName(",");
-                //sc.MustGetFloat();
-                //desc->mSelectOfsX = sc.Float;
-                //sc.MustGetStringName(",");
-                //sc.MustGetFloat();
-                //desc->mSelectOfsY = sc.Float;
+                throw new NotImplementedException("Class in scripting has not be implemented yet.");
             }
-            else if (line.StartsWith("Linespacing", StringComparison.InvariantCultureIgnoreCase))
+            else if (sr.Compare("Selector"))
             {
-                var splitLine = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                var lineSpacing = int.Parse(splitLine[1]);
-                menuDescriptor.LineSpacing = lineSpacing;
-                //sc.MustGetNumber();
-                //desc->mLinespacing = sc.Number;
+                sr.MustGetString();
+                menuDescriptor.Selector = sr.String;
+                sr.MustGetString(",");
+                sr.MustGetNumber();
+                menuDescriptor.SelectorOffsetX = sr.Number;
+                sr.MustGetString(",");
+                sr.MustGetNumber();
+                menuDescriptor.SelectorOffsetY = sr.Number;
             }
-            else if (line.StartsWith("Position", StringComparison.InvariantCultureIgnoreCase))
+            else if (sr.Compare("Linespacing"))
             {
-                var splitLine = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                var xPos = int.Parse(splitLine[1]);
-                var yPos = int.Parse(splitLine[2]);
-                menuDescriptor.XPosition = xPos;
-                menuDescriptor.YPosition = yPos;
-                //sc.MustGetFloat();
-                //desc->mXpos = sc.Float;
-                //sc.MustGetStringName(",");
-                //sc.MustGetFloat();
-                //desc->mYpos = sc.Float;
+                sr.MustGetNumber();
+                menuDescriptor.LineSpacing = sr.Number;
             }
-            //else if (line.StartsWith("Stripe", StringComparison.InvariantCultureIgnoreCase))
-            //{
-            //    // TODO: Set stripe? stuff
-            //}
-            else if (line.StartsWith("Font", StringComparison.InvariantCultureIgnoreCase))
+            else if (sr.Compare("Position"))
             {
-                // TODO: Set font stuff
-                var splitLine = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                menuDescriptor.Font = FontName.FromString(splitLine[1].Trim('\"'));
-                menuDescriptor.TextColor = FontColor.FromString(splitLine[2]);
+                sr.MustGetNumber();
+                menuDescriptor.XPosition = sr.Number;
+                sr.MustGetString(",");
+                sr.MustGetNumber();
+                menuDescriptor.YPosition = sr.Number;
             }
-            else if (line.StartsWith("Background", StringComparison.InvariantCultureIgnoreCase))
+            else if (sr.Compare("Font"))
             {
-                var splitLine = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                menuDescriptor.BackgroundColor = FontColor.FromString(splitLine[1]);
+                sr.MustGetString();
+                menuDescriptor.Font = FontName.FromString(sr.String);
+                sr.MustGetString(",");
+                sr.MustGetNumber();
+                menuDescriptor.TextColor = FontColor.FromInt(sr.Number);
+            }
+            else if (sr.Compare("BackgroundColor"))
+            {
+                sr.MustGetNumber();
+                menuDescriptor.BackgroundColor = FontColor.FromInt(sr.Number);
             }
             else
             {
@@ -227,59 +201,58 @@ internal class MenuDefManager
                 //    sizeCompatible = false;
                 //}
 
-                //var word = sr.ReadWord();
-
-                // I want the first word only
-                var splitLine = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                var word = splitLine[0];
+                var word = sr.String;
 
                 bool success = false;
                 
                 var type = Type.GetType($"Engine.DataModels.ListMenuItem{word}");
-                var args = splitLine.Skip(1).ToArray();
-                if (type != null)
+                var ctor = type?.GetConstructors().FirstOrDefault();
+                if (ctor == null)
                 {
-                    // TODO: Only pick the one matching constructor, not a loop
-                    // Not just length matching, but arg type matching
-                    // (how to do without actually performing the action?)
-                    foreach (var ci in type.GetConstructors())
+                    throw new Exception($"{type} has no available constructor");
+                }
+
+                var ctorParams = ctor.GetParameters().ToList();
+
+                var typedArgs = new List<object>();
+                foreach (var param in ctorParams)
+                {
+                    // Don't check comma before first parameter
+                    if (ctorParams.IndexOf(param) > 0)
                     {
-                        var typedArgs = new List<object>();
-
-                        var ctorParams = ci.GetParameters();
-                        if (ctorParams.Length != args.Length)
-                        {
-                            continue;
-                        }
-
-                        for (var p = 0; p < ctorParams.Length; p++)
-                        {
-                            var param = ctorParams[p];
-                            if (param.ParameterType == typeof(string))
-                            {
-                                args[p] = args[p].Trim('\"');
-                            }
-                            var newTypeArg = Convert.ChangeType(args[p], param.ParameterType);
-                            typedArgs.Add(newTypeArg);
-                        }
-
-                        var myObject = (ListMenuItem)ci.Invoke(typedArgs.ToArray());
-                        
-                        // Handle additional properties
-                        if (myObject is ListMenuItemTextItem)
-                        {
-                            ((ListMenuItemTextItem)myObject).PositionX = menuDescriptor.XPosition;
-                            var index = menuDescriptor.Items.Count(md => md is ListMenuItemSelectable);
-                            ((ListMenuItemTextItem)myObject).PositionY = menuDescriptor.YPosition + menuDescriptor.LineSpacing * index;
-                            ((ListMenuItemTextItem)myObject).FontName = menuDescriptor.Font;
-                            ((ListMenuItemTextItem)myObject).TextColor = menuDescriptor.TextColor;
-                        }
-
-                        menuDescriptor.Items.Add(myObject);
-                        break;
+                        sr.MustGetString(",");
                     }
 
+                    switch (param.ParameterType)
+                    {
+                        case Type intType when intType == typeof(int):
+                            sr.MustGetNumber();
+                            typedArgs.Add(sr.Number);
+                            break;
+                        case Type floatType when floatType == typeof(float):
+                            sr.MustGetFloat();
+                            typedArgs.Add(sr.Float);
+                            break;
+                        case Type stringType when stringType == typeof(string):
+                            sr.MustGetString();
+                            typedArgs.Add(sr.String);
+                            break;
+                    }
                 }
+
+                var myObject = (ListMenuItem)ctor.Invoke(typedArgs.ToArray());
+                        
+                // Handle additional properties
+                if (myObject is ListMenuItemTextItem)
+                {
+                    ((ListMenuItemTextItem)myObject).PositionX = menuDescriptor.XPosition;
+                    var index = menuDescriptor.Items.Count(md => md is ListMenuItemSelectable);
+                    ((ListMenuItemTextItem)myObject).PositionY = menuDescriptor.YPosition + menuDescriptor.LineSpacing * index;
+                    ((ListMenuItemTextItem)myObject).FontName = menuDescriptor.Font;
+                    ((ListMenuItemTextItem)myObject).TextColor = menuDescriptor.TextColor;
+                }
+
+                menuDescriptor.Items.Add(myObject);
             }
         }
     }
@@ -287,6 +260,14 @@ internal class MenuDefManager
     public bool CheckSkipOptionBlock(Scanner sr)
     {
         var filter = false;
+        sr.MustGetString("(");
+        do
+        {
+            sr.MustGetString();
+            // TODO: Platform checks
+
+        } while (sr.CheckString(","));
+        sr.MustGetString(")");
         // menu check options
         // platform check (windows, apple, linux, etc
 
@@ -301,24 +282,16 @@ internal class MenuDefManager
 
     public bool CheckSkipGameBlock(Scanner sr, bool yes = true)
     {
-        var line = sr.CurrentLine;
-        var openPar = line.IndexOf("(");
-        var closePar = line.IndexOf(")");
-        if (openPar == -1 || closePar == -1 || openPar >= closePar)
-        {
-            throw new Exception("CheckSkipGameBlock: line missing ( or )");
-        }
-
-        var games = line.Substring(openPar+1, closePar - 1 - openPar).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (games.Length == 0)
-        {
-            throw new Exception("CheckSkipGameBlock: identifers missing from between ()");
-        }
-
         var filter = false;
-        foreach (var game in games) {
-            filter |= CheckGame(game);
-        }
+        sr.MustGetString("(");
+        do
+        {
+            sr.MustGetString();
+            filter |= CheckGame(sr.String);
+
+        } while (sr.CheckString(","));
+
+        sr.MustGetString(")");
 
         if (filter != yes)
         {
@@ -331,24 +304,18 @@ internal class MenuDefManager
 
     public void SkipSubBlock(Scanner sr)
     {
-        var openBracketLine = sr.ReadLine()?.Replace("\t", string.Empty);
-        if (!openBracketLine?.Equals("{") ?? false)
-        {
-            throw new Exception("DoParseMenuListBody: Missing { to start body");
-        }
-
+        sr.MustGetString("{");
         SkipToEndOfBlock(sr);
     }
 
     public void SkipToEndOfBlock(Scanner sr)
     {
         int depth = 0;
-        string? line;
-        while ((line = sr.ReadLine()) != null)
+        while(true)
         {
-            line = line.Replace("\t", string.Empty);
-            if (line.StartsWith("{")) depth++;
-            else if (line.StartsWith("}"))
+            sr.MustGetString();
+            if (sr.Compare("{")) depth++;
+            else if (sr.Compare("}"))
             {
                 depth--;
                 if (depth < 0) return;

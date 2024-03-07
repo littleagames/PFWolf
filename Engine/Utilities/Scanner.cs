@@ -1,48 +1,133 @@
-﻿using System.Linq;
+﻿using System.Text.RegularExpressions;
 
-namespace Engine.Utilities
+namespace Engine.Utilities;
+
+internal class Scanner
 {
-    internal class Scanner : StringReader
+    public MatchCollection Matches { get; private set; } = null!;
+    public string String { get; private set; } = null!;
+    public float Float { get; private set; } = 0;
+    public int Number { get; private set; } = 0;
+
+    private int _matchIndex = -1;
+
+    public Scanner(string s)
     {
-        private bool _skipLineRead = false;
-        public string? CurrentLine { get; private set; }
+        ParseText(new StringReader(s));
+    }
 
-        public Scanner(string s) : base(s)
+    public string GetString()
+    {
+        if (_matchIndex >= Matches.Count) return null!;
+
+        if (_matchIndex < 0)
         {
+            throw new Exception("No available words (unexpected end of file)");
         }
 
-        public override string? ReadLine()
+        String = Matches[_matchIndex++].Value;
+        return String;
+    }
+
+    public void ParseText(StringReader reader)
+    {
+        var scannedLine = reader.ReadToEnd()?
+                // Clean the text
+                .Replace("\t", string.Empty)
+                .Trim();
+
+        var blockComments = @"/\*(.*?)\*/";
+        var lineComments = @"//(.*?)\r?\n";
+        var strings = @"""((\\[^\n]|[^""\n])*)""";
+        var verbatimStrings = @"@(""[^""]*"")+";
+        string noComments = Regex.Replace(scannedLine,
+            blockComments + "|" + lineComments + "|" + strings + "|" + verbatimStrings,
+            me => {
+                if (me.Value.StartsWith("/*") || me.Value.StartsWith("//"))
+                    return me.Value.StartsWith("//") ? Environment.NewLine : "";
+                // Keep the literal strings
+                return me.Value;
+            },
+            RegexOptions.Singleline);
+
+        var regexStr = @"^(?<=[^\\]|^)\"".*?(?<=[^\\])\""|(\\""|[\w\/\-])+|([\,{}()])+";
+        Matches = Regex.Matches(noComments, regexStr);
+        _matchIndex = 0;
+    }
+
+    public void UnGet()
+    {
+        _matchIndex--;
+    }
+
+    public bool CheckString(string name)
+    {
+        if (GetString() != null)
         {
-            if (_skipLineRead)
+            if (Compare(name))
             {
-                _skipLineRead = false;
-                return CurrentLine;
+                return true;
             }
 
-            CurrentLine = base.ReadLine();
-            return CurrentLine;
+            UnGet();
         }
 
-        public string? ReadWord()
+        return false;
+    }
+
+    public bool Compare(string value)
+    {
+        return String?.Equals(value, StringComparison.InvariantCultureIgnoreCase) ?? false;
+    }
+
+    public string MustGetString()
+    {
+        var line = GetString();
+        if (line == null)
         {
-            string? word = null;
-            char? singleChar;
-            while ((singleChar = (char)Read()).HasValue
-                && !new List<char> { ' ' }.Contains(singleChar.Value))
-            {
-                word += singleChar.Value;
-            }
-
-            return word;
+            throw new Exception("Missing string (unexpected end of file)");
         }
 
-        public bool CheckString(string word)
+        return line;
+    }
+
+    public void MustGetString(string value)
+    {
+        var line = MustGetString();
+        if (Compare(value) == false)
         {
-            var line = ReadLine()?.Replace("\t", string.Empty);
-            _skipLineRead = true;
-            return line?.StartsWith(word, StringComparison.InvariantCultureIgnoreCase) ?? false;
-            // todo "unget", go back one line in the
-
+            throw new Exception($"Expected '{value}' but got '{line}'");
         }
+    }
+
+    public void MustGetFloat()
+    {
+        var line = GetString();
+        if (line == null)
+        {
+            throw new Exception("Missing string (unexpected end of file)");
+        }
+
+        if (!float.TryParse(line, out float value))
+        {
+            throw new Exception($"Bad numeric constant '{line}'");
+        }
+
+        Float = value;
+    }
+    public void MustGetNumber()
+    {
+        var line = GetString();
+        if (line == null)
+        {
+            throw new Exception("Missing string (unexpected end of file)");
+        }
+
+        if (!int.TryParse(line, out int value))
+        {
+            throw new Exception($"Bad numeric constant '{line}'");
+        }
+
+        Number = value;
     }
 }
