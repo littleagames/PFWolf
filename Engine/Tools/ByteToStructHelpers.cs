@@ -2,9 +2,9 @@
 
 namespace Engine.Tools;
 
-internal class ByteToStructHelpers
+public class ByteToStructHelpers
 {
-    internal static T ByteArrayToStucture<T>(byte[] bytes) where T : struct
+    public static T ByteArrayToStucture<T>(byte[] bytes) where T : struct
     {
         var structBytes = bytes.Take(Marshal.SizeOf(typeof(T))).ToArray();
         IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(T)));

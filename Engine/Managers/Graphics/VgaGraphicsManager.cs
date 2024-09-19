@@ -1,4 +1,4 @@
-﻿using Engine.Compression;
+﻿using LittleAGames.PFWolf.Common.Compression;
 using System.Runtime.InteropServices;
 
 namespace Engine.Managers.Graphics;

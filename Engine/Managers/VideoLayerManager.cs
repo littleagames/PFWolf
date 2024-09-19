@@ -180,6 +180,11 @@ public class VideoLayerManager
         MemToScreen(graphic.Data, graphic.Width, graphic.Height, x, y);
     }
 
+    public void DrawBlock(int x, int y, byte[] block)
+    {
+        MemToScreen(block, 64, 64, x, y);
+    }
+
     public void DrawTextString(int startX, int startY, string text, FontName fontName, FontColor color)
     {
         var gfxManager = GraphicsManager.Instance;
@@ -254,7 +259,7 @@ public class VideoLayerManager
                 {
                     for (n = 0; n < _scaleFactorX; n++)
                     {
-                        if (col == 0xff) continue;
+                        //if (col == 0xff) continue;
 
                         var xlength = sci + n + destx;
                         var ylength = scj + m + desty;

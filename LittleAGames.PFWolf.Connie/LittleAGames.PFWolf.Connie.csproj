@@ -1,22 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ppy.SDL2-CS" Version="1.0.82" />
-    <PackageReference Include="StronglyTypedId" Version="0.2.1" />
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+    <PackageReference Include="CSharpFunctionalExtensions" Version="2.42.5" />
+    <PackageReference Include="Spectre.Console" Version="0.49.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LittleAGames.PFWolf.Common\LittleAGames.PFWolf.Common.csproj" />
+    <ProjectReference Include="..\LittleAGames.PFWolf.FileManager\LittleAGames.PFWolf.FileManager.csproj" />
   </ItemGroup>
 
 </Project>
