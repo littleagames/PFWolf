@@ -13,7 +13,7 @@ public class VgaFileManager
         this.dataFile = dataFile;
     }
 
-    private ICompression GetDictionary()
+    public ICompression GetDictionary()
     {
         var data = File.ReadAllBytes(dictionaryFile);
         return new HuffmanCompression(data);
@@ -48,6 +48,9 @@ public class VgaFileManager
                 var chunkcomplen = headerData[StructPic + 1] - headerData[StructPic] - 4;
 
                 var compseg = gfxFileData.Skip(filePosition + 4).Take(chunkcomplen).ToArray();
+                var destTable = GetDictionary().Expand(compseg);
+                //var numPics = 144;// 132; // 144 for apogee
+                //var destTable2 = GetDictionary().Expand(compseg, length: numPics*(sizeof(short)*2));
                 return Result.Success(); // TODO: Returns a result
             })
             .Map(headerData => new VgaData

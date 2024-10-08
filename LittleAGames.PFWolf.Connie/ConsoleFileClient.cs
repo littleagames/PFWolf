@@ -32,6 +32,7 @@ internal class ConsoleFileClient
             })
             .TapError(error => AnsiConsole.WriteLine(error));
     }
+
     public Result GetAudioDataList()
     {
         return GetFiles()
@@ -95,6 +96,26 @@ internal class ConsoleFileClient
                 {
                     AnsiConsole.WriteLine(item.Name);
                 }
+
+                return Result.Success();
+            })
+            .TapError(error => AnsiConsole.WriteLine(error));
+    }
+    public Result GetVgaHuffmanTree()
+    {
+        return GetFiles()
+            .Bind(files =>
+            {
+                // Display vga dictionary nodes
+                vgaFileManager = new VgaFileManager(
+                                        dictionaryFile: files.First(x => x.Contains("VGADICT", StringComparison.InvariantCultureIgnoreCase)),
+                                        headerFile: files.First(x => x.Contains("VGAHEAD", StringComparison.InvariantCultureIgnoreCase)),
+                                        dataFile: files.First(x => x.Contains("VGAGRAPH", StringComparison.InvariantCultureIgnoreCase))
+                                    );
+                AnsiConsole.WriteLine("Get VGA Dictionary Tree");
+                AnsiConsole.WriteLine(new string('=', 50));
+                var compression = vgaFileManager.GetDictionary();
+                AnsiConsole.Write(compression.DisplayLeaves());
 
                 return Result.Success();
             })

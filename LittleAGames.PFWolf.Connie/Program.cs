@@ -20,6 +20,7 @@ internal class Program
             { 201, ("Display Map File Data", consoleFileClient.GetMapDataList) },
 
             { -300, ("VGA FILES", null) },
+            { 300, ("Display Huffman Tree", consoleFileClient.GetVgaHuffmanTree) },
             // 300 TODO: Maybe "display" the node table from dictionary?
             { 301, ("Display VGA Header Data", consoleFileClient.GetVgaHeaderList) },
             { 302, ("Display VGA MetaData", consoleFileClient.GetVgaDataList) },

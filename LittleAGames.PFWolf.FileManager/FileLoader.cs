@@ -2,8 +2,8 @@
 
 public class FileLoader
 {
-    private static string path = "D:\\wolf3d-v1.4-activision";
-    //private static string path = "D:\\wolf3d-v1.4-apogee";
+    //private static string path = "D:\\wolf3d-v1.4-activision";
+    private static string path = "D:\\wolf3d-v1.4-apogee";
     private static readonly string[] filesToFind = new[] { 
         "AUDIOT.WL6",
         "AUDIOHED.WL6",

@@ -9,7 +9,23 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleAGames.PFWolf.Connie"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleAGames.PFWolf.Common", "LittleAGames.PFWolf.Common\LittleAGames.PFWolf.Common.csproj", "{FCD94890-F1B3-4D0E-A37C-ADB74EF5BE63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleAGames.PFWolf.FileManager", "LittleAGames.PFWolf.FileManager\LittleAGames.PFWolf.FileManager.csproj", "{9939C3A2-6CC5-4021-96F3-515E9710CDBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleAGames.PFWolf.FileManager", "LittleAGames.PFWolf.FileManager\LittleAGames.PFWolf.FileManager.csproj", "{9939C3A2-6CC5-4021-96F3-515E9710CDBE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleAGames.PFWolf.Common.Tests", "Tests\LittleAGames.PFWolf.Common.Tests\LittleAGames.PFWolf.Common.Tests.csproj", "{E93799C9-355C-4233-A1F2-2A8F9FCC2D6E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleAGames.PFWolf.PluginsPrototype", "LittleAGames.PFWolf.PluginsPrototype\LittleAGames.PFWolf.PluginsPrototype.csproj", "{01424D66-A1D3-4476-97E2-2AD1F8A3EA68}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{1D3CDBE0-D17B-4E64-923F-02B107BB5D50}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleAGames.PFWolf.Editor.SDK", "LittleAGames.PFWolf.Editor.SDK\LittleAGames.PFWolf.Editor.SDK.csproj", "{D4A8BD65-AA8B-4616-97CF-C52BF4FF2275}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloPlugin", "HelloPlugin\HelloPlugin.csproj", "{8B3C5ED5-31FC-440D-9BA7-21DBE6479157}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleAGames.PFWolf.ScriptingRunner", "LittleAGames.PFWolf.ScriptingRunner\LittleAGames.PFWolf.ScriptingRunner.csproj", "{514A61B9-D595-4E96-8682-F992631ACD5C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SDK", "SDK", "{113BC611-B500-4F98-A406-458ED7DD4A64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleAGames.PFWolf.SDK", "LittleAGames.PFWolf.SDK\LittleAGames.PFWolf.SDK.csproj", "{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,9 +49,40 @@ Global
 		{9939C3A2-6CC5-4021-96F3-515E9710CDBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9939C3A2-6CC5-4021-96F3-515E9710CDBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9939C3A2-6CC5-4021-96F3-515E9710CDBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E93799C9-355C-4233-A1F2-2A8F9FCC2D6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E93799C9-355C-4233-A1F2-2A8F9FCC2D6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E93799C9-355C-4233-A1F2-2A8F9FCC2D6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E93799C9-355C-4233-A1F2-2A8F9FCC2D6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01424D66-A1D3-4476-97E2-2AD1F8A3EA68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01424D66-A1D3-4476-97E2-2AD1F8A3EA68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01424D66-A1D3-4476-97E2-2AD1F8A3EA68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01424D66-A1D3-4476-97E2-2AD1F8A3EA68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4A8BD65-AA8B-4616-97CF-C52BF4FF2275}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4A8BD65-AA8B-4616-97CF-C52BF4FF2275}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4A8BD65-AA8B-4616-97CF-C52BF4FF2275}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4A8BD65-AA8B-4616-97CF-C52BF4FF2275}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B3C5ED5-31FC-440D-9BA7-21DBE6479157}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B3C5ED5-31FC-440D-9BA7-21DBE6479157}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B3C5ED5-31FC-440D-9BA7-21DBE6479157}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B3C5ED5-31FC-440D-9BA7-21DBE6479157}.Release|Any CPU.Build.0 = Release|Any CPU
+		{514A61B9-D595-4E96-8682-F992631ACD5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{514A61B9-D595-4E96-8682-F992631ACD5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{514A61B9-D595-4E96-8682-F992631ACD5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{514A61B9-D595-4E96-8682-F992631ACD5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{01424D66-A1D3-4476-97E2-2AD1F8A3EA68} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
+		{D4A8BD65-AA8B-4616-97CF-C52BF4FF2275} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
+		{8B3C5ED5-31FC-440D-9BA7-21DBE6479157} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
+		{514A61B9-D595-4E96-8682-F992631ACD5C} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
+		{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D} = {113BC611-B500-4F98-A406-458ED7DD4A64}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FA7EFAAB-37D3-4C59-A41E-EB9AFA16CF83}

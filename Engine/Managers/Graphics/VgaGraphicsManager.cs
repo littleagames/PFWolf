@@ -163,7 +163,7 @@ public class VgaGraphicsManager : IGraphicsManager
         var pictableSize = Marshal.SizeOf(typeof(pictabletype)) * pictable.Length;
 
         var compression = new HuffmanCompression(dictionaryFile);
-        var destTable = compression.Expand(compseg, pictableSize);
+        var destTable = compression.Expand(compseg);//, pictableSize);
 
         pictable = ByteToStructHelpers.ByteArrayToStuctureArray<pictabletype>(destTable, pictable.Length);
 
@@ -243,7 +243,7 @@ public class VgaGraphicsManager : IGraphicsManager
         //
         // allocate final space and decompress it
         //
-        grsegs[chunk] = compression.Expand(source.Skip(4).ToArray(), expanded);
+        grsegs[chunk] = compression.Expand(source.Skip(4).ToArray()).Take(expanded).ToArray();//, expanded);
     }
     private void CAL_DeplaneGrChunk(int chunk)
     {
