@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+        x:Class="LittleAGames.PFWolf.Launcher.MainWindow"
+        Title="LittleAGames.PFWolf.Launcher">
+    <StackPanel Orientation="Horizontal">
+    <StackPanel>
+        <TextBlock Margin="20" TextAlignment="Center">Please choose a base game pack to play.</TextBlock>
+            <ListBox SelectionMode="Single" Margin="20" Name="GamePacks" SelectionChanged="GamePackSelectionChangedHandler"></ListBox>
+            <Button HorizontalAlignment="Center" Click="LaunchGameHandler">Launch</Button>
+        </StackPanel>
+        <TextBlock Name="SelectionDescription">This will show all of the files, directory, etc)</TextBlock>
+    </StackPanel>
+</Window>

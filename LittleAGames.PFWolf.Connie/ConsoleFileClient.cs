@@ -1,4 +1,7 @@
-﻿using LittleAGames.PFWolf.FileManager;
+﻿using System.Security.Cryptography;
+using LittleAGames.PFWolf.Common.Models;
+using LittleAGames.PFWolf.FileManager;
+using LittleAGames.PFWolf.FileManager.Constants;
 
 namespace LittleAGames.PFWolf.Connie;
 
@@ -9,6 +12,50 @@ internal class ConsoleFileClient
     private VgaFileManager vgaFileManager = null!;
     private VswapFileManager swapFileManager = null!;
     private Pk3FileManager pk3FileManager = null!;
+
+    public Result FindAvailableGames()
+    {
+        // TODO: Get all files in path, and sub directories?
+        var path = "D:\\Wolf3D_Games";
+        var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+        var foundFiles = new List<GamePackFile>();
+
+        // Find all possible gamepacks (if at least 1 file exists)
+        // Add them to a list
+        // Then go through all game packs, and find all files for that pack
+        // If I have all files, add that game to available packs list (with the directories of each file
+        // TODO: Eventually, be smart, find the most common directory, and pick that instead (and see if all files exist in there)
+        // TODO: This search may actually pick files from all over, and cobble a working game pack
+        
+        // List all files found in directory
+        foreach (var file in files)
+        {
+            using var md5 = MD5.Create();
+            using var stream = File.OpenRead(file);
+
+            var md5Hash = md5.ComputeHash(stream);
+            var md5HashString = BitConverter.ToString(md5Hash).Replace("-", string.Empty).ToLowerInvariant();
+            foundFiles.Add(new GamePackFile(file, md5HashString));
+        }
+        
+        // Iterate through the files and match them to possible game packs
+        var gamePackFilesFound = new List<KeyValuePair<GamePacks, string>>();
+        foreach (var file in foundFiles)
+        {
+            // file -> matches file
+            // filehash -> matches hash
+            // returns a gamepack enum
+            // (enum, file, hash)
+            // TODO: match file, its hash to a game pack
+            var packsFound = GameHashCheckValues.FindGamePack(file.File, file.Hash);
+            
+        }
+
+        //var gamePackFileGroups = gamePackFilesFound.GroupBy(x => x.Key);
+        // TODO: Re-organize these by game packs
+        
+        return Result.Success();
+    }
 
     public Result GetAudioHeaderList()
     {

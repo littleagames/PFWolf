@@ -26,9 +26,9 @@ public class FileLoader
     {
         var files = Directory.GetFiles(path);
 
-        var filesNotFound = filesToFind.Where(foundFile => !files.Select(Path.GetFileName).Any(p2 => p2?.Equals(foundFile, StringComparison.InvariantCultureIgnoreCase) ?? false));
+        var filesNotFound = filesToFind.Where(foundFile => !files.Select(Path.GetFileName).Any(p2 => p2?.Equals(foundFile, StringComparison.InvariantCultureIgnoreCase) ?? false)).ToList();
 
-        if (filesNotFound.Any())
+        if (filesNotFound.Count > 0)
         {
             return Result.Failure<string[]>($"Files not found: {string.Join(", ", filesNotFound.Select(x => $"\"{x}\""))}");
         }

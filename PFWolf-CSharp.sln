@@ -15,17 +15,27 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleAGames.PFWolf.Common.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleAGames.PFWolf.PluginsPrototype", "LittleAGames.PFWolf.PluginsPrototype\LittleAGames.PFWolf.PluginsPrototype.csproj", "{01424D66-A1D3-4476-97E2-2AD1F8A3EA68}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{1D3CDBE0-D17B-4E64-923F-02B107BB5D50}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Prototypes", "Prototypes", "{1D3CDBE0-D17B-4E64-923F-02B107BB5D50}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleAGames.PFWolf.Editor.SDK", "LittleAGames.PFWolf.Editor.SDK\LittleAGames.PFWolf.Editor.SDK.csproj", "{D4A8BD65-AA8B-4616-97CF-C52BF4FF2275}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloPlugin", "HelloPlugin\HelloPlugin.csproj", "{8B3C5ED5-31FC-440D-9BA7-21DBE6479157}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleAGames.PFWolf.ScriptingRunner", "LittleAGames.PFWolf.ScriptingRunner\LittleAGames.PFWolf.ScriptingRunner.csproj", "{514A61B9-D595-4E96-8682-F992631ACD5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleAGames.PFWolf.ScriptingRunner", "LittleAGames.PFWolf.ScriptingRunner\LittleAGames.PFWolf.ScriptingRunner.csproj", "{514A61B9-D595-4E96-8682-F992631ACD5C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SDK", "SDK", "{113BC611-B500-4F98-A406-458ED7DD4A64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleAGames.PFWolf.SDK", "LittleAGames.PFWolf.SDK\LittleAGames.PFWolf.SDK.csproj", "{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleAGames.PFWolf.SDK", "LittleAGames.PFWolf.SDK\LittleAGames.PFWolf.SDK.csproj", "{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClickAndDragToLoadFiles", "ClickAndDragToLoadFiles\ClickAndDragToLoadFiles.csproj", "{36673C4A-C8E1-49F6-8E03-19EF31E9BA22}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaycastSample", "RaycastSample\RaycastSample.csproj", "{730FECDF-9779-4134-AA0E-D89A955B279A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaloniaTest", "AvaloniaTest\AvaloniaTest\AvaloniaTest.csproj", "{2C2FE681-60F3-4564-BB90-EB771376DDC8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaloniaTest.Desktop", "AvaloniaTest\AvaloniaTest.Desktop\AvaloniaTest.Desktop.csproj", "{C67143B3-BF8F-465F-849B-366111F9EEBA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleAGames.PFWolf.Launcher", "LittleAGames.PFWolf.Launcher\LittleAGames.PFWolf.Launcher.csproj", "{1F280D78-B0C0-4F1D-9BFB-2E5F1A26BA48}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -73,6 +83,26 @@ Global
 		{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36673C4A-C8E1-49F6-8E03-19EF31E9BA22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36673C4A-C8E1-49F6-8E03-19EF31E9BA22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36673C4A-C8E1-49F6-8E03-19EF31E9BA22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36673C4A-C8E1-49F6-8E03-19EF31E9BA22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{730FECDF-9779-4134-AA0E-D89A955B279A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{730FECDF-9779-4134-AA0E-D89A955B279A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{730FECDF-9779-4134-AA0E-D89A955B279A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{730FECDF-9779-4134-AA0E-D89A955B279A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C2FE681-60F3-4564-BB90-EB771376DDC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C2FE681-60F3-4564-BB90-EB771376DDC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C2FE681-60F3-4564-BB90-EB771376DDC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C2FE681-60F3-4564-BB90-EB771376DDC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C67143B3-BF8F-465F-849B-366111F9EEBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C67143B3-BF8F-465F-849B-366111F9EEBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C67143B3-BF8F-465F-849B-366111F9EEBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C67143B3-BF8F-465F-849B-366111F9EEBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F280D78-B0C0-4F1D-9BFB-2E5F1A26BA48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F280D78-B0C0-4F1D-9BFB-2E5F1A26BA48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F280D78-B0C0-4F1D-9BFB-2E5F1A26BA48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F280D78-B0C0-4F1D-9BFB-2E5F1A26BA48}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,6 +113,10 @@ Global
 		{8B3C5ED5-31FC-440D-9BA7-21DBE6479157} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
 		{514A61B9-D595-4E96-8682-F992631ACD5C} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
 		{78A4C1F0-C79A-4A1D-990D-2A75BF448B4D} = {113BC611-B500-4F98-A406-458ED7DD4A64}
+		{36673C4A-C8E1-49F6-8E03-19EF31E9BA22} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
+		{730FECDF-9779-4134-AA0E-D89A955B279A} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
+		{2C2FE681-60F3-4564-BB90-EB771376DDC8} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
+		{C67143B3-BF8F-465F-849B-366111F9EEBA} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FA7EFAAB-37D3-4C59-A41E-EB9AFA16CF83}

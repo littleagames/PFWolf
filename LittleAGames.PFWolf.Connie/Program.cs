@@ -9,6 +9,7 @@ internal class Program
         var picks = new Dictionary<int, (string Text, Func<Result>? WorkTask)>
         {
             { -1, ("GAME VERSIONS", null) },
+            { 1, ("Get List of Games", consoleFileClient.FindAvailableGames) },
             // Checking files for specific versions of the game
 
             { -100, ("AUDIO FILES", null) },
