@@ -83,7 +83,7 @@ internal class ConsoleFileClient
         foreach (var pack in gamePackFilesFound)
         {
             var i = gamePackFilesFound.IndexOf(pack);
-            AnsiConsole.WriteLine($"{i}) {pack.Key.PackName}");
+            AnsiConsole.WriteLine($"{i}) {pack.Key.PackName} in {pack.Value}");
         }
         
         return Result.Success();

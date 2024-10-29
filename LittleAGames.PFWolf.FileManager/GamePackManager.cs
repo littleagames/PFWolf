@@ -1,6 +1,6 @@
 ﻿using LittleAGames.PFWolf.FileManager.Constants.GamePacks;
 
-namespace LittleAGames.PFWolf.FileManager.Constants;
+namespace LittleAGames.PFWolf.FileManager;
 
 public class GamePackManager
 {
@@ -8,11 +8,21 @@ public class GamePackManager
     {
         GamePacks =
         [
+            new BlakeStoneAliensOfGold(),
+            new BlakeStoneAliensOfGoldDemo(),
+            new BlakeStonePlanetStrike(),
+            new Corridor7CD(),
+            new Corridor7Demo(),
+            new Corridor7Floppy(),
+            new OperationBodyCountDemo(),
             new OperationBodyCountFloppy(),
+            new RiseOfTheTriadDemo(),
+            new SpearOfDestiny(),
+            new SpearOfDestinyDemo(),
+            new Wolfenstein3DAlpha(),
             new Wolfenstein3DShareware(),
             new Wolfenstein3DApogee(),
-            new Wolfenstein3DActivision(),
-            new SpearOfDestinyDemo()
+            new Wolfenstein3DActivision()
         ];
     }
     
