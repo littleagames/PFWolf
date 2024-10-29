@@ -18,7 +18,7 @@ internal class ConsoleFileClient
         // TODO: Get all files in path, and sub directories?
         var path = "D:\\Wolf3D_Games";
         var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
-        var foundFiles = new List<GamePackFile>();
+        var foundFiles = new List<DataFile>();
 
         // Find all possible gamepacks (if at least 1 file exists)
         // Add them to a list
@@ -35,24 +35,56 @@ internal class ConsoleFileClient
 
             var md5Hash = md5.ComputeHash(stream);
             var md5HashString = BitConverter.ToString(md5Hash).Replace("-", string.Empty).ToLowerInvariant();
-            foundFiles.Add(new GamePackFile(file, md5HashString));
+            var fileInfo = new FileInfo(file);
+            foundFiles.Add(new DataFile(fileInfo.Name, fileInfo.DirectoryName ?? string.Empty, md5HashString));
         }
         
         // Iterate through the files and match them to possible game packs
-        var gamePackFilesFound = new List<KeyValuePair<GamePacks, string>>();
-        foreach (var file in foundFiles)
+        var gamePackFilesFound = new List<KeyValuePair<GamePack, string>>();
+        var hashChecker = new GamePackManager();
+        foreach (var directory in foundFiles.GroupBy(x => x.Path))
         {
-            // file -> matches file
-            // filehash -> matches hash
-            // returns a gamepack enum
-            // (enum, file, hash)
-            // TODO: match file, its hash to a game pack
-            var packsFound = GameHashCheckValues.FindGamePack(file.File, file.Hash);
+            // For each file, find all unique gamepacks (distinct the list)
+            var packFiles = new Dictionary<Guid, List<string>>();
             
+            foreach (var file in directory)
+            {
+                foreach (var packFound in hashChecker.FindGamePack(file.File, file.Md5))
+                {
+                    if (packFiles.ContainsKey(packFound.Id))
+                    {
+                        packFiles[packFound.Id].Add(file.File);
+                    }
+                    else
+                    {
+                        packFiles.Add(packFound.Id, [file.File]);
+                    }
+                }
+            }
+
+            foreach (var foundPack in packFiles)
+            {
+                var gamePack = hashChecker.Get(foundPack.Key);
+                if (gamePack == null)
+                {
+                    // TODO: This is a problem, but we'll ignore it for now
+                    continue;
+                }
+
+                var isValidPack = gamePack.Validate(foundPack.Value);
+                if (isValidPack)
+                {
+                    gamePackFilesFound.Add(new(gamePack, directory.Key));
+                    // Add directory to returned model (so that game pack is associated to a directory
+                }
+            }
         }
 
-        //var gamePackFileGroups = gamePackFilesFound.GroupBy(x => x.Key);
-        // TODO: Re-organize these by game packs
+        foreach (var pack in gamePackFilesFound)
+        {
+            var i = gamePackFilesFound.IndexOf(pack);
+            AnsiConsole.WriteLine($"{i}) {pack.Key.PackName}");
+        }
         
         return Result.Success();
     }
