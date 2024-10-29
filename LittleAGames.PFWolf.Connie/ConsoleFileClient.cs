@@ -1,7 +1,4 @@
-﻿using System.Security.Cryptography;
-using LittleAGames.PFWolf.Common.Models;
-using LittleAGames.PFWolf.FileManager;
-using LittleAGames.PFWolf.FileManager.Constants;
+﻿using LittleAGames.PFWolf.FileManager;
 
 namespace LittleAGames.PFWolf.Connie;
 
@@ -17,75 +14,12 @@ internal class ConsoleFileClient
     {
         // TODO: Get all files in path, and sub directories?
         var path = "D:\\Wolf3D_Games";
-        var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
-        var foundFiles = new List<DataFile>();
-
-        // Find all possible gamepacks (if at least 1 file exists)
-        // Add them to a list
-        // Then go through all game packs, and find all files for that pack
-        // If I have all files, add that game to available packs list (with the directories of each file
-        // TODO: Eventually, be smart, find the most common directory, and pick that instead (and see if all files exist in there)
-        // TODO: This search may actually pick files from all over, and cobble a working game pack
-        
-        // List all files found in directory
-        foreach (var file in files)
+        var packFiles = new FileLoader().FindAvailableGames(path);
+        foreach (var pack in packFiles)
         {
-            using var md5 = MD5.Create();
-            using var stream = File.OpenRead(file);
-
-            var md5Hash = md5.ComputeHash(stream);
-            var md5HashString = BitConverter.ToString(md5Hash).Replace("-", string.Empty).ToLowerInvariant();
-            var fileInfo = new FileInfo(file);
-            foundFiles.Add(new DataFile(fileInfo.Name, fileInfo.DirectoryName ?? string.Empty, md5HashString));
+            var i = packFiles.IndexOf(pack);
+            AnsiConsole.WriteLine($"{i}) {pack.Key.PackName} in {pack.Value}");
         }
-        
-        // Iterate through the files and match them to possible game packs
-        var gamePackFilesFound = new List<KeyValuePair<GamePack, string>>();
-        var hashChecker = new GamePackManager();
-        foreach (var directory in foundFiles.GroupBy(x => x.Path))
-        {
-            // For each file, find all unique gamepacks (distinct the list)
-            var packFiles = new Dictionary<Guid, List<string>>();
-            
-            foreach (var file in directory)
-            {
-                foreach (var packFound in hashChecker.FindGamePack(file.File, file.Md5))
-                {
-                    if (packFiles.ContainsKey(packFound.Id))
-                    {
-                        packFiles[packFound.Id].Add(file.File);
-                    }
-                    else
-                    {
-                        packFiles.Add(packFound.Id, [file.File]);
-                    }
-                }
-            }
-
-            foreach (var foundPack in packFiles)
-            {
-                var gamePack = hashChecker.Get(foundPack.Key);
-                if (gamePack == null)
-                {
-                    // TODO: This is a problem, but we'll ignore it for now
-                    continue;
-                }
-
-                var isValidPack = gamePack.Validate(foundPack.Value);
-                if (isValidPack)
-                {
-                    gamePackFilesFound.Add(new(gamePack, directory.Key));
-                    // Add directory to returned model (so that game pack is associated to a directory
-                }
-            }
-        }
-
-        foreach (var pack in gamePackFilesFound)
-        {
-            var i = gamePackFilesFound.IndexOf(pack);
-            AnsiConsole.WriteLine($"{i}) {pack.Key.PackName}");
-        }
-        
         return Result.Success();
     }
 
