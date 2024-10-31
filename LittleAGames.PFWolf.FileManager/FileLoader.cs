@@ -5,18 +5,18 @@ namespace LittleAGames.PFWolf.FileManager;
 public class FileLoader
 {
     //private static string path = "D:\\wolf3d-v1.4-activision";
-    private static string path = "D:\\wolf3d-v1.4-apogee";
-    private static readonly string[] filesToFind = new[] { 
-        "AUDIOT.WL6",
-        "AUDIOHED.WL6",
-        "GAMEMAPS.WL6",
-        "MAPHEAD.WL6",
-        "VGADICT.WL6",
-        "VGAGRAPH.WL6",
-        "VGAHEAD.WL6",
-        "VSWAP.WL6"//, 
-    //, "ecwolf.pk3"
-    };
+    private static string _filePath = "D:\\wolf3d-v1.4-apogee";
+     private static readonly string[] FilesToFind = new[] { 
+         "AUDIOT.WL6",
+         "AUDIOHED.WL6",
+         "GAMEMAPS.WL6",
+         "MAPHEAD.WL6",
+         "VGADICT.WL6",
+         "VGAGRAPH.WL6",
+         "VGAHEAD.WL6",
+         "VSWAP.WL6"//, 
+     //, "ecwolf.pk3"
+     };
 
     /// <summary>
     /// Looks for the files the game (currently just the apogee version), and returns the paths
@@ -24,36 +24,44 @@ public class FileLoader
     /// TODO: Priority order loading as well, this might branch out to several loader/managers
     /// </summary>
     /// <returns></returns>
-    public static Result<string[]> CheckForFiles()
+     public static Result<string[]> CheckForFiles()
+     {
+         var files = Directory.GetFiles(_filePath);
+    
+         var filesNotFound = FilesToFind.Where(foundFile => !files.Select(Path.GetFileName).Any(p2 => p2?.Equals(foundFile, StringComparison.InvariantCultureIgnoreCase) ?? false)).ToList();
+    
+         if (filesNotFound.Count > 0)
+         {
+             return Result.Failure<string[]>($"Files not found: {string.Join(", ", filesNotFound.Select(x => $"\"{x}\""))}");
+         }
+    
+         return Result.Success(files);
+     }
+    
+    
+    public bool Validate(GamePack gamePack, string path)
     {
-        var files = Directory.GetFiles(path);
+        var foundFiles = FindAvailableGameFiles(path, true);
+        return gamePack.Validate(foundFiles.Select(x => x.File).ToList());
+    }
 
-        var filesNotFound = filesToFind.Where(foundFile => !files.Select(Path.GetFileName).Any(p2 => p2?.Equals(foundFile, StringComparison.InvariantCultureIgnoreCase) ?? false)).ToList();
-
-        if (filesNotFound.Count > 0)
+    public Dictionary<string, byte[]> Load(GamePack gamePack, string path)
+    {
+        var fileData = new Dictionary<string, byte[]>();
+        var foundFiles = FindAvailableGameFiles(path, true);
+        var dataFiles = gamePack.GetDataFiles(foundFiles);
+        foreach (var gamePackFile in dataFiles)
         {
-            return Result.Failure<string[]>($"Files not found: {string.Join(", ", filesNotFound.Select(x => $"\"{x}\""))}");
+            var combinedPath = Path.Combine(gamePackFile.Path, gamePackFile.File);
+            fileData.Add(gamePackFile.File, File.ReadAllBytes(combinedPath));
         }
-
-        return Result.Success(files);
+        
+        return fileData;
     }
     
     public List<KeyValuePair<GamePack, string>> FindAvailableGames(string path)
     {
-        var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
-        var foundFiles = new List<DataFile>();
-
-        // List all files found in directory
-        foreach (var file in files)
-        {
-            using var md5 = MD5.Create();
-            using var stream = File.OpenRead(file);
-
-            var md5Hash = md5.ComputeHash(stream);
-            var md5HashString = BitConverter.ToString(md5Hash).Replace("-", string.Empty).ToLowerInvariant();
-            var fileInfo = new FileInfo(file);
-            foundFiles.Add(new DataFile(fileInfo.Name, fileInfo.DirectoryName ?? string.Empty, md5HashString));
-        }
+        var foundFiles = FindAvailableGameFiles(path, false);
         
         // Iterate through the files and match them to possible game packs
         var gamePackFilesFound = new List<KeyValuePair<GamePack, string>>();
@@ -97,5 +105,25 @@ public class FileLoader
         }
         
         return gamePackFilesFound;
+    }
+
+    private List<DataFile> FindAvailableGameFiles(string path, bool topOnly)
+    {
+        var files = Directory.GetFiles(path, "*.*", topOnly ? SearchOption.TopDirectoryOnly : SearchOption.AllDirectories);
+        var foundFiles = new List<DataFile>();
+        
+        // List all files found in directory
+        foreach (var file in files)
+        {
+            using var md5 = MD5.Create();
+            using var stream = File.OpenRead(file);
+
+            var md5Hash = md5.ComputeHash(stream);
+            var md5HashString = BitConverter.ToString(md5Hash).Replace("-", string.Empty).ToLowerInvariant();
+            var fileInfo = new FileInfo(file);
+            foundFiles.Add(new DataFile(fileInfo.Name, fileInfo.DirectoryName ?? string.Empty, md5HashString));
+        }
+
+        return foundFiles;
     }
 }

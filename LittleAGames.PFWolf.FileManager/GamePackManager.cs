@@ -16,6 +16,7 @@ public class GamePackManager
             new Corridor7Floppy(),
             new OperationBodyCountDemo(),
             new OperationBodyCountFloppy(),
+            new RiseOfTheTriad(),
             new RiseOfTheTriadDemo(),
             new SpearOfDestiny(),
             new SpearOfDestinyDemo(),

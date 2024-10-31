@@ -1,6 +1,6 @@
 ﻿namespace LittleAGames.PFWolf.SDK;
 
-public record GamePackFile(string File, string Md5);
+public record GamePackFile(string File, string Md5/*, Type GamePackFileLoader*/);
 
 public abstract class GamePack
 {
@@ -24,5 +24,20 @@ public abstract class GamePack
     public bool Validate(List<string> files)
     {
         return Files.All(x => files.Any(f => f.Equals(x.File, StringComparison.InvariantCultureIgnoreCase)));
+    }
+
+    public IEnumerable<DataFile> GetDataFiles(List<DataFile> foundFiles)
+    {
+        var dataFiles = new List<DataFile>();
+        foreach (var gamePackFile in Files)
+        {
+            var gameFile = foundFiles.FirstOrDefault(x => x.Md5.Equals(gamePackFile.Md5));
+            if (gameFile == null)
+            {
+                throw new InvalidDataException($"Missing file: {gamePackFile.File} from found files.");
+            }
+
+            yield return gameFile;
+        }
     }
 }
