@@ -29,4 +29,7 @@ public class Corridor7Floppy : GamePack
         new(VgaGraph, "b3b64da4b725ae1cea119950594738b0"),
         new(VgaHead, "4037ffa97ca6afc3d6f604026d6b44ff")
     ];
+    protected override List<GamePackFileLoader> FileLoaders =>
+    [
+    ];
 }

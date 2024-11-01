@@ -23,4 +23,7 @@ public class Wolfenstein3DShareware : GamePack
         new (VgaHead, "61bf1616e78367853c91f2c04e2c1cb7"),
         new (Vswap,  "6efa079414b817c97db779cecfb081c9")
     ];
+    protected override List<GamePackFileLoader> FileLoaders =>
+    [
+    ];
 }

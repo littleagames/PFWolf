@@ -1,4 +1,4 @@
-﻿namespace Engine.Managers.AssetLoaders.Models;
+﻿namespace LittleAGames.PFWolf.SDK.Assets;
 
 public class MapAsset : Asset
 {

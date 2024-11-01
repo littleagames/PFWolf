@@ -27,4 +27,7 @@ public class BlakeStonePlanetStrike : GamePack
         new(VgaHead, "31c0301eb320718029efaa3b275f689c"),
         new(Vswap,"24827f8b2920acc60bab0e57b6e9937e")
     ];
+    protected override List<GamePackFileLoader> FileLoaders =>
+    [
+    ];
 }

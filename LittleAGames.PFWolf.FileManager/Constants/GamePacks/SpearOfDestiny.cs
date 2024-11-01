@@ -23,4 +23,7 @@ public class SpearOfDestiny : GamePack
         new (VgaHead, "fb75007a1167bba05c4acadf90bc30d8"),
         new (Vswap,  "b1dac0a8786c7cdbb09331a4eba00652")
     ];
+    protected override List<GamePackFileLoader> FileLoaders =>
+    [
+    ];
 }

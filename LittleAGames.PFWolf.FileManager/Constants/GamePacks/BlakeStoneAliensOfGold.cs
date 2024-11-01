@@ -33,4 +33,7 @@ public class BlakeStoneAliensOfGold : GamePack
         new(VgaHead, "095d7c737e1c31d7674e1ed2160b676c"),
         new(Vswap, "5e7d5862fda72a1b2874301c01491aac")
     ];
+    protected override List<GamePackFileLoader> FileLoaders =>
+    [
+    ];
 }

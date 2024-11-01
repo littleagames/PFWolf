@@ -9,4 +9,7 @@ public class RiseOfTheTriadDemo : GamePack
     protected override List<GamePackFile> Files => [
         new(WadFile, "37793500e3b1de2125a98604b69838e3")
     ];
+    protected override List<GamePackFileLoader> FileLoaders =>
+    [
+    ];
 }

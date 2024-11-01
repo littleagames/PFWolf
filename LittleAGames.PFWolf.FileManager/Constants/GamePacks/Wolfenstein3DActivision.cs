@@ -22,4 +22,7 @@ public class Wolfenstein3DActivision : GamePack
          new(VgaHead, "9059afb104a51140bd0c127b73717197"),
          new(Vswap, "a6d901dfb455dfac96db5e4705837cdb")
     ];
+    protected override List<GamePackFileLoader> FileLoaders =>
+    [
+    ];
 }

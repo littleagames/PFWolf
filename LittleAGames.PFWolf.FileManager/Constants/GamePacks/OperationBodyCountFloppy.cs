@@ -25,4 +25,7 @@ public class OperationBodyCountFloppy : GamePack
         new(VgaGraph, "e09be75f20afac2827fa6808ad35f0c7"),
         new(VgaHead, "f463da1212dc1238730028a21872da72")
     ];
+    protected override List<GamePackFileLoader> FileLoaders =>
+    [
+    ];
 }

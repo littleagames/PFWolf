@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LittleAGames.PFWolf.Common.Utilities;
+﻿namespace LittleAGames.PFWolf.SDK.Utilities;
 
 public static class Converters
 {

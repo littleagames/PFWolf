@@ -1,4 +1,6 @@
-﻿namespace LittleAGames.PFWolf.FileManager.Constants.GamePacks;
+﻿using LittleAGames.PFWolf.SDK.FileLoaders;
+
+namespace LittleAGames.PFWolf.FileManager.Constants.GamePacks;
 
 public class Wolfenstein3DApogee : GamePack
 {
@@ -22,5 +24,13 @@ public class Wolfenstein3DApogee : GamePack
         new(VgaGraph, "4e96d7b4e89a5b3a4beeebf5d7d87eb7"),
         new(VgaHead, "a08905e2b0d299b3fad259f90c0efb1a"),
         new(Vswap, "a6d901dfb455dfac96db5e4705837cdb")
+    ];
+
+    protected override List<GamePackFileLoader> FileLoaders =>
+    [
+        new(typeof(Wolf3DAudioFileLoader), AudioHed, AudioT),
+        new(typeof(Wolf3DMapFileLoader), MapHead, GameMaps),
+        new(typeof(Wolf3DVgaFileLoader), VgaDict, VgaHead, VgaGraph),
+        new(typeof(Wolf3DVswapFileLoader), Vswap),
     ];
 }

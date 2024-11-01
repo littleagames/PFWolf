@@ -19,9 +19,14 @@ void InitGame()
         Console.WriteLine($"Pack: {gamePack.PackName} not found in directory: {directory}");
         return;
     }
-    
+
     var assetManager = new AssetManager(fileLoader);
 
     assetManager.AddGamePack(gamePack, directory);
-    new GameManager(assetManager).Start(); // TODO: GameManager needs the assetManager
+
+    // foreach (var pk3File in args.Select(x => x.EndsWith(".pk3") && isValidFilePath(x))
+    // {
+    // TODO: assetManager.AddModdedPack(
+    // }
+    // new GameManager(assetManager).Start(); // TODO: GameManager needs the assetManager
 }

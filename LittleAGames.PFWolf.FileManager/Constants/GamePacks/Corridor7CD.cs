@@ -33,4 +33,7 @@ public class Corridor7CD : GamePack
         new(VgaGraph, "3f6de286010058708110bc7000a2827c"),
         new(VgaHead, "a186ac0e094d4588c454e4f23c96a002")
     ];
+    protected override List<GamePackFileLoader> FileLoaders =>
+    [
+    ];
 }

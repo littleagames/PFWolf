@@ -81,6 +81,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Managers\AssetLoaders\Models\" />
     <Folder Include="old\Managers\" />
   </ItemGroup>
 

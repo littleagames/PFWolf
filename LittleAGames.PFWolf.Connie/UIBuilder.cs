@@ -4,6 +4,17 @@ namespace LittleAGames.PFWolf.Connie;
 
 internal class UIBuilder
 {
+    public static KeyValuePair<GamePack, string>? GamePackPicker(List<KeyValuePair<GamePack, string>> picks)
+    {
+        var pick = AnsiConsole.Prompt(
+            new SelectionPrompt<KeyValuePair<GamePack, string>>()
+                .Title(" Choice:")
+                .AddChoices(picks)
+                .UseConverter(x => $"{x.Key.PackName} in {x.Value}"));
+
+        AnsiConsole.Clear();
+        return pick;
+    }
     public static void RenderMenu(Dictionary<int, (String Text, Func<Result> WorkTask)> picks)
     {
         while (true)
@@ -40,8 +51,8 @@ internal class UIBuilder
     {
         var picks = new List<(string Text, Action Action)>
         {
-            ("Keep Results", Console.WriteLine),
-            ("Clear Console", Console.Clear)
+            ("Keep Results", AnsiConsole.WriteLine),
+            ("Clear Console", AnsiConsole.Clear)
         };
 
         var pick = AnsiConsole.Prompt(

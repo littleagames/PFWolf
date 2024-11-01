@@ -1,75 +1,78 @@
 ﻿using LittleAGames.PFWolf.FileManager;
+using LittleAGames.PFWolf.SDK.FileLoaders;
 
 namespace LittleAGames.PFWolf.Connie;
 
 internal class ConsoleFileClient
 {
-    // TODO: Need to revisit this
-    //private AudioFileManager audioFileManager = null!;
-    //private MapFileManager mapFileManager = null!;
-    //private VgaFileManager vgaFileManager = null!;
-    //private VswapFileManager swapFileManager = null!;
-    //private Pk3FileManager pk3FileManager = null!;
-
+    private KeyValuePair<GamePack, string>? chosenPack = null;
     public Result FindAvailableGames()
     {
-        // TODO: Get all files in path, and sub directories?
         var path = "D:\\Wolf3D_Games";
-        var packFiles = new FileLoader().FindAvailableGames(path);
-        foreach (var pack in packFiles)
-        {
-            var i = packFiles.IndexOf(pack);
-            AnsiConsole.WriteLine($"{i}) {pack.Key.PackName} in {pack.Value}");
-        }
+        var availablePacks = new FileLoader().FindAvailableGames(path);
+        chosenPack = UIBuilder.GamePackPicker(availablePacks);
         return Result.Success();
     }
-
+    
     public Result GetAudioHeaderList()
     {
-        throw new NotImplementedException();
-        // return GetFiles()
-        //     .Bind(files =>
-        //     {
-        //         // Display audio file list of chunks
-        //         audioFileManager = new AudioFileManager(
-        //                                 audioFilePath: files.First(x => x.Contains("AUDIOT", StringComparison.InvariantCultureIgnoreCase)),
-        //                                 audioHeaderFilePath: files.First(x => x.Contains("AUDIOHED", StringComparison.InvariantCultureIgnoreCase))
-        //                             );
-        //         AnsiConsole.WriteLine("Get Audio Header List");
-        //         AnsiConsole.WriteLine(new string('=', 50));
-        //         var list = audioFileManager.GetAudioHeaderList();
-        //         foreach (var item in list)
-        //         {
-        //             AnsiConsole.WriteLine(item.Name);
-        //         }
-        //
-        //         return Result.Success();
-        //     })
-        //     .TapError(error => AnsiConsole.WriteLine(error));
+        if (!chosenPack.HasValue)
+            return Result.Failure("No pack selected");
+        
+        var gamePack = chosenPack.Value;
+        if (string.IsNullOrWhiteSpace(gamePack.Value) || !Path.Exists(gamePack.Value))
+        {
+            return Result.Failure($"Pack {gamePack.Value} not found in path: {gamePack.Value}");
+        }
+
+        try
+        {
+            // checks for that loader, returns loader here.
+            Wolf3DAudioFileLoader loader = gamePack.Key.GetLoader<Wolf3DAudioFileLoader>(gamePack.Value);
+            var headerData = loader.GetAudioHeaderList();
+            AnsiConsole.WriteLine("Get Audio Header Data");
+            AnsiConsole.WriteLine(new string('=', 50));
+            foreach (var item in headerData)
+            {
+                AnsiConsole.WriteLine(item.Name);
+            }
+
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            return Result.Failure($"Unable to run loader. Exception: {e.Message}");
+        }
     }
 
     public Result GetAudioDataList()
     {
-        throw new NotImplementedException();
-        // return GetFiles()
-        //     .Bind(files =>
-        //     {
-        //         // Display audio file list of chunks
-        //         audioFileManager = new AudioFileManager(
-        //                                 audioFilePath: files.First(x => x.Contains("AUDIOT", StringComparison.InvariantCultureIgnoreCase)),
-        //                                 audioHeaderFilePath: files.First(x => x.Contains("AUDIOHED", StringComparison.InvariantCultureIgnoreCase))
-        //                             );
-        //         AnsiConsole.WriteLine("Get Audio Data List");
-        //         AnsiConsole.WriteLine(new string('=', 50));
-        //         var list = audioFileManager.GetAudioList();
-        //         foreach (var item in list)
-        //         {
-        //             AnsiConsole.WriteLine(item.Name);
-        //         }
-        //
-        //         return Result.Success();
-        //     })
-        //     .TapError(error => AnsiConsole.WriteLine(error));
+        if (!chosenPack.HasValue)
+            return Result.Failure("No pack selected");
+        
+        var gamePack = chosenPack.Value;
+        if (string.IsNullOrWhiteSpace(gamePack.Value) || !Path.Exists(gamePack.Value))
+        {
+            return Result.Failure($"Pack {gamePack.Value} not found in path: {gamePack.Value}");
+        }
+        try
+        {
+            // checks for that loader, returns loader here.
+            Wolf3DAudioFileLoader loader = gamePack.Key.GetLoader<Wolf3DAudioFileLoader>(gamePack.Value);
+            var assets = loader.Load();
+            AnsiConsole.WriteLine("Get Audio Assets");
+            AnsiConsole.WriteLine(new string('=', 50));
+            foreach (var asset in assets)
+            {
+                AnsiConsole.WriteLine(asset.ToString());
+            }
+
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            return Result.Failure($"Unable to run loader. Exception: {e.Message}");
+        }
     }
 
     public Result GetMapHeaderList()

@@ -29,4 +29,7 @@ public class OperationBodyCountDemo : GamePack
         new(VgaGraph, "924f11546256118a87b6b00cbff3f8f5"),
         new(VgaHead, "aca17a032ec23bfc9456ac31561d4646")
     ];
+    protected override List<GamePackFileLoader> FileLoaders =>
+    [
+    ];
 }
