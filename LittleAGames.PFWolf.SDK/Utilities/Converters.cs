@@ -14,6 +14,20 @@ public static class Converters
         return result;
     }
 
+    public static byte[] UInt16ArrayToByteArray(ushort[] source)
+    {
+        byte[] target = new byte[source.Length * 2]; 
+        Buffer.BlockCopy(source, 0, target, 0, source.Length * 2);
+        return target;
+    }
+    
+    public static ushort[] ByteArrayToUInt16Array(byte[] source)
+    {
+        ushort[] target = new ushort[source.Length / 2 + source.Length % 2];
+        Buffer.BlockCopy(source, 0, target, 0, source.Length);
+        return target;
+    }
+    
     public static UInt16[] ByteArrayToUInt16Array(byte[] bytes, int length)
     {
         UInt16[] result = new UInt16[length];

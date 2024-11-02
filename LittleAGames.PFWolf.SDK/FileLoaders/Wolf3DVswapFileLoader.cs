@@ -16,6 +16,6 @@ public class Wolf3DVswapFileLoader : BaseFileLoader
     {
         var vswapFilePath = Path.Combine(Directory, _vswap);
         
-        throw new NotImplementedException();
+        return [];
     }
 }

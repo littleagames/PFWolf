@@ -22,6 +22,6 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
         var vgaHeadFilePath = Path.Combine(Directory, _vgaHead);
         var vgaGraphFilePath = Path.Combine(Directory, _vgaGraph);
         
-        throw new NotImplementedException();
+        return [];
     }
 }

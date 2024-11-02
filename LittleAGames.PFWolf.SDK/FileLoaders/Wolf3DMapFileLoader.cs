@@ -1,5 +1,6 @@
 ﻿using LittleAGames.PFWolf.SDK.Abstract;
 using LittleAGames.PFWolf.SDK.Assets;
+using LittleAGames.PFWolf.SDK.Compression;
 using LittleAGames.PFWolf.SDK.Utilities;
 
 namespace LittleAGames.PFWolf.SDK.FileLoaders;
@@ -87,8 +88,23 @@ public class Wolf3DMapFileLoader : BaseFileLoader
 
     public override List<Asset> Load()
     {
-        var headers = GetHeader();
-        
+        var segments = GetMapHeaderSegmentsList();
+        foreach (var segment in segments)
+        {
+            for (var plane = 0; plane < DefaultNumberOfPlanes; plane++)
+            {
+                var position = segment.PlaneStarts[plane];
+                var compressedSize = segment.PlaneLengths[plane];
+
+                var compressedData = _gameMapData.Skip(position).Take(compressedSize).ToArray();
+                var carmackCompression = new CarmackCompression();
+                var expandedData = carmackCompression.Expand(compressedData);
+                // TODO: 1434 - compressed, 717 expanded via carmack, 1250 - via rlew?
+                // TODO: Expectation after rlew should be 4096?
+                var rlewCompression = new RLEWCompression();
+                var rlewedData = rlewCompression.Expand(Converters.UInt16ArrayToByteArray(expandedData));
+            }
+        }
         return [];
     }
 

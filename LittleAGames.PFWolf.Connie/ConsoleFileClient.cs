@@ -1,4 +1,5 @@
 ﻿using LittleAGames.PFWolf.FileManager;
+using LittleAGames.PFWolf.SDK.Assets;
 using LittleAGames.PFWolf.SDK.FileLoaders;
 
 namespace LittleAGames.PFWolf.Connie;
@@ -144,31 +145,40 @@ internal class ConsoleFileClient
         catch (Exception e)
         {
             return Result.Failure($"Unable to run loader. Exception: {e.Message}");
-        }   
+        }
     }
 
     public Result GetMapDataList()
     {
-        throw new NotImplementedException();
-        // return GetFiles()
-        //     .Bind(files =>
-        //     {
-        //         // Display audio file list of chunks
-        //         mapFileManager = new MapFileManager(
-        //                                 mapFilePath: files.First(x => x.Contains("GAMEMAPS", StringComparison.InvariantCultureIgnoreCase)),
-        //                                 mapHeaderFilePath: files.First(x => x.Contains("MAPHEAD", StringComparison.InvariantCultureIgnoreCase))
-        //                             );
-        //         AnsiConsole.WriteLine("Get Map Data List");
-        //         AnsiConsole.WriteLine(new string('=', 50));
-        //         var list = mapFileManager.GetMapDataList();
-        //         foreach (var item in list)
-        //         {
-        //             AnsiConsole.WriteLine(item.Name);
-        //         }
-        //
-        //         return Result.Success();
-        //     })
-        //     .TapError(error => AnsiConsole.WriteLine(error));
+        if (!chosenPack.HasValue)
+            return Result.Failure("No pack selected");
+        
+        var gamePack = chosenPack.Value;
+        if (string.IsNullOrWhiteSpace(gamePack.Value) || !Path.Exists(gamePack.Value))
+        {
+            return Result.Failure($"Pack {gamePack.Value} not found in path: {gamePack.Value}");
+        }
+
+        try
+        {
+            // checks for that loader, returns loader here.
+            Wolf3DMapFileLoader loader = gamePack.Key.GetLoader<Wolf3DMapFileLoader>(gamePack.Value);
+            var mapAssets = loader.Load();
+            AnsiConsole.WriteLine("Get Map Assets");
+            AnsiConsole.WriteLine(new string('=', 50));
+            
+            for (var i = 0; i < mapAssets.Count; i++)
+            {
+                var asset = (MapAsset)mapAssets[i];
+                AnsiConsole.WriteLine($"{i}] \"{asset.Name}\" Size: ({asset.Width}x{asset.Height}), Planes: {asset.NumPlanes}");
+            }
+
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            return Result.Failure($"Unable to run loader. Exception: {e.Message}");
+        }
     }
     public Result GetVgaHuffmanTree()
     {
