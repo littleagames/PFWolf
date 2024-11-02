@@ -17,8 +17,9 @@ internal class Program
             { 101, ("Display Audio File Data", consoleFileClient.GetAudioDataList) },
 
             { -200, ("GAME MAPS FILES", null) },
-            { 200, ("Display Map Header Data", consoleFileClient.GetMapHeaderList) },
-            { 201, ("Display Map File Data", consoleFileClient.GetMapDataList) },
+            { 200, ("Display Map Header", consoleFileClient.GetMapHeader) },
+            { 201, ("Display Map Header Segments", consoleFileClient.GetMapHeaderSegments) },
+            { 202, ("Display Map File Data", consoleFileClient.GetMapDataList) },
 
             { -300, ("VGA FILES", null) },
             { 300, ("Display Huffman Tree", consoleFileClient.GetVgaHuffmanTree) },

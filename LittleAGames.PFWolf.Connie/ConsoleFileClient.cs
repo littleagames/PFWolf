@@ -75,7 +75,7 @@ internal class ConsoleFileClient
         }
     }
 
-    public Result GetMapHeaderList()
+    public Result GetMapHeader()
     {
         if (!chosenPack.HasValue)
             return Result.Failure("No pack selected");
@@ -90,12 +90,15 @@ internal class ConsoleFileClient
         {
             // checks for that loader, returns loader here.
             Wolf3DMapFileLoader loader = gamePack.Key.GetLoader<Wolf3DMapFileLoader>(gamePack.Value);
-            var headerData = loader.GetHeaderList();
-            AnsiConsole.WriteLine("Get Map Header Data");
+            var headerData = loader.GetHeader();
+            AnsiConsole.WriteLine("Get Map Header");
             AnsiConsole.WriteLine(new string('=', 50));
             
             AnsiConsole.WriteLine($"RLEW Tag: {headerData.RLEWTag:X2}");
             AnsiConsole.WriteLine($"Num Planes: {headerData.NumPlanes:N0}");
+            AnsiConsole.WriteLine($"Num Available Maps: {headerData.NumAvailableMaps}");
+            AnsiConsole.WriteLine($"Num Maps: {headerData.NumMaps}");
+
             for (var i = 0; i < headerData.HeaderOffsets.Length; i++)
             {
                 AnsiConsole.WriteLine($"{i}] Offset: {headerData.HeaderOffsets[i]}");
@@ -107,6 +110,41 @@ internal class ConsoleFileClient
         {
             return Result.Failure($"Unable to run loader. Exception: {e.Message}");
         }
+    }
+
+    public Result GetMapHeaderSegments()
+    {
+        if (!chosenPack.HasValue)
+            return Result.Failure("No pack selected");
+        
+        var gamePack = chosenPack.Value;
+        if (string.IsNullOrWhiteSpace(gamePack.Value) || !Path.Exists(gamePack.Value))
+        {
+            return Result.Failure($"Pack {gamePack.Value} not found in path: {gamePack.Value}");
+        }
+
+        try
+        {
+            // checks for that loader, returns loader here.
+            Wolf3DMapFileLoader loader = gamePack.Key.GetLoader<Wolf3DMapFileLoader>(gamePack.Value);
+            var headerSegments = loader.GetMapHeaderSegmentsList();
+            AnsiConsole.WriteLine("Get Map Header Segments");
+            AnsiConsole.WriteLine(new string('=', 50));
+            
+            for (var i = 0; i < headerSegments.Count; i++)
+            {
+                var segment = headerSegments[i];
+                AnsiConsole.WriteLine($"{i}] \"{segment.Name}\" Size: ({segment.Width}x{segment.Height})");
+                AnsiConsole.WriteLine($"\tPlane Starts: {string.Join(',', segment.PlaneStarts)}");
+                AnsiConsole.WriteLine($"\tPlane Length: {string.Join(',', segment.PlaneLengths)}");
+            }
+
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            return Result.Failure($"Unable to run loader. Exception: {e.Message}");
+        }   
     }
 
     public Result GetMapDataList()
