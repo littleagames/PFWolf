@@ -15,12 +15,35 @@ public class CarmackCompression : ICompression<ushort>
             while (reader.BaseStream.Position < reader.BaseStream.Length)
             {
                 ushort value = reader.ReadUInt16();
+                int valueHigh = value >> 8;
 
-                if (value == NEAR_POINTER_FLAG || value == FAR_POINTER_FLAG)
+                if (valueHigh  == NEAR_POINTER_FLAG)
                 {
-                    ushort repeatValue = reader.ReadUInt16();
-                    data.Add(repeatValue);
-                    data.Add(repeatValue);
+                    var count = value & 0xff;
+                    if (count == 0)
+                    {
+                        // TODO: This
+                    }
+                    else
+                    {
+                        var offset = reader.ReadByte();
+                        var copy = data.Skip(data.Count -offset).Take(count);
+                        data.AddRange(copy);
+                    }
+                }
+                else if (valueHigh == FAR_POINTER_FLAG)
+                {
+                    var count = value & 0xff;
+                    if (count == 0)
+                    {
+                        // TODO: This
+                    }
+                    else
+                    {
+                        var offset = reader.ReadUInt16();
+                        var copy = data.Skip(offset).Take(count);
+                        data.AddRange(copy);
+                    }
                 }
                 else
                 {
@@ -28,6 +51,7 @@ public class CarmackCompression : ICompression<ushort>
                 }
             }
         }
+        
         return data.ToArray();
     }
 

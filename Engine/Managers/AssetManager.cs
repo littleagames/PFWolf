@@ -14,6 +14,8 @@ public class AssetManager
         _fileLoader = fileLoader;
     }
     
+    public int AssetCount => _assets.Count;
+    
     // TODO: This will take in a string "asset" and return the metadata, and byte data for that asset
     public void AddGamePack(GamePack gamePack, string directory)
     {

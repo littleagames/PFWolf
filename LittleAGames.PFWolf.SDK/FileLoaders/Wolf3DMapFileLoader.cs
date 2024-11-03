@@ -88,24 +88,47 @@ public class Wolf3DMapFileLoader : BaseFileLoader
 
     public override List<Asset> Load()
     {
+        var assets = new List<Asset>();
         var segments = GetMapHeaderSegmentsList();
         foreach (var segment in segments)
         {
+            var mapAsset = new MapAsset
+            {
+                Name = segment.Name,
+                NumPlanes = DefaultNumberOfPlanes,
+                Width = segment.Width,
+                Height = segment.Height,
+                AssetType = AssetType.Map,
+                PlaneData = new ushort[DefaultNumberOfPlanes][]
+            };
             for (var plane = 0; plane < DefaultNumberOfPlanes; plane++)
             {
                 var position = segment.PlaneStarts[plane];
                 var compressedSize = segment.PlaneLengths[plane];
+                if (compressedSize == 0)
+                    continue;
 
                 var compressedData = _gameMapData.Skip(position).Take(compressedSize).ToArray();
-                var carmackCompression = new CarmackCompression();
-                var expandedData = carmackCompression.Expand(compressedData);
-                // TODO: 1434 - compressed, 717 expanded via carmack, 1250 - via rlew?
-                // TODO: Expectation after rlew should be 4096?
-                var rlewCompression = new RLEWCompression();
-                var rlewedData = rlewCompression.Expand(Converters.UInt16ArrayToByteArray(expandedData));
+                var carmackCompression = new CarmackCompression(/*nearTag, farTag*/);
+
+                //
+                // unhuffman, then unRLEW
+                // The huffman'd chunk has a two byte expanded length first
+                // The resulting RLEW chunk also does, even though it's not really
+                // needed
+                //
+                var expanded = BitConverter.ToUInt16(compressedData.Take(sizeof(ushort)).ToArray());
+                var expandedData = carmackCompression.Expand(compressedData.Skip(sizeof(ushort)).ToArray()).Take(expanded).ToArray();
+                
+                var rlewCompression = new RLEWCompression(/*rlewTag*/);
+                var size = expandedData.First();
+                var mapPlaneData = rlewCompression.Expand(Converters.UInt16ArrayToByteArray(expandedData.Skip(1).ToArray())).Take(size).ToArray();
+                mapAsset.PlaneData[plane] = mapPlaneData;
             }
+
+            assets.Add(mapAsset);
         }
-        return [];
+        return assets;
     }
 
     public record MapHeader

@@ -8,4 +8,5 @@ public enum AssetType
     DigiSound,
     ImfMusic,
     AudioMarker,
+    Map
 }

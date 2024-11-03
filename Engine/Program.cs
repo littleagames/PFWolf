@@ -24,6 +24,7 @@ void InitGame()
 
     assetManager.AddGamePack(gamePack, directory);
 
+    Console.WriteLine($"Assets loaded: {assetManager.AssetCount}");
     // foreach (var pk3File in args.Select(x => x.EndsWith(".pk3") && isValidFilePath(x))
     // {
     // TODO: assetManager.AddModdedPack(

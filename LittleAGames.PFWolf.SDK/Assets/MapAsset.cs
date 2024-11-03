@@ -2,9 +2,10 @@
 
 public class MapAsset : Asset
 {
-    public override string Name { get; set; }
-    public int Width { get; set; }
-    public int Height { get; set; }
-    public int NumPlanes { get; set; }
-    public override byte[] RawData { get; set; }
+    public override string Name { get; set; } = null!;
+    public int Width { get; init; }
+    public int Height { get; init; }
+    public int NumPlanes { get; init; }
+    public override byte[] RawData { get; set; } = [];
+    public ushort[][] PlaneData { get; init; } = [];
 }
