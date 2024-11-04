@@ -138,13 +138,9 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
                 var compressedData = lumps[i].CompressedData.Skip(sizeof(int)).ToArray();
                 var expandedData = huffman.Expand(compressedData);
                 expandedData = expandedData.Take(size).ToArray();
-                vgaAssets.Add(new FontAsset
-                {
-                    Name = $"FONT{i:D5}",
-                    //Height
-                    //Font array (width, data)
-                    RawData = expandedData
-                });
+                vgaAssets.Add(new FontAsset(
+                    name: $"FONT{i:D5}",
+                    rawData: expandedData));
             }
             
             // Graphics
@@ -206,30 +202,37 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
 
                 var gameMapNumber = expandedData[0]; // Cannot validate this number on number of maps, since that information may not be known
                 var demoLength = BitConverter.ToInt16(expandedData.Skip(sizeof(byte)).Take(sizeof(short)).ToArray());
-                // TODO: Calculate DEMO length
-                 if (demoLength == expandedData.Length || demoLength == size)
-                 {
-                     // demo length in file 2077, expanded data is 2076
-                     // should the expanded data be 2077 + 2 + 1 (demo + demolength + map)??
-                     if (expandedData.Length < demoLength)
-                         Array.Resize(ref expandedData, demoLength);
-                     vgaAssets.Add(new DemoAsset
-                     {
-                         MapNumber = gameMapNumber,
-                         Name = $"DEMO{i:D5}",
-                         RawData = expandedData
-                     });
-                     continue;
-                 }
+                if (demoLength == expandedData.Length || demoLength == size)
+                {
+                    // demo length in file 2077, expanded data is 2076
+                    // should the expanded data be 2077 + 2 + 1 (demo + demolength + map)??
+                    if (expandedData.Length < demoLength)
+                        Array.Resize(ref expandedData, demoLength);
+                    vgaAssets.Add(new DemoAsset
+                    {
+                        MapNumber = gameMapNumber,
+                        Name = $"DEMO{i:D5}",
+                        RawData = expandedData
+                    });
+                    continue;
+                }
                 
-                //var compressedData = lumps[i].CompressedData.Skip(sizeof(int)).ToArray();
-                //var expandedData = huffman.Expand(compressedData);
-                // TILE8s
-                // ENDSCREENs (4000+8)
-                // PALETTE
-                // ENDARTs
-                // DEMOs
-                // More ENDARTs 
+                var text = System.Text.Encoding.ASCII.GetString(expandedData);
+                if (text.StartsWith("^P", StringComparison.CurrentCultureIgnoreCase)
+                    || text.EndsWith("^E", StringComparison.CurrentCultureIgnoreCase))
+                    // TODO: Check to see if all values are between 32 and 127 (used for ASCII)
+                // TODO: Spear text is missing the page tags (its unused but still there
+                {
+                    vgaAssets.Add(new TextAsset
+                    {
+                        Name = $"TEXT{i:D5}",
+                        RawData = expandedData,
+                        Text = text
+                    });
+                    continue;
+                }
+                
+                // TODO: Tile8s
             }
         }
         

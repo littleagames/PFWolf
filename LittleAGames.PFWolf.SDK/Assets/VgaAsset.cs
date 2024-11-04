@@ -24,14 +24,83 @@ public class StructPicAsset : VgaAsset
     public List<Dimension> Dimensions { get; set; } = [];
 }
 
-public class FontAsset : VgaAsset
+public class FontCharacter
 {
-    public FontAsset()
+    public short Height { get; set; }
+    public byte Width { get; set; }
+    public byte[] RawData { get; set; } = null!;
+}
+
+public sealed class FontAsset : VgaAsset
+{
+    public FontAsset(string name, byte[] rawData)
     {
+        Name = name;
+        RawData = rawData;
         AssetType = AssetType.Font;
+        FontCharacters = GetFontCharacters();
+    }
+
+    public List<FontCharacter> FontCharacters { get; set; }
+
+    private List<FontCharacter> GetFontCharacters()
+    {
+        var fontChars = new List<FontCharacter>();
+        var location = GetLocations();
+        var widths = GetWidths();
+        var height = GetHeight();
+        for (var ascii = 0; ascii < 256; ascii++)
+        {
+            byte[] fontData = RawData.Skip(location[ascii]).Take(sizeof(byte) * widths[ascii] * height)
+                .ToArray();
+            
+            fontChars.Add(new FontCharacter
+            {
+                Height = height,
+                Width = widths[ascii],
+                RawData = fontData,
+            });
+        }
+
+        return fontChars;
     }
     
-    public Dimension Dimensions { get; set; } = null!;
+    private short GetHeight()
+    {
+        var height = BitConverter.ToInt16(RawData.Take(2).ToArray());
+        if (height > 255)
+        {
+            throw new InvalidDataException("Font height is too large.");
+        }
+        
+        return height;
+    }
+    
+    private short[] GetLocations()
+    {
+        short[] location = new short[256];
+        Buffer.BlockCopy(RawData, sizeof(short), location, 0, sizeof(short) * 256);
+        if (location.ToList().Any(l => l > RawData.Length))
+        {
+            throw new InvalidDataException("Invalid font data while reading the location data.");
+        }
+
+        return location;
+    }
+    
+    private byte[] GetWidths()
+    {
+        byte[] widths = new byte[256];
+        var offset = sizeof(short) + (sizeof(short)*256);
+        Buffer.BlockCopy(RawData, offset, widths, 0, sizeof(byte) * 256);
+        
+        if (widths.ToList().Any(l => l > RawData.Length))
+        {
+            throw new InvalidDataException("Invalid font data while reading the widths data.");
+        }
+        
+        return widths;
+    }
 }
 
 public class GraphicAsset : VgaAsset
@@ -80,6 +149,8 @@ public class PaletteAsset : VgaAsset
 
 public class TextAsset : VgaAsset
 {
+    public string Text { get; set; } = null!;
+    
     public TextAsset()
     {
         AssetType = AssetType.Text;
