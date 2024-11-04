@@ -81,169 +81,18 @@
 ////    //    return;
 ////    //}
 ////}
-//using LittleAGames.PFWolf.Common.Compression;
-//using Microsoft.VisualBasic;
-//using System.Runtime.InteropServices;
-//using System.Text.Json;
-//using Wolf3D_CSharp.Compression;
-//using Wolf3D_CSharp.Data.BaseFileLoader.Tools;
-//using Wolf3D_CSharp.Tools;
-
-//namespace Wolf3D_CSharp;
-
-//public class VgaGraphFileLoader
-//{
-//    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-//    private struct pictabletype
-//    {
-//        public short width, height;
-//    }
 
 //    public void LoadDataFiles()
 //    {
-//        // Try loading the VGA files
-
-//        const string graphicsFileName = "vgagraph";
-//        const string graphicsHeaderFileName = "vgahead";
-//        const string graphicsDictionaryFileName = "vgadict";
-
-//        // Load dictionary
-//        var dictionaryFile = File.ReadAllBytes($"{Constants.GameFilesDirectory}{graphicsDictionaryFileName}.{Constants.FileExtension}");
-//        Console.WriteLine($"Dictionary file size: {dictionaryFile.Length}");
-
-//        // Load header
-//        var headerLength = new FileInfo($"{Constants.GameFilesDirectory}{graphicsHeaderFileName}.{Constants.FileExtension}").Length;
-//        Console.WriteLine($"Header length: {headerLength}");
-//        var headerFile = File.ReadAllBytes($"{Constants.GameFilesDirectory}{graphicsHeaderFileName}.{Constants.FileExtension}");
-//        Console.WriteLine($"Header file size: {headerFile.Length}");
-
-//        // Expand and Load graphics
-//        var graphicsFile = File.ReadAllBytes($"{Constants.GameFilesDirectory}{graphicsFileName}.{Constants.FileExtension}");
-//        Console.WriteLine($"Graphics file size: {graphicsFile.Length}");
-
-//        const int headerChunk = 3; // 3 is for each byte (we read 3 bytes of data)
-
-//        var numLumps = (headerFile.Length / headerChunk);
-
-//        var graphicStartPositions = new int[numLumps];
-
-//        // Header has 24-bit integers
-//        try
-//        {
-//            for (var i = 0; i < graphicStartPositions.Length; i++)
-//            {
-//                var d0 = headerFile[i * headerChunk];
-//                var d1 = headerFile[i * headerChunk + 1];
-//                var d2 = headerFile[i * headerChunk + 2];
-//                var val = d0 | d1 << 8 | d2 << 16; // Little endian
-//                graphicStartPositions[i] = val == 0x00FFFFFF ? -1 : val;
-//                Console.WriteLine($"Graphic #{i} start: {graphicStartPositions[i]}");
-//            }
-
-//            Console.WriteLine($"Num Chunks: {numLumps}");
-//        }
-//        catch (Exception e)
-//        {
-//            Console.WriteLine(e);
-//            return;
-//        }
-
-//        var huffman = new HuffmanCompression(dictionaryFile);
-//        var lumps = new List<VgaLump>(numLumps);
-//        var numFonts = 0;
-
-//        // Struct pic data
-//        // 4 bytes = size of picdata
-//        // remainder is pictabletype compressed data
-//        var pictableSize = BitConverter.ToInt32(graphicsFile, graphicStartPositions[0]);
-//        var numPics = pictableSize / Marshal.SizeOf(typeof(pictabletype));
-
-//        // Is the chunkcomplen 386 or 390? and does stripping 4 bytes off of the end cause issues for anything else
-//        // In this case, 390 gives us 586 in compout2 and that's an additional 8 bytes that we don't care to have.
-//        // Original code has | 4 bytes = len | 390 bytes as "compseg" | as part of STRUCTPIC
-//        // But the last 4 bytes are all 0s
-//        var compSegment = graphicsFile.Take(graphicStartPositions[1] - 4).Skip(sizeof(int)).ToArray(); // Skip first 4 bytes (pic table size)
-
-//        var compout = huffman.Expand(compSegment, pictableSize);
-//        var compout2 = huffman.Expand2(compSegment);
-
-//        var pictable = ByteToStructHelpers.ByteArrayToStructureArray<pictabletype>(compout, numPics);
-//        var fontCheckComplete = false;
-
 //        for (var i = 1; i < numLumps; i++)
 //        {
-//            // Maybe assumed that the layout is
-//            // STRUCT PIC data
-//            // FONTS
-//            // PICTURES
-//            // TILE8s
-//            // etc
-
-//            var end = graphicsFile.Length;
-//            if (i < numLumps - 1)
-//            {
-//                end = graphicStartPositions[i + 1];
-//            }
-
-//            var size = end - graphicStartPositions[i];
-
-//            if (size <= 0) continue;
-
 //            var data = graphicsFile.Skip(graphicStartPositions[i]).Take(size).ToArray();
 
 //            var tile8Position = numFonts + numPics + 1;
-//            // Determine if last lump was a font
-//            if (!fontCheckComplete && BuildFontLump(data, i, huffman, out var lump))
-//            {
-//                numFonts++;
-//                lumps.Add(lump);
-//                Console.WriteLine($"Added font {numFonts}");
-//            }
-//            else if (i <= (numPics + numFonts) && BuildPictureLump(data, pictable[i - numFonts - 1], i, huffman, out lump))
-//            {
-//                if (!fontCheckComplete)
-//                    fontCheckComplete = true;
-
-//                lumps.Add(lump);
-//                Console.WriteLine($"Added picture {i - numFonts - 1}");
-//            }
-//            else if (i == tile8Position && BuildTile8Lump(data, i, huffman, out lump))
-//            {
-//                lumps.Add(lump);
-//                Console.WriteLine($"Added TILE8");
-//            }
 //            else
 //            {
 //                var expanded = BitConverter.ToInt32(data.Take(4).ToArray());
 //                var decompressedData = huffman.Expand2(data.Skip(4).ToArray());
-
-//                // Check if palette?
-//                // 256*3 bytes
-//                if (decompressedData.Length == 256 * 3)
-//                {
-//                    var screenLump = new VgaLump
-//                    {
-//                        LumpName = $"VGAPALETTE{i:D5}",
-//                        //Data = decompressedData
-//                    };
-//                    lumps.Add(screenLump);
-//                    continue;
-//                }
-
-//                // Check if ENDSCREEN (4000 bytes?)
-//                // 80 x 25
-//                // ASCII, foreground, and background color (2 + 1 + 1 byte)
-//                if (decompressedData.Length == 4008)
-//                {
-
-//                    var screenLump = new VgaLump
-//                    {
-//                        LumpName = $"VGASCREEN{i:D5}",
-//                        //Data = decompressedData
-//                    };
-//                    lumps.Add(screenLump);
-//                    continue;
-//                }
 
 //                // Check if DEMO?
 //                var gameMapNumber = decompressedData[0];
@@ -277,25 +126,7 @@
 //                    lumps.Add(textLump);
 //                    continue;
 //                }
-
-
-//                var otherLump = new VgaLump
-//                {
-//                    LumpName = $"VGAOTHER{i:D5}",
-//                    //Data = decompressedData
-//                };
-//                lumps.Add(otherLump);
 //            }
-//        }
-
-//        Console.WriteLine();
-//        Console.WriteLine("=====================================");
-//        Console.WriteLine("=  LUMPS");
-//        Console.WriteLine("=====================================");
-
-//        foreach (var lump in lumps)
-//        {
-//            Console.WriteLine($"Lump: {lump.LumpName}");
 //        }
 //    }
 
@@ -357,23 +188,6 @@
 //        return true;
 //    }
 
-//    private bool BuildPictureLump(byte[] data, pictabletype picData, int lumpNumber, HuffmanCompression huffman, out VgaLump lump)
-//    {
-//        var expanded = BitConverter.ToInt32(data.Take(4).ToArray());
-//        //var decompressedData = huffman.Expand(data.Skip(4).ToArray(), expanded);
-//        var decompressedData = huffman.Expand2(data.Skip(4).ToArray());
-
-//        lump = new VgaPictureLump
-//        {
-//            LumpName = $"VGAPICT{lumpNumber:D5}",
-//            Width = picData.width,
-//            Height = picData.height,
-//            Data = decompressedData
-//        };
-
-//        return true;
-//    }
-
 //    private bool BuildTile8Lump(byte[] data, int lumpNumber, HuffmanCompression huffman, out VgaLump lump)
 //    {
 //        // The tile 8 doesn't contain a size at the start
@@ -393,14 +207,6 @@
 //        return true;
 //    }
 
-//    private class VgaLump
-//    {
-//        public string LumpName { get; set; } = null!;
-//        public int Position { get; set; }
-//        public int CompressedSize { get; set; }
-//        public int DecompressedSize { get; set; }
-//    }
-
 //    private class VgaTile8Lump : VgaLump
 //    {
 //        public int Height { get; set; }
@@ -414,11 +220,3 @@
 //        public byte[] Widths { get; set; } = new byte[256];
 //        public byte[][] Data { get; set; } = new byte[256][];
 //    }
-
-//    private class VgaPictureLump : VgaLump
-//    {
-//        public int Height { get; set; }
-//        public int Width { get; set; }
-//        public byte[] Data { get; set; } = null!;
-//    }
-//}

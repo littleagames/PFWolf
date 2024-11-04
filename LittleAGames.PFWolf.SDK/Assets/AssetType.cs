@@ -7,6 +7,14 @@ public enum AssetType
     AdLibSound,
     DigiSound,
     ImfMusic,
-    AudioMarker,
-    Map
+    Marker,
+    Map,
+    VgaPicData,
+    Font,
+    Graphic,
+    Tile8,
+    EndScreen,
+    Demo,
+    Palette,
+    Text
 }

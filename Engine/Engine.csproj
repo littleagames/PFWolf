@@ -80,8 +80,4 @@
     </Compile>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="old\Managers\" />
-  </ItemGroup>
-
 </Project>

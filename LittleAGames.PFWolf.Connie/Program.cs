@@ -25,8 +25,7 @@ internal class Program
             { 300, ("Display Huffman Tree", consoleFileClient.GetVgaHuffmanTree) },
             // 300 TODO: Maybe "display" the node table from dictionary?
             { 301, ("Display VGA Header Data", consoleFileClient.GetVgaHeaderList) },
-            { 302, ("Display VGA MetaData", consoleFileClient.GetVgaDataList) },
-            // 302 - get all assets (their type, etc, all that)
+            { 302, ("Display VGA Assets", consoleFileClient.GetVgaAssets) },
 
             { -400, ("VSWAP FILES", null) },
             { 400, ("Display Swap Header Data", consoleFileClient.GetVswapHeaderList) },

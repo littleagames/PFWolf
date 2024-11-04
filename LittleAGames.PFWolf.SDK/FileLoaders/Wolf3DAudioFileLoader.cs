@@ -8,7 +8,6 @@ public class Wolf3DAudioFileLoader : BaseFileLoader
 {
     private readonly byte[] _headerData;
     private readonly byte[] _audioData;
-    private const string AudioMarker = "!ID!";
 
     public Wolf3DAudioFileLoader(string directory, string audioHed, string audioT)
         : base(directory)
@@ -86,8 +85,9 @@ public class Wolf3DAudioFileLoader : BaseFileLoader
             {
                 var tagBytes = _audioData.Skip(audioStarts[index] + size - 4).Take(4).ToArray();
                 var tag = System.Text.Encoding.UTF8.GetString(tagBytes);
-                if (tag.Equals(AudioMarker))
+                if (tag.Equals(Asset.AssetMarker))
                 {
+                    // TODO: Add "marker" to assets
                     segmentStarts[++currentSegment] = (uint)index+1;
                     // Lump end contains a !ID! tag, remove it from the lump
                     audioHeaders[index].Size -= 4;

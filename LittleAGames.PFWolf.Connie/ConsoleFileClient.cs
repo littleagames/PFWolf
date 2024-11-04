@@ -204,52 +204,67 @@ internal class ConsoleFileClient
 
     public Result GetVgaHeaderList()
     {
-        throw new NotImplementedException();
-        // return GetFiles()
-        //     .Bind(files =>
-        //     {
-        //         // Display vga dictionary nodes
-        //         vgaFileManager = new VgaFileManager(
-        //                                 dictionaryFile: files.First(x => x.Contains("VGADICT", StringComparison.InvariantCultureIgnoreCase)),
-        //                                 headerFile: files.First(x => x.Contains("VGAHEAD", StringComparison.InvariantCultureIgnoreCase)),
-        //                                 dataFile: files.First(x => x.Contains("VGAGRAPH", StringComparison.InvariantCultureIgnoreCase))
-        //                             );
-        //         AnsiConsole.WriteLine("Get VGA Header");
-        //         AnsiConsole.WriteLine(new string('=', 50));
-        //         var list = vgaFileManager.GetHeaderList().Value;
-        //         foreach (var item in list)
-        //         {
-        //             AnsiConsole.WriteLine($"VGA #{list.IndexOf(item)} Offset: {item}");
-        //         }
-        //
-        //         return Result.Success();
-        //     })
-        //     .TapError(error => AnsiConsole.WriteLine(error));
+        if (!chosenPack.HasValue)
+            return Result.Failure("No pack selected");
+        
+        var gamePack = chosenPack.Value;
+        if (string.IsNullOrWhiteSpace(gamePack.Value) || !Path.Exists(gamePack.Value))
+        {
+            return Result.Failure($"Pack {gamePack.Value} not found in path: {gamePack.Value}");
+        }
+
+        try
+        {
+            // checks for that loader, returns loader here.
+            Wolf3DVgaFileLoader loader = gamePack.Key.GetLoader<Wolf3DVgaFileLoader>(gamePack.Value);
+            var headerList = loader.GetHeaderList();
+            AnsiConsole.WriteLine("Get VGA Header Starts");
+            AnsiConsole.WriteLine(new string('=', 50));
+            
+            for (var i = 0; i < headerList.Count; i++)
+            {
+                var segment = headerList[i];
+                AnsiConsole.WriteLine($"{i}] {segment}");
+            }
+
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            return Result.Failure($"Unable to run loader. Exception: {e.Message}");
+        }
     }
 
-    public Result GetVgaDataList()
+    public Result GetVgaAssets()
     {
-        throw new NotImplementedException();
-        // return GetFiles()
-        //     .Bind(files =>
-        //     {
-        //         // Display vga dictionary nodes
-        //         vgaFileManager = new VgaFileManager(
-        //                                 dictionaryFile: files.First(x => x.Contains("VGADICT", StringComparison.InvariantCultureIgnoreCase)),
-        //                                 headerFile: files.First(x => x.Contains("VGAHEAD", StringComparison.InvariantCultureIgnoreCase)),
-        //                                 dataFile: files.First(x => x.Contains("VGAGRAPH", StringComparison.InvariantCultureIgnoreCase))
-        //                             );
-        //         AnsiConsole.WriteLine("Get VGA Meta data");
-        //         AnsiConsole.WriteLine(new string('=', 50));
-        //         var vgaData = vgaFileManager.GetMetadataList().Value;
-        //         //foreach (var item in list)
-        //         //{
-        //             AnsiConsole.WriteLine($"VGA Num Chunks: {vgaData.NumChunks}");
-        //         //}
-        //
-        //         return Result.Success();
-        //     })
-        //     .TapError(error => AnsiConsole.WriteLine(error));
+        if (!chosenPack.HasValue)
+            return Result.Failure("No pack selected");
+        
+        var gamePack = chosenPack.Value;
+        if (string.IsNullOrWhiteSpace(gamePack.Value) || !Path.Exists(gamePack.Value))
+        {
+            return Result.Failure($"Pack {gamePack.Value} not found in path: {gamePack.Value}");
+        }
+
+        try
+        {
+            // checks for that loader, returns loader here.
+            Wolf3DVgaFileLoader loader = gamePack.Key.GetLoader<Wolf3DVgaFileLoader>(gamePack.Value);
+            var assets = loader.Load();
+            AnsiConsole.WriteLine("Get VGA Assets");
+            AnsiConsole.WriteLine(new string('=', 50));
+            
+            foreach (var asset in assets)
+            {
+                AnsiConsole.WriteLine(asset.ToString());
+            }
+
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            return Result.Failure($"Unable to run loader. Exception: {e.Message}");
+        }
     }
 
     public Result GetVswapHeaderList()
