@@ -27,4 +27,7 @@ public class AssetManager
     {
         throw new NotImplementedException();
     }
+    
+    public List<Asset> GetAssets(AssetType assetType)
+        => _assets.Where(a => a.AssetType == assetType).ToList();
 }

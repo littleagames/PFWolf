@@ -269,48 +269,68 @@ internal class ConsoleFileClient
 
     public Result GetVswapHeaderList()
     {
-        throw new NotImplementedException();
-        // return GetFiles()
-        //     .Bind(files =>
-        //     {
-        //         // Display audio file list of chunks
-        //         swapFileManager = new VswapFileManager(
-        //                                 files.First(x => x.Contains("VSWAP", StringComparison.InvariantCultureIgnoreCase))
-        //                             );
-        //         AnsiConsole.WriteLine("Get Swap Header Info");
-        //         AnsiConsole.WriteLine(new string('=', 50));
-        //         var swapData = swapFileManager.GetData().Value; // TODO: Result checking
-        //         //foreach (var item in list)
-        //         //{
-        //             AnsiConsole.WriteLine(swapData.Display());
-        //         //}
-        //
-        //         return Result.Success();
-        //     })
-        //     .TapError(error => AnsiConsole.WriteLine(error));
+        if (!chosenPack.HasValue)
+            return Result.Failure("No pack selected");
+        
+        var gamePack = chosenPack.Value;
+        if (string.IsNullOrWhiteSpace(gamePack.Value) || !Path.Exists(gamePack.Value))
+        {
+            return Result.Failure($"Pack {gamePack.Value} not found in path: {gamePack.Value}");
+        }
+
+        try
+        {
+            // checks for that loader, returns loader here.
+            Wolf3DVswapFileLoader loader = gamePack.Key.GetLoader<Wolf3DVswapFileLoader>(gamePack.Value);
+            var headerInfo = loader.GetHeaderInfo();
+            AnsiConsole.WriteLine("Get Vswap Header Info");
+            AnsiConsole.WriteLine(new string('=', 50));
+            
+            AnsiConsole.WriteLine($"PageOffsets = {headerInfo.PageOffsets}");
+            AnsiConsole.WriteLine($"PageLengths = {headerInfo.PageLengths}");
+            AnsiConsole.WriteLine($"ChunksInFile = {headerInfo.ChunksInFile}");
+            AnsiConsole.WriteLine($"SpriteStartIndex = {headerInfo.SpriteStartIndex}");
+            AnsiConsole.WriteLine($"SoundStartIndex = {headerInfo.SoundStartIndex}");
+
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            return Result.Failure($"Unable to run loader. Exception: {e.Message}");
+        }
     }
 
     public Result GetVswapDataList()
     {
-        throw new NotImplementedException();
-        // return GetFiles()
-        //     .Bind(files =>
-        //     {
-        //         // Display entries built out from page data
-        //         swapFileManager = new VswapFileManager(
-        //                                 files.First(x => x.Contains("VSWAP", StringComparison.InvariantCultureIgnoreCase))
-        //                             );
-        //         AnsiConsole.WriteLine("Get Swap Header Info");
-        //         AnsiConsole.WriteLine(new string('=', 50));
-        //         var entries = swapFileManager.GetSwapEntries().Value; // TODO: Result checking
-        //         foreach (var item in entries)
-        //         {
-        //             AnsiConsole.WriteLine(item.Display());
-        //         }
-        //
-        //         return Result.Success();
-        //     })
-        //     .TapError(error => AnsiConsole.WriteLine(error));
+        if (!chosenPack.HasValue)
+            return Result.Failure("No pack selected");
+        
+        var gamePack = chosenPack.Value;
+        if (string.IsNullOrWhiteSpace(gamePack.Value) || !Path.Exists(gamePack.Value))
+        {
+            return Result.Failure($"Pack {gamePack.Value} not found in path: {gamePack.Value}");
+        }
+
+        try
+        {
+            // checks for that loader, returns loader here.
+            Wolf3DVswapFileLoader loader = gamePack.Key.GetLoader<Wolf3DVswapFileLoader>(gamePack.Value);
+            var assets = loader.Load();
+            AnsiConsole.WriteLine("Get Vswap Assets");
+            AnsiConsole.WriteLine(new string('=', 50));
+            
+            foreach (var asset in assets)
+            {
+                AnsiConsole.WriteLine(asset.ToString());
+            }
+
+
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            return Result.Failure($"Unable to run loader. Exception: {e.Message}");
+        }
     }
 
     public Result GetPk3DirectoryList()

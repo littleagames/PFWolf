@@ -16,5 +16,7 @@ public enum AssetType
     EndScreen,
     Demo,
     Palette,
-    Text
+    Text,
+    Texture,
+    Sprite
 }
