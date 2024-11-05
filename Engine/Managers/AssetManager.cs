@@ -30,4 +30,10 @@ public class AssetManager
     
     public List<Asset> GetAssets(AssetType assetType)
         => _assets.Where(a => a.AssetType == assetType).ToList();
+
+    public Asset? FindAsset(AssetType assetType, string assetName)
+    {
+        return _assets.FirstOrDefault(a =>
+            a.AssetType == assetType && a.Name.Equals(assetName, StringComparison.InvariantCultureIgnoreCase));
+    }
 }

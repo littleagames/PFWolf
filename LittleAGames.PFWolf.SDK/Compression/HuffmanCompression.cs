@@ -202,6 +202,8 @@ public class HuffmanCompression : ICompression<byte>
                 nodeval = node.Right;
             if (mask == 0x80) // if mask is 128, 2^7
             {
+                if (sourceIndex >= source.Length)
+                    break;
                 val = source[sourceIndex++]; // get next source void
                 mask = 1;           // start mask back to 1
             }
@@ -211,7 +213,6 @@ public class HuffmanCompression : ICompression<byte>
             {
                 dest.Add((byte)nodeval.Value);
                 node = Tree.Head; // start huffptr back at head
-                if (sourceIndex >= source.Length) break;
             }
             else
             {

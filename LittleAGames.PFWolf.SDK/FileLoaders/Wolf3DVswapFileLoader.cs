@@ -7,10 +7,12 @@ namespace LittleAGames.PFWolf.SDK.FileLoaders;
 
 public class Wolf3DVswapFileLoader : BaseFileLoader
 {
+    private readonly List<string> _assetReferences;
     private readonly byte[] _vswapData;
 
-    public Wolf3DVswapFileLoader(string directory, string vswap) : base(directory)
+    public Wolf3DVswapFileLoader(string directory, List<string> assetReferences, string vswap) : base(directory)
     {
+        _assetReferences = assetReferences;
         var vswapFilePath = Path.Combine(Directory, vswap);
         _vswapData = File.ReadAllBytes(vswapFilePath);
     }

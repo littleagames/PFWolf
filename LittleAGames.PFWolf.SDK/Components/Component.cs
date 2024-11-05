@@ -15,9 +15,31 @@ public class ComponentCollection
     {
         _components.Add(component);
     }
+
+    public HashSet<Component> GetComponents()
+    {
+        return _components;
+    }
 }
 
 public abstract class Component
 {
-    public abstract void Draw();
+    public virtual void OnStart()
+    {
+        
+    }
+
+    public virtual void OnUpdate()
+    {
+        
+    }
+
+    public virtual void OnDestroy()
+    {
+        
+    }
+}
+
+public abstract class RenderComponent : Component
+{
 }

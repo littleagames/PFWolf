@@ -5,13 +5,14 @@ namespace LittleAGames.PFWolf.SDK;
 
 public record GamePackFile(string File, string Md5);
 
-public record GamePackFileLoader(Type FileLoader, params string[] Files);
+public record GamePackFileLoader(Type FileLoader, List<string> AssetReferences, params string[] Files);
 
 public abstract class GamePack
 {
     public Guid Id = Guid.NewGuid();
     
     public abstract string PackName { get; }
+    
     protected abstract List<GamePackFile> Files { get; }
     protected abstract List<GamePackFileLoader> FileLoaders { get; }
 
@@ -50,22 +51,25 @@ public abstract class GamePack
     public T GetLoader<T>(string directory) where T : BaseFileLoader
     {
         var loader = FileLoaders.FirstOrDefault(x => x.FileLoader == typeof(T));
+        return (T)InstantiateLoader(directory, loader);
+    }
 
+    private BaseFileLoader InstantiateLoader(string directory, GamePackFileLoader? loader)
+    {
         if (loader == null)
-            throw new InvalidOperationException($"File Loader {typeof(T).Name} not found in pack.");
-        
-        var stringParams = new List<string> { directory };
-        stringParams.AddRange(loader.Files);
-        var args = stringParams.ToArray();
+            throw new InvalidOperationException($"Failed to instantiate loader.");
+
         try
         {
-            BaseFileLoader fileLoader = Activator.CreateInstance(loader.FileLoader, args) as BaseFileLoader;
+            List<object?> argsList = [directory, loader.AssetReferences];
+            argsList.AddRange(loader.Files);
+            BaseFileLoader fileLoader = Activator.CreateInstance(loader.FileLoader, argsList.ToArray()) as BaseFileLoader;
             if (fileLoader == null)
             {
                 throw new InvalidOperationException($"File Loader {loader.GetType().Name} could not be instantiated.");
             }
 
-            return (T)fileLoader;
+            return fileLoader;
         }
         catch (Exception ex)
         {
@@ -83,14 +87,7 @@ public abstract class GamePack
         List<Asset> assets = new List<Asset>();
         foreach (var loader in FileLoaders)
         {
-            var stringParams = new List<string> { directory };
-            stringParams.AddRange(loader.Files);
-            var args = stringParams.ToArray();
-            BaseFileLoader fileLoader = Activator.CreateInstance(loader.FileLoader, args) as BaseFileLoader;
-            if (fileLoader == null)
-            {
-                throw new InvalidOperationException($"File Loader {loader.GetType().Name} could not be instantiated.");
-            }
+            var fileLoader = InstantiateLoader(directory, loader);
             
             var loadedAssets = fileLoader.Load();
             assets.AddRange(loadedAssets);

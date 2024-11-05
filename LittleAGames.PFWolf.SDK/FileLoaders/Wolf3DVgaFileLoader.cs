@@ -7,24 +7,21 @@ namespace LittleAGames.PFWolf.SDK.FileLoaders;
 
 public class Wolf3DVgaFileLoader : BaseFileLoader
 {
+    private readonly List<string> _assetReferences;
     private readonly byte[] _dictionaryData;
     private readonly byte[] _headerData;
     private readonly byte[] _graphicData;
 
-    public Wolf3DVgaFileLoader(string directory, string vgaDict, string vgaHead, string vgaGraph)
+    public Wolf3DVgaFileLoader(string directory, List<string> assetReferences, string vgaDict, string vgaHead, string vgaGraph)
         : base(directory)
     {
+        _assetReferences = assetReferences;
         var vgaDictFilePath = Path.Combine(Directory, vgaDict);
         _dictionaryData = File.ReadAllBytes(vgaDictFilePath);
         var vgaHeadFilePath = Path.Combine(Directory, vgaHead);
         _headerData = File.ReadAllBytes(vgaHeadFilePath);
         var vgaGraphFilePath = Path.Combine(Directory, vgaGraph);
         _graphicData = File.ReadAllBytes(vgaGraphFilePath);
-    }
-    
-    public ICompression<byte> GetDictionary()
-    {
-        return new HuffmanCompression(_dictionaryData);
     }
     
     public List<int> GetHeaderList()
@@ -48,7 +45,6 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
     
     public override List<Asset> Load()
     {
-        var dictionary = GetDictionary();
         var headerList = GetHeaderList();
 
         var vgaAssets = new List<Asset>();
@@ -139,7 +135,7 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
                 var expandedData = huffman.Expand(compressedData);
                 expandedData = expandedData.Take(size).ToArray();
                 vgaAssets.Add(new FontAsset(
-                    name: $"FONT{i:D5}",
+                    name: GetReferenceName(i) ?? $"FONT{i:D5}",
                     rawData: expandedData));
             }
             
@@ -157,11 +153,18 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
                 
                 var size = BitConverter.ToInt32(lumps[i].CompressedData.Take(sizeof(int)).ToArray());
                 var compressedData = lumps[i].CompressedData.Skip(sizeof(int)).ToArray();
-                var expandedData = huffman.Expand(compressedData);
+                var expandedData = huffman.Expand(compressedData); // TODO: 63999 for a 64000 image?
+                if (expandedData.Length < size)
+                {
+                    throw new Exception(
+                        $"Huffman expand didn't fill the entire array: {expandedData.Length} (expanded) < {size} (size)");
+                }
                 expandedData = expandedData.Take(size).ToArray();
+                expandedData = DeplaneData(expandedData, dimensions);
+                
                 vgaAssets.Add(new GraphicAsset
                 {
-                    Name = $"PIC{i:D5}",
+                    Name = GetReferenceName(i) ?? $"PIC{i:D5}",
                     RawData = expandedData, // TODO: DeplaneVGA? (4 byte blocks?)
                     Dimensions = dimensions
                 });
@@ -184,7 +187,7 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
                 {
                     vgaAssets.Add(new PaletteAsset
                     {
-                        Name = $"PALETTE{i:D5}",
+                        Name = GetReferenceName(i) ??  $"PALETTE{i:D5}",
                         RawData = expandedData
                     });
                     continue;
@@ -194,7 +197,7 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
                 {
                     vgaAssets.Add(new EndScreenAsset
                     {
-                        Name = $"SCREEN{i:D5}",
+                        Name = GetReferenceName(i) ?? $"SCREEN{i:D5}",
                         RawData = expandedData
                     });
                     continue;
@@ -211,7 +214,7 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
                     vgaAssets.Add(new DemoAsset
                     {
                         MapNumber = gameMapNumber,
-                        Name = $"DEMO{i:D5}",
+                        Name = GetReferenceName(i) ?? $"DEMO{i:D5}",
                         RawData = expandedData
                     });
                     continue;
@@ -225,7 +228,7 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
                 {
                     vgaAssets.Add(new TextAsset
                     {
-                        Name = $"TEXT{i:D5}",
+                        Name = GetReferenceName(i) ?? $"TEXT{i:D5}",
                         RawData = expandedData,
                         Text = text
                     });
@@ -239,6 +242,14 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
         return vgaAssets;
     }
 
+    private string? GetReferenceName(int i)
+    {
+        if (i < 0 || i > _assetReferences.Count)
+            return null;
+        
+        return _assetReferences[i];
+    }
+    
     private List<Dimension> ToDimensions(ushort[] picTableData, int numPics)
     {
         var dimensions = new List<Dimension>(numPics);
@@ -258,6 +269,52 @@ public class Wolf3DVgaFileLoader : BaseFileLoader
         }
         
         return dimensions;
+    }
+
+    private byte[] DeplaneData(byte[] source, Dimension dimensions)
+    {
+        int width = dimensions.Width;
+        int height = dimensions.Height;
+        
+        int x, y, plane;
+        ushort size, pwidth;
+        byte[] temp, dest, srcline;
+
+        size = (ushort)(width * height);
+
+        if ((width & 3) != 0)
+            throw new Exception("DeplaneData: width not divisible by 4!");
+
+        temp = new byte[size];// SafeMalloc(size);
+
+        //
+        // munge pic into the temp buffer
+        //
+        srcline = source;
+        var srcLineIndex = 0;
+        pwidth = (ushort)(width >> 2); // width/4
+
+        for (plane = 0; plane < 4; plane++)
+        {
+            dest = temp;
+
+            for (y = 0; y < height; y++)
+            {
+                for (x = 0; x < pwidth; x++)
+                {
+                    if (srcLineIndex >= srcline.Length)
+                        continue;
+                    dest[(width * y) + ((x << 2) + plane)] = srcline[srcLineIndex++];
+                }
+            }
+        }
+
+        //
+        // copy the temp buffer back into the original source
+        //
+        //Array.Copy(temp, source, size);
+
+        return temp;
     }
 
     private class VgaLump

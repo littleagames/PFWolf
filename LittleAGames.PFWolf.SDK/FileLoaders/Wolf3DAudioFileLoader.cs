@@ -6,12 +6,14 @@ namespace LittleAGames.PFWolf.SDK.FileLoaders;
 
 public class Wolf3DAudioFileLoader : BaseFileLoader
 {
+    private readonly List<string> _assetReferences;
     private readonly byte[] _headerData;
     private readonly byte[] _audioData;
 
-    public Wolf3DAudioFileLoader(string directory, string audioHed, string audioT)
+    public Wolf3DAudioFileLoader(string directory, List<string> assetReferences, string audioHed, string audioT)
         : base(directory)
     {
+        _assetReferences = assetReferences;
         var audioHeaderFilePath = Path.Combine(Directory, audioHed);
         _headerData = File.ReadAllBytes(audioHeaderFilePath);
 

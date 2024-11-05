@@ -36,13 +36,17 @@ public class GameManager
     public void Start()
     {
         var videoMgr = VideoLayerManager.Instance;
-        videoMgr.Start();
+        videoMgr.Start(assetManager: _assetManager);
+        
+        var sceneManager = new SceneManager(videoMgr);
+        sceneManager.LoadScene("SignonScene");
         
         // GameLoop
         var i = 0;
         do
         {
-            videoMgr.DrawBackground((byte)((i/1000)%255));
+            // TODO: Restrict this to 70 FPS
+            sceneManager.OnUpdate();
             Console.WriteLine("Loop");
             i++;
             // TODO: Input manager to press keys
@@ -53,6 +57,7 @@ public class GameManager
 
     private void Quit()
     {
-        VideoLayerManager.Instance.Start();
+        // TODO: Shut down everything else also (if it needs to be)
+        VideoLayerManager.Instance.Shutdown();
     }
 }

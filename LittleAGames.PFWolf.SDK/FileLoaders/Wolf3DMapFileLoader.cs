@@ -7,13 +7,15 @@ namespace LittleAGames.PFWolf.SDK.FileLoaders;
 
 public class Wolf3DMapFileLoader : BaseFileLoader
 {
+    private readonly List<string> _assetReferences;
     private readonly byte[] _headerData;
     private readonly byte[] _gameMapData;
     private const int DefaultNumberOfPlanes = 3;
     private const int DefaultMapNameSize = 16;
 
-    public Wolf3DMapFileLoader(string directory, string mapHead, string gameMap) : base(directory)
+    public Wolf3DMapFileLoader(string directory, List<string> assetReferences, string mapHead, string gameMap) : base(directory)
     {
+        _assetReferences = assetReferences;
         var mapHeaderFilePath = Path.Combine(Directory, mapHead);
         _headerData = File.ReadAllBytes(mapHeaderFilePath);
 

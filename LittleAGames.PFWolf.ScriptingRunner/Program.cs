@@ -153,7 +153,7 @@ internal class Program
                     else
                     {
                         Console.WriteLine($"Script found: {obj.GetType().Name}");
-                        obj.Execute();
+                        //obj.Execute();
                     }
                 }
             }

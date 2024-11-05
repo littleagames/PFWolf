@@ -3,6 +3,8 @@ using static SDL2.SDL;
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using LittleAGames.PFWolf.SDK.Assets;
+using LittleAGames.PFWolf.SDK.Components;
 
 namespace Engine.Managers;
 
@@ -41,6 +43,8 @@ public class VideoLayerManager
 
     private uint[] _ylookup = null!;
 
+    private AssetManager _assetManager = null!;
+    
     /// <summary>
     /// The instance of the singleton
     /// safe for multithreading
@@ -67,21 +71,22 @@ public class VideoLayerManager
         }
     }
 
-    public void Start()
+    public void Start(AssetManager assetManager)
     {
+        _assetManager = assetManager;
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0)
         {
-            Console.WriteLine($"There was an issue initilizing SDL. {SDL_GetError()}");
+            Console.WriteLine($"There was an issue initializing SDL. {SDL_GetError()}");
         }
 
         // TODO: Get "Fullscreen" from config
-        Initialize(false);
+        Initialize("PF Wolf", false);
     }
 
-    public void Initialize(bool fullscreen = false)
+    public void Initialize(string gameTitle, bool fullscreen = false)
     {
         // Create a new window given a title, size, and passes it a flag indicating it should be shown.
-        _window = SDL.SDL_CreateWindow("Wolfenstein 3-D", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ScreenWidth, ScreenHeight, (fullscreen ? SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0) | SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
+        _window = SDL.SDL_CreateWindow(gameTitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ScreenWidth, ScreenHeight, (fullscreen ? SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0) | SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
 
         if (_window == IntPtr.Zero)
         {
@@ -170,18 +175,7 @@ public class VideoLayerManager
     {
         UpdateScreen(_screenBuffer);
     }
-    //
-    // public void DrawPic(int x, int y, string picName)
-    // {
-    //     var gfxManager = GraphicsManager.Instance;
-    //     var graphic = gfxManager.GetGraphic(picName);
-    //     
-    //     //Remove this restriction.I want to be free to put in on any pixel I please
-    //     //x &= ~7;
-    //     
-    //     MemToScreen(graphic.Data, graphic.Width, graphic.Height, x, y);
-    // }
-
+    
     public void DrawBlock(int x, int y, byte[] block)
     {
         MemToScreen(block, 64, 64, x, y);
@@ -233,13 +227,12 @@ public class VideoLayerManager
     //}
 
     // TODO: This should not be public as a byte[], only an "asset", which this handles
-    public void MemToScreen(byte[] source, int width, int height, int x, int y)
+    private void MemToScreen(byte[] source, int width, int height, int x, int y)
     {
         MemToScreenScaledCoord(_screenBuffer, source, width, height, _scaleFactorX * x, _scaleFactorY * y);
     }
 
-    // TODO: This should not obe public as a byte[], only an "asset lookup", which this handles
-    public void MemToScreenScaledCoord(IntPtr screenBuffer, byte[] source, int width, int height, int destx, int desty)
+    private void MemToScreenScaledCoord(IntPtr screenBuffer, byte[] source, int width, int height, int destx, int desty)
     {
         byte[] dest;
         int i, j, sci, scj;
@@ -281,18 +274,34 @@ public class VideoLayerManager
         UnlockSurface(screenBuffer);
     }
 
-    public void DrawBackground(byte color)
+    public void Draw(Component component)
     {
-        DrawRectangleScaledCoord(0, 0, ScreenWidth, ScreenHeight, color);
-        UpdateScreen();
+        if (component.GetType().IsAssignableTo(typeof(Background))) // TODO: Is this the answer?
+        {
+            var backgroundRectangle = (Background)component;
+            DrawRectangleScaledCoord(0, 0, ScreenWidth, ScreenHeight, backgroundRectangle.Color);
+        }
+        
+        if (component.GetType().IsAssignableTo(typeof(Rectangle))) // TODO: Is this the answer?
+        {
+            var rect = (Rectangle)component;
+            DrawRectangleScaledCoord(rect.X, rect.Y, rect.Width, rect.Height, rect.Color);
+        }
+
+        if (component.GetType().IsAssignableTo(typeof(Graphic)))
+        {
+            var graphic = (Graphic)component;
+            var graphicAsset = _assetManager.FindAsset(AssetType.Graphic, graphic.AssetName) as GraphicAsset;
+            if (graphicAsset == null)
+            {
+                // TODO: Placeholder for missing graphic?
+                return;   
+            }
+            MemToScreen(graphicAsset.RawData, graphicAsset.Dimensions.Width, graphicAsset.Dimensions.Height, graphic.X, graphic.Y);
+        }
     }
 
-    public void DrawRectangle(int x, int y, int width, int height, byte color)
-    {
-        DrawRectangleScaledCoord(_scaleFactorX * x, _scaleFactorY * y, _scaleFactorX * width, _scaleFactorY * height, color);
-    }
-
-    public void DrawRectangleScaledCoord(int scaledX, int scaledY, int scaledWidth, int scaledHeight, byte color)
+    private void DrawRectangleScaledCoord(int scaledX, int scaledY, int scaledWidth, int scaledHeight, byte color)
     {
         byte[] dest;
         IntPtr dest_ptr = LockSurface(_screenBuffer);
