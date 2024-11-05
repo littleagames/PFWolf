@@ -29,5 +29,5 @@ void InitGame()
     // {
     // TODO: assetManager.AddModdedPack(
     // }
-    // new GameManager(assetManager).Start(); // TODO: GameManager needs the assetManager
+    new GameManager(assetManager).Start();
 }

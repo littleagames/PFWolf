@@ -35,11 +35,24 @@ public class GameManager
     
     public void Start()
     {
+        var videoMgr = VideoLayerManager.Instance;
+        videoMgr.Start();
+        
         // GameLoop
+        var i = 0;
         do
         {
+            videoMgr.DrawBackground((byte)((i/1000)%255));
             Console.WriteLine("Loop");
+            i++;
             // TODO: Input manager to press keys
         } while (true);
+
+        Quit();
+    }
+
+    private void Quit()
+    {
+        VideoLayerManager.Instance.Start();
     }
 }
