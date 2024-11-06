@@ -1,4 +1,5 @@
-﻿using LittleAGames.PFWolf.FileManager;
+﻿using LittleAGames.PFWolf.Common.FileLoaders;
+using LittleAGames.PFWolf.FileManager;
 using LittleAGames.PFWolf.SDK.Assets;
 using LittleAGames.PFWolf.SDK.FileLoaders;
 
@@ -335,27 +336,68 @@ internal class ConsoleFileClient
 
     public Result GetPk3DirectoryList()
     {
-        throw new NotImplementedException();
-        // return GetFiles()
-        //     .Bind(files =>
-        //     {
-        //         // Display entries built out from page data
-        //         pk3FileManager = new Pk3FileManager(
-        //                                 files.First(x => x.Contains(".pk3", StringComparison.InvariantCultureIgnoreCase))
-        //                             );
-        //         AnsiConsole.WriteLine("Get PK3 Directory Info");
-        //         AnsiConsole.WriteLine(new string('=', 50));
-        //         var entries = pk3FileManager.GetDirectoryList().Value; // TODO: Result checking
-        //         foreach (var item in entries)
-        //         {
-        //             AnsiConsole.WriteLine(item);
-        //         }
-        //
-        //         return Result.Success();
-        //     })
-        //     .TapError(error => AnsiConsole.WriteLine(error));
+        if (!chosenPack.HasValue)
+            return Result.Failure("No pack selected");
+        
+        var gamePack = chosenPack.Value;
+        if (string.IsNullOrWhiteSpace(gamePack.Value) || !Path.Exists(gamePack.Value))
+        {
+            return Result.Failure($"Pack {gamePack.Value} not found in path: {gamePack.Value}");
+        }
+        
+        try
+        {
+            // checks for that loader, returns loader here.
+            Pk3FileLoader loader = new Pk3FileLoader("D:\\PFWolf-Assets", "pfwolf.pk3");
+            var pk3Entries = loader.GetDirectoryList();
+            AnsiConsole.WriteLine("Get PK3 Directory Listing");
+            AnsiConsole.WriteLine(new string('=', 50));
+            
+            foreach (var entry in pk3Entries)
+            {
+                AnsiConsole.WriteLine(entry);
+            }
+
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            return Result.Failure($"Unable to run loader. Exception: {e.Message}");
+        }
     }
 
+    public Result GetPk3Assets()
+    {
+        if (!chosenPack.HasValue)
+            return Result.Failure("No pack selected");
+        
+        var gamePack = chosenPack.Value;
+        if (string.IsNullOrWhiteSpace(gamePack.Value) || !Path.Exists(gamePack.Value))
+        {
+            return Result.Failure($"Pack {gamePack.Value} not found in path: {gamePack.Value}");
+        }
+        
+        try
+        {
+            // checks for that loader, returns loader here.
+            Pk3FileLoader loader = new Pk3FileLoader("D:\\PFWolf-Assets", "pfwolf.pk3");
+            var pk3Assets = loader.Load();
+            AnsiConsole.WriteLine("Get PK3 Assets");
+            AnsiConsole.WriteLine(new string('=', 50));
+            
+            foreach (var asset in pk3Assets)
+            {
+                AnsiConsole.WriteLine(asset.ToString());
+            }
+
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            return Result.Failure($"Unable to run loader. Exception: {e.Message}");
+        }
+    }
+    
     private static Result<string[]> GetFiles()
     {
         return FileLoader.CheckForFiles()

@@ -24,7 +24,7 @@ public class Wolf3DAudioFileLoader : BaseFileLoader
     public override List<Asset> Load()
     {
         var headerList = GetAudioHeaderList();
-        var audioDataList = new List<Asset>(headerList.Count);
+        var audioAssets = new List<Asset>(headerList.Count);
 
         for (var i = 0; i < headerList.Count; i++)
         {
@@ -44,15 +44,15 @@ public class Wolf3DAudioFileLoader : BaseFileLoader
                 continue;
             }
             
-            audioDataList.Add(new AudioAsset
+            audioAssets.Add(new AudioAsset
             {
-                Name = $"AUD{i:D5}",
+                Name = GetReferencedName(i) ?? $"AUD{i:D5}",
                 AssetType = header.Namespace,
                 RawData = _audioData.Skip(pos).Take(chunkLength).ToArray()
             });
         }
 
-        return audioDataList;
+        return audioAssets;
     }
 
     public List<AudioHeaderData> GetAudioHeaderList()
@@ -116,6 +116,14 @@ public class Wolf3DAudioFileLoader : BaseFileLoader
         }
 
         return audioHeaders;
+    }
+
+    private string? GetReferencedName(int i)
+    {
+        if (i < 0 || i >= _assetReferences.Count)
+            return null;
+
+        return _assetReferences[i];
     }
 }
 

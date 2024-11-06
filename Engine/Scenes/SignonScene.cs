@@ -14,8 +14,7 @@ public class SignonScene : Scene
 
     public override void OnStart()
     {
-        Components.Add(new Background(0x00));
-        Components.Add(new Graphic("title", 0, 0));
+        Components.Add(new Graphic("wolf3d-signon", 0, 0));
         Components.Add(_timer);
         _timer.OnStart();
     }

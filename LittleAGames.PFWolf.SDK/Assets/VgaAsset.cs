@@ -103,16 +103,6 @@ public sealed class FontAsset : VgaAsset
     }
 }
 
-public class GraphicAsset : VgaAsset
-{
-    public GraphicAsset()
-    {
-        AssetType = AssetType.Graphic;
-    }
-    
-    public Dimension Dimensions { get; set; } = null!;
-}
-
 public class Tile8Asset : VgaAsset
 {
     public Tile8Asset()

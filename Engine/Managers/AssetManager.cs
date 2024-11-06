@@ -1,6 +1,8 @@
-﻿using LittleAGames.PFWolf.FileManager;
+﻿using LittleAGames.PFWolf.Common.FileLoaders;
+using LittleAGames.PFWolf.FileManager;
 using LittleAGames.PFWolf.SDK;
 using LittleAGames.PFWolf.SDK.Assets;
+using LittleAGames.PFWolf.SDK.FileLoaders;
 
 namespace Engine.Managers;
 
@@ -23,9 +25,11 @@ public class AssetManager
         _assets.AddRange(gamePackAssets);
     }
 
-    public void AddModPack(object pk3File)
+    public void AddModPack(string directory, string pk3File)
     {
-        throw new NotImplementedException();
+        var loader = new Pk3FileLoader(directory, pk3File);
+        var pk3Assets = loader.Load();
+        _assets.AddRange(pk3Assets);
     }
     
     public List<Asset> GetAssets(AssetType assetType)

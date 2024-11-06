@@ -23,6 +23,7 @@ void InitGame()
     var assetManager = new AssetManager(fileLoader);
 
     assetManager.AddGamePack(gamePack, directory);
+    assetManager.AddModPack("D:\\PFWolf-Assets", "pfwolf.pk3");
 
     Console.WriteLine($"Assets loaded: {assetManager.AssetCount}");
     // foreach (var pk3File in args.Select(x => x.EndsWith(".pk3") && isValidFilePath(x))

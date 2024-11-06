@@ -31,7 +31,7 @@ public class SceneManager
         foreach (var component in _currentScene.Components.GetComponents())
         {
             component.OnUpdate();
-            if (component.GetType().IsAssignableFrom(typeof(RenderComponent)))
+            if (component.GetType().IsSubclassOf(typeof(RenderComponent)))
                 _videoManager.Draw(component);
         }
         _videoManager.UpdateScreen();

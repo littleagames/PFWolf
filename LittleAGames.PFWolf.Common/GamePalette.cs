@@ -1,23 +1,19 @@
-﻿using SDL2;
-using static SDL2.SDL;
+﻿using System.Drawing;
 
-namespace Engine;
+namespace LittleAGames.PFWolf.Common;
 
 // TODO: Convert this to a PLAYPAL file
-internal static class GamePal
+public static class GamePalette
 {
-    private static SDL_Color RGB(byte red, byte green, byte blue)
+    private static Color RGB(byte red, byte green, byte blue)
     {
-        return new SDL_Color
-        {
-            r = (byte)(red * 255 / 63),
-            g = (byte)(green * 255 / 63),
-            b = (byte)(blue * 255 / 63),
-            a = 0
-        };
+        return Color.FromArgb(
+            red: (byte)(red * 255 / 63),
+            green: (byte)(green * 255 / 63),
+            blue: (byte)(blue * 255 / 63));
     }
 
-    internal static SDL_Color[] BasePalette = new SDL_Color[256]
+    public static Color[] BasePalette = new Color[256]
     {
 RGB(  0,  0,  0),RGB(  0,  0, 42),RGB(  0, 42,  0),RGB(  0, 42, 42),RGB( 42,  0,  0),
 RGB( 42,  0, 42),RGB( 42, 21,  0),RGB( 42, 42, 42),RGB( 21, 21, 21),RGB( 21, 21, 63),

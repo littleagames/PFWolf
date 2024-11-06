@@ -34,7 +34,8 @@ internal class Program
             { -1000, ("WAD FILES", null) },
 
             { -2000, ("PK3 FILES", null) },
-            { 2000, ("Display Directory Listing", consoleFileClient.GetPk3DirectoryList) },
+            { 2000, ("Display PFWolf Directory Listing", consoleFileClient.GetPk3DirectoryList) },
+            { 2001, ("Display PFWolf Pack Assets", consoleFileClient.GetPk3Assets) },
 
             { -2, ("APPLICATION", null) },
             { 0, ("Exit", ExitProgram) }

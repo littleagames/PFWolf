@@ -45,9 +45,6 @@
     <Compile Update="old\Utilities\Scanner.cs">
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
     </Compile>
-    <Compile Update="old\GamePal.cs">
-      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
-    </Compile>
     <Compile Update="old\GlobalUsings.cs">
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
     </Compile>

@@ -3,8 +3,10 @@ using static SDL2.SDL;
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Engine.Extensions;
 using LittleAGames.PFWolf.SDK.Assets;
 using LittleAGames.PFWolf.SDK.Components;
+using LittleAGames.PFWolf.Common;
 
 namespace Engine.Managers;
 
@@ -22,11 +24,13 @@ public class VideoLayerManager
     public bool FullScreen { get; private set; } = false;
     public bool UseDoubleBuffering { get; private set; } = false;
     internal static bool ScreenFaded { get; private set; } = false;
-
+    
     private VideoLayerManager()
     {
         _ylookup = new uint[ScreenHeight];
     }
+
+    private SDL_Color[] SDLPalette = GamePalette.BasePalette.ToSDLPalette();
 
     private static int _scaleFactorX;
     private static int _scaleFactorY;
@@ -119,10 +123,11 @@ public class VideoLayerManager
         SDL_Surface sdl_screen = (SDL_Surface)Marshal.PtrToStructure(_screen, typeof(SDL_Surface));
         SDL_PixelFormat sdl_screen_format = (SDL_PixelFormat)Marshal.PtrToStructure(sdl_screen.format, typeof(SDL_PixelFormat));
 
-        SDL_SetPaletteColors(sdl_screen_format.palette, GamePal.BasePalette, 0, 256);
-
+        var paletteAsset = (PaletteAsset)_assetManager.FindAsset(AssetType.Palette, "wolfpal");
+        var basePalette = paletteAsset.RawData.ToSDLPalette();
+        SDL_SetPaletteColors(sdl_screen_format.palette, basePalette, 0, 256);
         // Set palette global variable
-        Array.Copy(GamePal.BasePalette, _currentPalette, 256);
+        Array.Copy(SDLPalette, _currentPalette, 256);
 
         _screenBuffer = SDL.SDL_CreateRGBSurface(0, ScreenWidth, ScreenHeight, 8, 0, 0, 0, 0);
         if (_screenBuffer == IntPtr.Zero)
@@ -132,7 +137,7 @@ public class VideoLayerManager
         SDL_Surface sdl_screenbuffer = (SDL_Surface)Marshal.PtrToStructure(_screenBuffer, typeof(SDL_Surface));
         SDL_PixelFormat sdl_screenbuffer_format = (SDL_PixelFormat)Marshal.PtrToStructure(sdl_screenbuffer.format, typeof(SDL_PixelFormat));
 
-        SDL_SetPaletteColors(sdl_screenbuffer_format.palette, GamePal.BasePalette, 0, 256);
+        SDL_SetPaletteColors(sdl_screenbuffer_format.palette, SDLPalette, 0, 256);
 
         _texture = SDL_CreateTexture(
             _renderer,
@@ -168,7 +173,7 @@ public class VideoLayerManager
     }
     public void FadeIn(int steps)
     {
-        FadeIn(0, 255, GamePal.BasePalette, steps);
+        FadeIn(0, 255, SDLPalette, steps);
     }
 
     public void UpdateScreen()
