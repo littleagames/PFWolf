@@ -18,6 +18,7 @@ public class GameManager
         _videoManager.Initialize();
         
         var sceneManager = new SceneManager(_videoManager);
+        // asset manager GetAsset(Script, "SignonScene")
         sceneManager.LoadScene("SignonScene");
         
         // GameLoop

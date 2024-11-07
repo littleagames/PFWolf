@@ -1,12 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using LittleAGames.PFWolf.SDK.Assets;
 using LittleAGames.PFWolf.SDK.Components;
 using SDL2;
 using static SDL2.SDL;
 
 namespace Engine.Managers;
 
-public class LegacyVideoManager : IVideoManager
+public class LegacyVideoManager
 {
     public int ScreenWidth { get; private set; } = 960;
     public int ScreenHeight { get; private set; } = 600;
@@ -15,8 +16,10 @@ public class LegacyVideoManager : IVideoManager
     public bool UseDoubleBuffering { get; private set; } = false;
     internal static bool ScreenFaded { get; private set; } = false;
 
-    private LegacyVideoManager()
+    private readonly AssetManager _assetManager;
+    public LegacyVideoManager(AssetManager assetManager)
     {
+        _assetManager = assetManager;
         _ylookup = new uint[ScreenHeight];
     }
 
@@ -34,86 +37,6 @@ public class LegacyVideoManager : IVideoManager
     private uint _bufferPitch;
 
     private uint[] _ylookup = null!;
-
-    public void Initialize()
-    {
-        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0)
-        {
-            Console.WriteLine($"There was an issue initilizing SDL. {SDL_GetError()}");
-        }
-        
-        build(false);
-    }
-
-    public void DrawComponent(Component component)
-    {
-        throw new NotImplementedException();
-    }
-
-    private void build(bool fullscreen = false)
-    {
-        // Create a new window given a title, size, and passes it a flag indicating it should be shown.
-        _window = SDL.SDL_CreateWindow("Wolfenstein 3-D", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ScreenWidth, ScreenHeight, (fullscreen ? SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0) | SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
-
-        if (_window == IntPtr.Zero)
-        {
-            Console.WriteLine($"There was an issue creating the window. {SDL_GetError()}");
-        }
-
-        SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ARGB8888, out var screenBits, out var r, out var g, out var b, out var a);
-
-        _screen = SDL.SDL_CreateRGBSurface(0, ScreenWidth, ScreenHeight, screenBits, r, g, b, a);
-        if (_screen == IntPtr.Zero)
-        {
-            Console.WriteLine($"There was an issue creating the screen. {SDL_GetError()}");
-        }
-
-        // Creates a new SDL hardware renderer using the default graphics device with VSYNC enabled.
-        _renderer = SDL.SDL_CreateRenderer(_window,
-                                                -1,
-                                                SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED |
-                                                SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
-
-        if (_renderer == IntPtr.Zero)
-        {
-            Console.WriteLine($"There was an issue creating the renderer. {SDL.SDL_GetError()}");
-        }
-
-        SDL_SetRenderDrawBlendMode(_renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-
-        SDL_ShowCursor(SDL_DISABLE);
-        SDL.SDL_Surface sdl_screen = (SDL.SDL_Surface)Marshal.PtrToStructure(_screen, typeof(SDL.SDL_Surface));
-        SDL.SDL_PixelFormat sdl_screen_format = (SDL.SDL_PixelFormat)Marshal.PtrToStructure(sdl_screen.format, typeof(SDL.SDL_PixelFormat));
-
-        SDL_SetPaletteColors(sdl_screen_format.palette, GamePal.BasePalette, 0, 256);
-
-        // Set palette global variable
-        Array.Copy(GamePal.BasePalette, _currentPalette, 256);
-
-        _screenBuffer = SDL.SDL_CreateRGBSurface(0, ScreenWidth, ScreenHeight, 8, 0, 0, 0, 0);
-        if (_screenBuffer == IntPtr.Zero)
-        {
-            Console.WriteLine($"There was an issue creating the screenbuffer. {SDL.SDL_GetError()}");
-        }
-        SDL.SDL_Surface sdl_screenbuffer = (SDL.SDL_Surface)Marshal.PtrToStructure(_screenBuffer, typeof(SDL.SDL_Surface));
-        SDL.SDL_PixelFormat sdl_screenbuffer_format = (SDL.SDL_PixelFormat)Marshal.PtrToStructure(sdl_screenbuffer.format, typeof(SDL.SDL_PixelFormat));
-
-        SDL_SetPaletteColors(sdl_screenbuffer_format.palette, GamePal.BasePalette, 0, 256);
-
-        _texture = SDL_CreateTexture(
-            _renderer,
-            SDL_PIXELFORMAT_ARGB8888,
-            (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING,
-            ScreenWidth, ScreenHeight);
-
-        _bufferPitch = (uint)sdl_screenbuffer.pitch;
-        _scaleFactorX = ScreenWidth / 320;
-        _scaleFactorY = ScreenHeight / 200;
-
-        for (var i = 0; i < ScreenHeight; i++)
-            _ylookup[i] = (uint)(i * _bufferPitch);
-    }
 
     public void WaitVBL(uint a)
     {
@@ -138,10 +61,6 @@ public class LegacyVideoManager : IVideoManager
         FadeIn(0, 255, GamePal.BasePalette, steps);
     }
 
-    public void UpdateScreen()
-    {
-        UpdateScreen(_screenBuffer);
-    }
 
     // public void DrawPic(int x, int y, string picName)
     // {
@@ -239,69 +158,26 @@ public class LegacyVideoManager : IVideoManager
             }
         }
 
-        SDL.SDL_Surface sdl_screenbuffer = (SDL.SDL_Surface)Marshal.PtrToStructure(screenBuffer, typeof(SDL.SDL_Surface));
-        GCHandle pinnedArray = GCHandle.Alloc(dest, GCHandleType.Pinned);
-        IntPtr dest_pointer = pinnedArray.AddrOfPinnedObject();
-        sdl_screenbuffer.pixels = dest_pointer;
-        Marshal.StructureToPtr(sdl_screenbuffer, screenBuffer, false);
-
+        
+        SDL_Surface sdlScreenBuffer = (SDL_Surface)Marshal.PtrToStructure(screenBuffer, typeof(SDL_Surface))!;
+        
+        IntPtr ptr = Marshal.AllocHGlobal(dest.Length);
+        Marshal.Copy(dest, 0, ptr, dest.Length);
+        sdlScreenBuffer.pixels = ptr;
+        
+        Marshal.StructureToPtr(sdlScreenBuffer, screenBuffer, false);
+        
         UnlockSurface(screenBuffer);
-    }
-
-    public void DrawBackground(byte color)
-    {
-        DrawRectangleScaledCoord(0, 0, ScreenWidth, ScreenHeight, color);
-    }
-
-    public void DrawRectangle(int x, int y, int width, int height, byte color)
-    {
-        DrawRectangleScaledCoord(_scaleFactorX * x, _scaleFactorY * y, _scaleFactorX * width, _scaleFactorY * height, color);
-    }
-
-    public void DrawRectangleScaledCoord(int scaledX, int scaledY, int scaledWidth, int scaledHeight, byte color)
-    {
-        byte[] dest;
-        IntPtr dest_ptr = LockSurface(_screenBuffer);
-        if (dest_ptr == IntPtr.Zero) return;
-
-        int size = ScreenWidth * ScreenHeight; // screen size
-        dest = new byte[size];
-        Marshal.Copy(dest_ptr, dest, 0, size);
-
-        if (scaledY > _ylookup.Length) return;
-        var firstPosition = _ylookup[scaledY] + scaledX;
-        var position = firstPosition;
-
-        for (int i = 0; i < scaledHeight; i++)
-        {
-            //memset(dest, color, scwidth);
-            for (int scw = 0; scw < scaledWidth; scw++)
-            {
-                if (position + scw > dest.Length) continue;
-
-                dest[position + scw] = color;
-            }
-
-            position += _bufferPitch;
-        }
-
-        SDL.SDL_Surface sdl_screenbuffer = (SDL.SDL_Surface)Marshal.PtrToStructure(_screenBuffer, typeof(SDL.SDL_Surface));
-        GCHandle pinnedArray = GCHandle.Alloc(dest, GCHandleType.Pinned);
-        IntPtr dest_pointer = pinnedArray.AddrOfPinnedObject();
-        sdl_screenbuffer.pixels = dest_pointer;
-        Marshal.StructureToPtr(sdl_screenbuffer, _screenBuffer, false);
-        UnlockSurface(_screenBuffer);
-    }
-
-    public void Shutdown() // Dispose?
-    {
-        // Clean up the resources that were created.
-        SDL_FreeSurface(_screen);
-        SDL_FreeSurface(_screenBuffer);
-        SDL.SDL_DestroyTexture(_texture);
-        SDL.SDL_DestroyRenderer(_renderer);
-        SDL.SDL_DestroyWindow(_window);
-        SDL.SDL_Quit();
+        // Free the allocated unmanaged memory
+        Marshal.FreeHGlobal(ptr);
+        
+        // SDL.SDL_Surface sdl_screenbuffer = (SDL.SDL_Surface)Marshal.PtrToStructure(screenBuffer, typeof(SDL.SDL_Surface));
+        // GCHandle pinnedArray = GCHandle.Alloc(dest, GCHandleType.Pinned);
+        // IntPtr dest_pointer = pinnedArray.AddrOfPinnedObject();
+        // sdl_screenbuffer.pixels = dest_pointer;
+        // Marshal.StructureToPtr(sdl_screenbuffer, screenBuffer, false);
+        //
+        // UnlockSurface(screenBuffer);
     }
 
     #region Private Methods
@@ -483,4 +359,76 @@ public class LegacyVideoManager : IVideoManager
     }
 
     #endregion
+}
+
+// TODO: Convert this to a PLAYPAL file
+internal static class GamePal
+{
+    private static SDL_Color RGB(byte red, byte green, byte blue)
+    {
+        return new SDL_Color
+        {
+            r = (byte)(red * 255 / 63),
+            g = (byte)(green * 255 / 63),
+            b = (byte)(blue * 255 / 63),
+            a = 0
+        };
+    }
+
+    internal static SDL_Color[] BasePalette = new SDL_Color[256]
+    {
+RGB(  0,  0,  0),RGB(  0,  0, 42),RGB(  0, 42,  0),RGB(  0, 42, 42),RGB( 42,  0,  0),
+RGB( 42,  0, 42),RGB( 42, 21,  0),RGB( 42, 42, 42),RGB( 21, 21, 21),RGB( 21, 21, 63),
+RGB( 21, 63, 21),RGB( 21, 63, 63),RGB( 63, 21, 21),RGB( 63, 21, 63),RGB( 63, 63, 21),
+RGB( 63, 63, 63),RGB( 59, 59, 59),RGB( 55, 55, 55),RGB( 52, 52, 52),RGB( 48, 48, 48),
+RGB( 45, 45, 45),RGB( 42, 42, 42),RGB( 38, 38, 38),RGB( 35, 35, 35),RGB( 31, 31, 31),
+RGB( 28, 28, 28),RGB( 25, 25, 25),RGB( 21, 21, 21),RGB( 18, 18, 18),RGB( 14, 14, 14),
+RGB( 11, 11, 11),RGB(  8,  8,  8),RGB( 63,  0,  0),RGB( 59,  0,  0),RGB( 56,  0,  0),
+RGB( 53,  0,  0),RGB( 50,  0,  0),RGB( 47,  0,  0),RGB( 44,  0,  0),RGB( 41,  0,  0),
+RGB( 38,  0,  0),RGB( 34,  0,  0),RGB( 31,  0,  0),RGB( 28,  0,  0),RGB( 25,  0,  0),
+RGB( 22,  0,  0),RGB( 19,  0,  0),RGB( 16,  0,  0),RGB( 63, 54, 54),RGB( 63, 46, 46),
+RGB( 63, 39, 39),RGB( 63, 31, 31),RGB( 63, 23, 23),RGB( 63, 16, 16),RGB( 63,  8,  8),
+RGB( 63,  0,  0),RGB( 63, 42, 23),RGB( 63, 38, 16),RGB( 63, 34,  8),RGB( 63, 30,  0),
+RGB( 57, 27,  0),RGB( 51, 24,  0),RGB( 45, 21,  0),RGB( 39, 19,  0),RGB( 63, 63, 54),
+RGB( 63, 63, 46),RGB( 63, 63, 39),RGB( 63, 63, 31),RGB( 63, 62, 23),RGB( 63, 61, 16),
+RGB( 63, 61,  8),RGB( 63, 61,  0),RGB( 57, 54,  0),RGB( 51, 49,  0),RGB( 45, 43,  0),
+RGB( 39, 39,  0),RGB( 33, 33,  0),RGB( 28, 27,  0),RGB( 22, 21,  0),RGB( 16, 16,  0),
+RGB( 52, 63, 23),RGB( 49, 63, 16),RGB( 45, 63,  8),RGB( 40, 63,  0),RGB( 36, 57,  0),
+RGB( 32, 51,  0),RGB( 29, 45,  0),RGB( 24, 39,  0),RGB( 54, 63, 54),RGB( 47, 63, 46),
+RGB( 39, 63, 39),RGB( 32, 63, 31),RGB( 24, 63, 23),RGB( 16, 63, 16),RGB(  8, 63,  8),
+RGB(  0, 63,  0),RGB(  0, 63,  0),RGB(  0, 59,  0),RGB(  0, 56,  0),RGB(  0, 53,  0),
+RGB(  1, 50,  0),RGB(  1, 47,  0),RGB(  1, 44,  0),RGB(  1, 41,  0),RGB(  1, 38,  0),
+RGB(  1, 34,  0),RGB(  1, 31,  0),RGB(  1, 28,  0),RGB(  1, 25,  0),RGB(  1, 22,  0),
+RGB(  1, 19,  0),RGB(  1, 16,  0),RGB( 54, 63, 63),RGB( 46, 63, 63),RGB( 39, 63, 63),
+RGB( 31, 63, 62),RGB( 23, 63, 63),RGB( 16, 63, 63),RGB(  8, 63, 63),RGB(  0, 63, 63),
+RGB(  0, 57, 57),RGB(  0, 51, 51),RGB(  0, 45, 45),RGB(  0, 39, 39),RGB(  0, 33, 33),
+RGB(  0, 28, 28),RGB(  0, 22, 22),RGB(  0, 16, 16),RGB( 23, 47, 63),RGB( 16, 44, 63),
+RGB(  8, 42, 63),RGB(  0, 39, 63),RGB(  0, 35, 57),RGB(  0, 31, 51),RGB(  0, 27, 45),
+RGB(  0, 23, 39),RGB( 54, 54, 63),RGB( 46, 47, 63),RGB( 39, 39, 63),RGB( 31, 32, 63),
+RGB( 23, 24, 63),RGB( 16, 16, 63),RGB(  8,  9, 63),RGB(  0,  1, 63),RGB(  0,  0, 63),
+RGB(  0,  0, 59),RGB(  0,  0, 56),RGB(  0,  0, 53),RGB(  0,  0, 50),RGB(  0,  0, 47),
+RGB(  0,  0, 44),RGB(  0,  0, 41),RGB(  0,  0, 38),RGB(  0,  0, 34),RGB(  0,  0, 31),
+RGB(  0,  0, 28),RGB(  0,  0, 25),RGB(  0,  0, 22),RGB(  0,  0, 19),RGB(  0,  0, 16),
+RGB( 10, 10, 10),RGB( 63, 56, 13),RGB( 63, 53,  9),RGB( 63, 51,  6),RGB( 63, 48,  2),
+RGB( 63, 45,  0),RGB( 45,  8, 63),RGB( 42,  0, 63),RGB( 38,  0, 57),RGB( 32,  0, 51),
+RGB( 29,  0, 45),RGB( 24,  0, 39),RGB( 20,  0, 33),RGB( 17,  0, 28),RGB( 13,  0, 22),
+RGB( 10,  0, 16),RGB( 63, 54, 63),RGB( 63, 46, 63),RGB( 63, 39, 63),RGB( 63, 31, 63),
+RGB( 63, 23, 63),RGB( 63, 16, 63),RGB( 63,  8, 63),RGB( 63,  0, 63),RGB( 56,  0, 57),
+RGB( 50,  0, 51),RGB( 45,  0, 45),RGB( 39,  0, 39),RGB( 33,  0, 33),RGB( 27,  0, 28),
+RGB( 22,  0, 22),RGB( 16,  0, 16),RGB( 63, 58, 55),RGB( 63, 56, 52),RGB( 63, 54, 49),
+RGB( 63, 53, 47),RGB( 63, 51, 44),RGB( 63, 49, 41),RGB( 63, 47, 39),RGB( 63, 46, 36),
+RGB( 63, 44, 32),RGB( 63, 41, 28),RGB( 63, 39, 24),RGB( 60, 37, 23),RGB( 58, 35, 22),
+RGB( 55, 34, 21),RGB( 52, 32, 20),RGB( 50, 31, 19),RGB( 47, 30, 18),RGB( 45, 28, 17),
+RGB( 42, 26, 16),RGB( 40, 25, 15),RGB( 39, 24, 14),RGB( 36, 23, 13),RGB( 34, 22, 12),
+RGB( 32, 20, 11),RGB( 29, 19, 10),RGB( 27, 18,  9),RGB( 23, 16,  8),RGB( 21, 15,  7),
+RGB( 18, 14,  6),RGB( 16, 12,  6),RGB( 14, 11,  5),RGB( 10,  8,  3),RGB( 24,  0, 25),
+RGB(  0, 25, 25),RGB(  0, 24, 24),RGB(  0,  0,  7),RGB(  0,  0, 11),RGB( 12,  9,  4),
+RGB( 18,  0, 18),RGB( 20,  0, 20),RGB(  0,  0, 13),RGB(  7,  7,  7),RGB( 19, 19, 19),
+RGB( 23, 23, 23),RGB( 16, 16, 16),RGB( 12, 12, 12),RGB( 13, 13, 13),RGB( 54, 61, 61),
+RGB( 46, 58, 58),RGB( 39, 55, 55),RGB( 29, 50, 50),RGB( 18, 48, 48),RGB(  8, 45, 45),
+RGB(  8, 44, 44),RGB(  0, 41, 41),RGB(  0, 38, 38),RGB(  0, 35, 35),RGB(  0, 33, 33),
+RGB(  0, 31, 31),RGB(  0, 30, 30),RGB(  0, 29, 29),RGB(  0, 28, 28),RGB(  0, 27, 27),
+RGB( 38,  0, 34)
+
+    };
 }

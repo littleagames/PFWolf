@@ -6,10 +6,15 @@ public class Graphic : RenderComponent
     public int X { get; }
     public int Y { get; }
 
-    public Graphic(string assetName, int x, int y)
+    private Graphic(string assetName, int x, int y)
     {
         AssetName = assetName;
         X = x;
         Y = y;
+    }
+
+    public static Graphic Create(string assetName, int x, int y)
+    {
+        return new Graphic(assetName, x, y);
     }
 }

@@ -8,7 +8,9 @@ public abstract class Scene : RunnableBase
     }
 
     private string _name;
-    
+    public bool _changeScene;
+    public string _nextScene;
+
     public ComponentCollection Components { get; private set; } = new();
 
     public virtual void OnStart()
@@ -22,5 +24,11 @@ public abstract class Scene : RunnableBase
 
     public virtual void OnDestroy()
     {
+    }
+
+    public void LoadScene(string sceneName)
+    {
+        _changeScene = true;
+        _nextScene = sceneName;
     }
 }

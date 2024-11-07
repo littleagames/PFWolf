@@ -10,7 +10,15 @@ public class Timer : Component
         _paused = true;
     }
 
-    public void Update()
+    public override void OnStart()
+    {
+        _paused = false;
+    }
+    
+    public void Pause() => _paused = true;
+    public void Resume() => _paused = false;
+    
+    public override void OnUpdate()
     {
         if (!_paused)
             _timeinTics++;
