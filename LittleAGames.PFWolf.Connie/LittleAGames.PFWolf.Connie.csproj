@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LittleAGames.PFWolf.Common\LittleAGames.PFWolf.Common.csproj" />
-    <ProjectReference Include="..\LittleAGames.PFWolf.FileManager\LittleAGames.PFWolf.FileManager.csproj" />
   </ItemGroup>
 
 </Project>

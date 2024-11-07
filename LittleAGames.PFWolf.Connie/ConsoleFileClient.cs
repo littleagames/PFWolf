@@ -1,5 +1,5 @@
-﻿using LittleAGames.PFWolf.Common.FileLoaders;
-using LittleAGames.PFWolf.FileManager;
+﻿using LittleAGames.PFWolf.Common;
+using LittleAGames.PFWolf.Common.FileLoaders;
 using LittleAGames.PFWolf.SDK.Assets;
 using LittleAGames.PFWolf.SDK.FileLoaders;
 
@@ -370,13 +370,13 @@ internal class ConsoleFileClient
     {
         if (!chosenPack.HasValue)
             return Result.Failure("No pack selected");
-        
+
         var gamePack = chosenPack.Value;
         if (string.IsNullOrWhiteSpace(gamePack.Value) || !Path.Exists(gamePack.Value))
         {
             return Result.Failure($"Pack {gamePack.Value} not found in path: {gamePack.Value}");
         }
-        
+
         try
         {
             // checks for that loader, returns loader here.
@@ -384,7 +384,7 @@ internal class ConsoleFileClient
             var pk3Assets = loader.Load();
             AnsiConsole.WriteLine("Get PK3 Assets");
             AnsiConsole.WriteLine(new string('=', 50));
-            
+
             foreach (var asset in pk3Assets)
             {
                 AnsiConsole.WriteLine(asset.ToString());
@@ -396,23 +396,5 @@ internal class ConsoleFileClient
         {
             return Result.Failure($"Unable to run loader. Exception: {e.Message}");
         }
-    }
-    
-    private static Result<string[]> GetFiles()
-    {
-        return FileLoader.CheckForFiles()
-            .Ensure(files => files.Length > 0, "No files found")
-            .Tap(files =>
-            {
-                // Display files found
-                AnsiConsole.WriteLine($"Files found: {files.Length}");
-                foreach (var file in files)
-                {
-                    AnsiConsole.WriteLine(file);
-                }
-                AnsiConsole.WriteLine();
-                AnsiConsole.WriteLine(new string('=', 50));
-                AnsiConsole.WriteLine();
-            });
     }
 }

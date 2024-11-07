@@ -1,6 +1,7 @@
 ﻿// Initializes SDL.
 using Engine;
 using Engine.Managers;
+using LittleAGames.PFWolf.Common;
 using LittleAGames.PFWolf.FileManager;
 using LittleAGames.PFWolf.FileManager.Constants.GamePacks;
 

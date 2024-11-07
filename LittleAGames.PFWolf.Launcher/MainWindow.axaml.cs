@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.Json;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using LittleAGames.PFWolf.Common;
 using LittleAGames.PFWolf.FileManager;
 using LittleAGames.PFWolf.Launcher.ViewModels;
 using LittleAGames.PFWolf.SDK;
