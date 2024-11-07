@@ -28,6 +28,18 @@ public class SceneManager
         {
             _currentScene = new PG13Scene();
         }
+        else if (sceneName == "TitleScene")
+        {
+            _currentScene = new TitleScene();
+        }
+        else if (sceneName == "CreditsScene")
+        {
+            _currentScene = new CreditsScene();
+        }
+        else if (sceneName == "MainMenuScene")
+        {
+            _currentScene = new MainMenuScene();
+        }
 
         // Unload all other scenes
         // TODO: Make "scene" current scene
