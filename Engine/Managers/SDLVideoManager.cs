@@ -8,7 +8,7 @@ using static SDL2.SDL;
 
 namespace Engine.Managers;
 
-public class VideoManager : IVideoManager
+public class SDLVideoManager : IVideoManager
 {
     private readonly AssetManager _assetManager;
     private readonly GameConfiguration _config;
@@ -27,7 +27,7 @@ public class VideoManager : IVideoManager
     // SDL pointers
     private IntPtr _screen, _screenBuffer, _texture, _renderer, _window;
 
-    public VideoManager(AssetManager assetManager, GameConfiguration config)
+    public SDLVideoManager(AssetManager assetManager, GameConfiguration config)
     {
         _assetManager = assetManager;
         _config = config;
