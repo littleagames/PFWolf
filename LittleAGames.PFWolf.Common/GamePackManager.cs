@@ -1,6 +1,6 @@
-﻿using LittleAGames.PFWolf.FileManager.Constants.GamePacks;
+﻿using LittleAGames.PFWolf.Common.GamePacks;
 
-namespace LittleAGames.PFWolf.FileManager;
+namespace LittleAGames.PFWolf.Common;
 
 public class GamePackManager
 {

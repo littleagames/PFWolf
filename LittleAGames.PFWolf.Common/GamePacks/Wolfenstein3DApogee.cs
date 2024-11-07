@@ -1,6 +1,6 @@
 ﻿using LittleAGames.PFWolf.SDK.FileLoaders;
 
-namespace LittleAGames.PFWolf.FileManager.Constants.GamePacks;
+namespace LittleAGames.PFWolf.Common.GamePacks;
 
 public class Wolfenstein3DApogee : GamePack
 {

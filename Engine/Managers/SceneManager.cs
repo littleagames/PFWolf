@@ -5,9 +5,9 @@ namespace Engine.Managers;
 
 public class SceneManager
 {
-    private readonly VideoLayerManager _videoManager;
+    private readonly IVideoManager _videoManager;
 
-    public SceneManager(VideoLayerManager videoManager)
+    public SceneManager(IVideoManager videoManager)
     {
         _videoManager = videoManager;
     }
@@ -32,7 +32,7 @@ public class SceneManager
         {
             component.OnUpdate();
             if (component.GetType().IsSubclassOf(typeof(RenderComponent)))
-                _videoManager.Draw(component);
+                _videoManager.DrawComponent(component);
         }
         _videoManager.UpdateScreen();
         

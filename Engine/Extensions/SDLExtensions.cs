@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using LittleAGames.PFWolf.SDK.Assets;
 using SDL2;
 
 namespace Engine.Extensions;
@@ -33,4 +34,8 @@ public static class SDLExtensions
 
         return paletteColors;
     }
+
+    internal static SDL.SDL_Color[] ToSDLPalette(this PaletteAsset asset)
+        => asset.RawData.ToSDLPalette();
+    
 }

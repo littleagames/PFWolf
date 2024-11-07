@@ -15,17 +15,17 @@ public class SignonScene : Scene
     public override void OnStart()
     {
         Components.Add(new Graphic("wolf3d-signon", 0, 0));
-        Components.Add(_timer);
-        _timer.OnStart();
+        //Components.Add(_timer);
+        //_timer.OnStart();
     }
 
     public override void OnUpdate()
     {
-        if (_timer.GetTime() > 1000 * 3)
-        {
-            _timer.Stop();
-            //LoadScene("PG13");
-        }
+        // if (_timer.GetTime() > 1000 * 3)
+        // {
+        //     _timer.Stop();
+        //     //LoadScene("PG13");
+        // }
         //else if (Inputs.AnyKeyPressed)
         //{
         //    LoadScene("MainMenu");

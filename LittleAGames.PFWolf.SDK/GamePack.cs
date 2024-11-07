@@ -13,6 +13,9 @@ public abstract class GamePack
     
     public abstract string PackName { get; }
     
+    // TODO: Introduce this when you add more game palettes into pfwolf.pk3
+    //public abstract string DefaultPaletteAssetName { get; }
+
     protected abstract List<GamePackFile> Files { get; }
     protected abstract List<GamePackFileLoader> FileLoaders { get; }
 

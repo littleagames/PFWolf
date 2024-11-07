@@ -1,4 +1,4 @@
-﻿namespace LittleAGames.PFWolf.FileManager.Constants.GamePacks;
+﻿namespace LittleAGames.PFWolf.Common.GamePacks;
 
 public class BlakeStoneAliensOfGoldDemo : GamePack
 {
@@ -23,6 +23,7 @@ public class BlakeStoneAliensOfGoldDemo : GamePack
         new(MapHead, "4560fb7492c99f9fddde9cc7987fdc77"),
         new(MapTemp, "6532d4062fed1817b440684c41a21fb5"),
         new(SAnim, "24848d1955e61d7d5d88ece1e9aa1557"),
+        new(SVswap, "d9dbfb903478cf6c7ede6af9afe3b4d3"),
         new(VgaDict, "78ea7678704503dbb453c59bffcb4b98"),
         new(VgaGraph, "f5dfd3f330af0274bf87cd08c2513d55"),
         new(VgaHead, "3d6973e5032bfaadefa6684367a26f77"),

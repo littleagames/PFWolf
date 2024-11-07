@@ -1,4 +1,4 @@
-﻿namespace LittleAGames.PFWolf.FileManager.Constants.GamePacks;
+﻿namespace LittleAGames.PFWolf.Common.GamePacks;
 
 public class Corridor7Demo : GamePack
 {

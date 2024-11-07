@@ -26,9 +26,6 @@
     <Compile Update="old\MenuManager_old.cs">
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
     </Compile>
-    <Compile Update="old\VideoLayerManager_old.cs">
-      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
-    </Compile>
     <Compile Update="old\StronglyTypeIds\FontColor.cs">
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
     </Compile>
@@ -42,12 +39,6 @@
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
     </Compile>
     <Compile Update="old\Utilities\Scanner.cs">
-      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
-    </Compile>
-    <Compile Update="old\GlobalUsings.cs">
-      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
-    </Compile>
-    <Compile Update="old\Signon.cs">
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
     </Compile>
     <Compile Update="old\Managers\Graphics\GraphicsManager.cs">

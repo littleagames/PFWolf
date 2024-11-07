@@ -1,2 +1,1 @@
-﻿//global using CSharpFunctionalExtensions;
-global using LittleAGames.PFWolf.SDK;
+﻿global using LittleAGames.PFWolf.SDK;

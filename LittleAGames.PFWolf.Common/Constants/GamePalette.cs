@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace LittleAGames.PFWolf.Common;
+namespace LittleAGames.PFWolf.Common.Constants;
 
 // TODO: Convert this to a PLAYPAL file
 public static class GamePalette
