@@ -6,8 +6,8 @@ namespace Engine.Scenes;
 public class CreditsScene : Scene
 {
     private readonly Timer _timer = new();
-    private readonly Fader _fadeInFader = Fader.Create(1.0f, 0.0f, 0x00, 0x00, 0x00, 240);
-    private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 240);
+    private readonly Fader _fadeInFader = Fader.Create(1.0f, 0.0f, 0x00, 0x00, 0x00, 20);
+    private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
     
     public CreditsScene()
         : base("CreditsScene")
@@ -44,7 +44,7 @@ public class CreditsScene : Scene
             if (_fadeOutFader.IsComplete)
             {
                 // View scores?
-                LoadScene("CreditsScene");
+                LoadScene("MainMenuScene");
             }
         }
         // else if (Inputs.AnyKeyPressed)

@@ -6,8 +6,8 @@ namespace Engine.Scenes;
 public class PG13Scene : Scene
 {
     private readonly Timer _timer = new();
-    private readonly Fader _fadeInFader = Fader.Create(1.0f, 0.0f, 0x00, 0x00, 0x00, 240);
-    private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 240);
+    private readonly Fader _fadeInFader = Fader.Create(1.0f, 0.0f, 0x00, 0x00, 0x00, 20);
+    private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
     
     public PG13Scene()
         : base("PG13Scene")

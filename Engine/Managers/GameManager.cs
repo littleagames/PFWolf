@@ -29,6 +29,8 @@ public class GameManager
         // Main loop
         while (!quit)
         {
+            ulong start = SDL.SDL_GetPerformanceCounter();
+
             // Handle events on the queue
             while (SDL.SDL_PollEvent(out e) != 0)
             {
@@ -37,8 +39,16 @@ public class GameManager
                 {
                     quit = true;
                 }
-            }
+            } 
             sceneManager.OnUpdate();
+            ulong end = SDL.SDL_GetPerformanceCounter();
+            float elapsedMS = (end - start) / (float)SDL.SDL_GetPerformanceFrequency() * 1000.0f;
+            
+            float frameMs = 14.28571428571429f;
+            if (elapsedMS < frameMs)
+            {
+                SDL.SDL_Delay((uint)(frameMs - elapsedMS));
+            }
         }
         
         Quit();

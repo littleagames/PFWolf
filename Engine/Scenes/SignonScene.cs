@@ -6,7 +6,7 @@ namespace Engine.Scenes;
 public class SignonScene : Scene
 {
     private readonly Timer _timer = new();
-    private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 240);
+    private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
     
     public SignonScene()
         : base("SignonScene")
@@ -24,7 +24,7 @@ public class SignonScene : Scene
 
     public override void OnUpdate()
     {
-         if (_timer.GetTime() > 300 /*|| Inputs.AnyKeyPressed*/)
+         if (_timer.GetTime() > 210 /*|| Inputs.AnyKeyPressed*/)
          {
              _timer.Stop();
              if (!_fadeOutFader.IsFading)
@@ -32,8 +32,8 @@ public class SignonScene : Scene
 
              if (_fadeOutFader.IsComplete)
              {
-                 LoadScene("MainMenu");
-                 //LoadScene("Pg13Scene");
+                 //LoadScene("MainMenu");
+                 LoadScene("Pg13Scene");
              }
          }
     }
