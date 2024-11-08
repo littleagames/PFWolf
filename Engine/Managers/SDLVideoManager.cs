@@ -31,8 +31,11 @@ public class SDLVideoManager : IVideoManager
     {
         _assetManager = assetManager;
         _config = config;
+        
         _gamePalette = LoadPaletteFromAssets(_config.GamePalette);
         _currentPalette = new SDL_Color[_gamePalette.Length];
+        Array.Copy(_gamePalette, _currentPalette, 256);
+        
         _screenSize = _config.ScreenSize;
         _screenBits = _config.ScreenBits;
         _yLookup = new uint[_screenSize.Height];
@@ -81,23 +84,22 @@ public class SDLVideoManager : IVideoManager
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
         SDL_ShowCursor(SDL_DISABLE);
-        SDL.SDL_Surface sdl_screen = (SDL.SDL_Surface)Marshal.PtrToStructure(_screen, typeof(SDL.SDL_Surface));
-        SDL.SDL_PixelFormat sdl_screen_format = (SDL.SDL_PixelFormat)Marshal.PtrToStructure(sdl_screen.format, typeof(SDL.SDL_PixelFormat));
-
-        SDL_SetPaletteColors(sdl_screen_format.palette, GamePal.BasePalette, 0, 256);
+        SDL_Surface sdlScreen = (SDL.SDL_Surface)Marshal.PtrToStructure(_screen, typeof(SDL.SDL_Surface))!;
+        SDL_PixelFormat sdlScreenFormat = (SDL.SDL_PixelFormat)Marshal.PtrToStructure(sdlScreen.format, typeof(SDL.SDL_PixelFormat))!;
+       
+        SDL_SetPaletteColors(sdlScreenFormat.palette, _gamePalette, 0, 256);
 
         // Set palette global variable
-        Array.Copy(GamePal.BasePalette, _currentPalette, 256);
 
-        _screenBuffer = SDL.SDL_CreateRGBSurface(0, _screenSize.Width, _screenSize.Height, 8, 0, 0, 0, 0);
+        _screenBuffer = SDL_CreateRGBSurface(0, _screenSize.Width, _screenSize.Height, 8, 0, 0, 0, 0);
         if (_screenBuffer == IntPtr.Zero)
         {
             Console.WriteLine($"There was an issue creating the screenbuffer. {SDL.SDL_GetError()}");
         }
-        SDL.SDL_Surface sdl_screenbuffer = (SDL.SDL_Surface)Marshal.PtrToStructure(_screenBuffer, typeof(SDL.SDL_Surface));
-        SDL.SDL_PixelFormat sdl_screenbuffer_format = (SDL.SDL_PixelFormat)Marshal.PtrToStructure(sdl_screenbuffer.format, typeof(SDL.SDL_PixelFormat));
+        SDL_Surface sdlScreenBuffer = (SDL.SDL_Surface)Marshal.PtrToStructure(_screenBuffer, typeof(SDL.SDL_Surface))!;
+        SDL_PixelFormat sdlScreenBufferFormat = (SDL.SDL_PixelFormat)Marshal.PtrToStructure(sdlScreenBuffer.format, typeof(SDL.SDL_PixelFormat))!;
 
-        SDL_SetPaletteColors(sdl_screenbuffer_format.palette, GamePal.BasePalette, 0, 256);
+        SDL_SetPaletteColors(sdlScreenBufferFormat.palette, _gamePalette, 0, 256);
 
         _texture = SDL_CreateTexture(
             _renderer,
@@ -105,7 +107,7 @@ public class SDLVideoManager : IVideoManager
             (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING,
             _screenSize.Width, _screenSize.Height);
 
-        _bufferPitch = (uint)sdl_screenbuffer.pitch;
+        _bufferPitch = (uint)sdlScreenBuffer.pitch;
         
         for (var i = 0; i < _screenSize.Height; i++)
             _yLookup[i] = (uint)(i * _bufferPitch);
@@ -141,7 +143,10 @@ public class SDLVideoManager : IVideoManager
         {
             var fader = (Fader)component;
             if (fader.IsFading)
-                ShiftPalette(fader.Red, fader.Green, fader.Blue, fader.CurrentOpacity);
+            {
+                var shiftedPalette = ShiftPalette(fader.Red, fader.Green, fader.Blue, fader.CurrentOpacity);
+                SetPalette(shiftedPalette, true);
+            }
         }
     }
 
@@ -171,98 +176,28 @@ public class SDLVideoManager : IVideoManager
     
     #region Private Methods
 
-    private void ShiftPalette(byte red, byte green, byte blue, float opacity)
+    private SDL_Color[] ShiftPalette(byte red, byte green, byte blue, float opacity)
     {
-        int i, j, orig, delta;
-        SDL_Color[] palette2 = new SDL_Color[256];
-        
-        //Array.Copy(_currentPalette, palette1, 256);
-        Array.Copy(_gamePalette, palette2, 256);
+        SDL_Color[] palette1 = new SDL_Color[256];
+
+        Array.Copy(_gamePalette, palette1, 256);
         // start and end are 0 to 255
         // its possible to only fade out specific colors of the palette
-        for (j = 0; j <= 255; j++)
+        for (var i = 0; i <= 255; i++)
         {
-            var originalColor = _gamePalette[j];
-            orig = originalColor.r;
-            delta = red - orig;
-            palette2[j].r = (byte)(orig + delta * opacity);
-            orig = originalColor.g;
-            delta = green - orig;
-            palette2[j].g = (byte)(orig + delta * opacity);
-            orig = originalColor.b;
-            delta = blue - orig;
-            palette2[j].b = (byte)(orig + delta * opacity);
+            var originalColor = _gamePalette[i];
+            palette1[i].r = NormalizeColorByte(originalColor.r, red, opacity);
+            palette1[i].g = NormalizeColorByte(originalColor.g, green, opacity);
+            palette1[i].b = NormalizeColorByte(originalColor.b, blue, opacity);
         }
-        
-        SetPalette(palette2, true);
+
+        return palette1;
     }
-    
-    private void FadeOut(int start, int end, byte red, byte green, byte blue, int steps)
+
+    private static byte NormalizeColorByte(byte originalColor, byte destinationColor, float opacity)
     {
-        int i, j, orig, delta;
-        SDL.SDL_Color[] palette1 = new SDL.SDL_Color[256];
-        SDL.SDL_Color[] palette2 = new SDL.SDL_Color[256];
-
-        SDL_Delay(1 * 8);
-        //WaitVBL(1); // wait 8 tics
-
-        Array.Copy(_currentPalette, palette1, 256);
-        Array.Copy(palette1, palette2, 256);
-
-        //
-        // fade through intermediate frames
-        //
-        for (i = 0; i < steps; i++)
-        {
-            // start and end are 0 to 255
-            // its possible to only fade out specific colors of the palette
-            for (j = start; j <= end; j++)
-            {
-                var originalColor = palette1[j];
-                orig = originalColor.r;
-                delta = red - orig;
-                palette2[j].r = (byte)(orig + delta * i / steps);
-                orig = originalColor.g;
-                delta = green - orig;
-                palette2[j].g = (byte)(orig + delta * i / steps);
-                orig = originalColor.b;
-                delta = blue - orig;
-                palette2[j].b = (byte)(orig + delta * i / steps);
-            }
-
-            //if (!UseDoubleBuffering || ScreenBits == 8) WaitVBL(1);
-            if (_screenBits == 8)
-                SDL_Delay(8);
-            SetPalette(palette2, true);
-        }
-
-        //
-        // final color
-        //
-        FillPalette(red, green, blue);
-
-        //ScreenFaded = true;
-    }
-    
-    /// <summary>
-    /// Fills the palette with a single color
-    /// </summary>
-    /// <param name="red"></param>
-    /// <param name="green"></param>
-    /// <param name="blue"></param>
-    private void FillPalette(byte red, byte green, byte blue)
-    {
-        int i;
-        SDL_Color[] pal = new SDL.SDL_Color[256];
-
-        for (i = 0; i < 256; i++)
-        {
-            pal[i].r = red;
-            pal[i].g = green;
-            pal[i].b = blue;
-        }
-
-        SetPalette(pal, true);
+        var delta = destinationColor - originalColor;
+        return (byte)((originalColor + delta * opacity));
     }
 
     private void MemToScreen(byte[] source, int width, int height, int x, int y)

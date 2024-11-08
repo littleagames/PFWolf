@@ -8,18 +8,15 @@ public class SceneManager
 {
     private readonly IVideoManager _videoManager;
 
-    private List<string> _scenes;
-    
     public SceneManager(IVideoManager videoManager)
     {
         _videoManager = videoManager;
-        _scenes = new List<string> { "SignonScene", "PG13Scene" };
     }
     
     private Scene? _currentScene = null;
-    // TODO: Store all "Scene" objects here
     public void LoadScene(string sceneName)
     {
+        // assetManager.Scripts(AssetType.ScriptScene, sceneName)
         if (sceneName == "SignonScene")
         {
             _currentScene = new SignonScene();

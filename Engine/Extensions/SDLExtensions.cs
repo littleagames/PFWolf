@@ -27,8 +27,8 @@ public static class SDLExtensions
             paletteColors[i] = new SDL.SDL_Color
             {
                 r = data[(i * 3)],
-                b = data[(i * 3) + 1],
-                g = data[(i * 3) + 2],
+                g = data[(i * 3) + 1],
+                b = data[(i * 3) + 2],
             };
         }
 

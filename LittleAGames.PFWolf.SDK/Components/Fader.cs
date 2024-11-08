@@ -59,7 +59,7 @@ public class Fader : Timer
             currentTime = Duration;
         
         var timeLeft = (Duration - currentTime);
-        if (timeLeft <= 0)
+        if (timeLeft < 0)
         {
             // Prevent any precision errors
             // Just set it flat to finish value
