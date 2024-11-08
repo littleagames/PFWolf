@@ -15,8 +15,10 @@ public class MainMenuScene : Scene
     public override void OnStart()
     {
         Components.Add(Background.Create(0x24));
+        
+        
         Components.Add(_timer);
-        Components.Add(new Fader()); // color, time, callback function?
+        //Components.Add(new Fader()); // color, time, callback function?
         
         _timer.OnStart();
     }

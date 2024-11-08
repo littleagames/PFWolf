@@ -6,6 +6,8 @@ namespace Engine.Scenes;
 public class PG13Scene : Scene
 {
     private readonly Timer _timer = new();
+    private readonly Fader _fadeInFader = Fader.Create(1.0f, 0.0f, 0x00, 0x00, 0x00, 240);
+    private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 240);
     
     public PG13Scene()
         : base("PG13Scene")
@@ -17,19 +19,32 @@ public class PG13Scene : Scene
         Components.Add(Background.Create(0x82));
         Components.Add(Graphic.Create("PG13", 216, 110));
         Components.Add(_timer);
-        Components.Add(new Fader()); // color, time, callback function?
-        
-        _timer.OnStart();
+        Components.Add(_fadeInFader);
+        Components.Add(_fadeOutFader);
     }
 
     public override void OnUpdate()
     {
+        if (!_fadeInFader.IsFading)
+            _fadeInFader.BeginFade();
+
+        if (!_fadeInFader.IsComplete)
+            return;
+        
+        // Start wait timer after fade in
+        if (!_timer.IsRunning)
+            _timer.Start();
+        
         if (_timer.GetTime() > 300)
         {
             _timer.Stop();
-            // TODO: FadeOut
+            if (!_fadeOutFader.IsFading)
+                _fadeOutFader.BeginFade();
 
-            LoadScene("TitleScene");
+            if (_fadeOutFader.IsComplete)
+            {
+                LoadScene("TitleScene");
+            }
         }
         // else if (Inputs.AnyKeyPressed)
         // {

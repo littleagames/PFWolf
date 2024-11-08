@@ -53,18 +53,12 @@ public class SceneManager
         
         //_currentScene.OnPreUpdate();
         
-        // TODO: Translate scene and its components to video manager
         foreach (var component in _currentScene.Components.GetComponents())
         {
             component.OnUpdate();
-            if (component.GetType().IsSubclassOf(typeof(RenderComponent)))
-                _videoManager.DrawComponent(component);
-            if (component.GetType().IsSubclassOf(typeof(Timer)))
-            {
-                component.OnUpdate();
-            }
-            
+            _videoManager.Update(component);
         }
+        
         _videoManager.UpdateScreen();
         
         _currentScene.OnUpdate();

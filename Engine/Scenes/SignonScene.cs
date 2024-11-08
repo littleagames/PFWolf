@@ -6,6 +6,7 @@ namespace Engine.Scenes;
 public class SignonScene : Scene
 {
     private readonly Timer _timer = new();
+    private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 240);
     
     public SignonScene()
         : base("SignonScene")
@@ -16,9 +17,9 @@ public class SignonScene : Scene
     {
         Components.Add(Graphic.Create("wolf3d-signon", 0, 0));
         Components.Add(_timer);
-        Components.Add(new Fader()); // color, time, callback function?
+        Components.Add(_fadeOutFader);
         
-        _timer.OnStart();
+        _timer.Start();
     }
 
     public override void OnUpdate()
@@ -26,9 +27,13 @@ public class SignonScene : Scene
          if (_timer.GetTime() > 300 /*|| Inputs.AnyKeyPressed*/)
          {
              _timer.Stop();
-             // TODO: FadeOut
+             if (!_fadeOutFader.IsFading)
+                _fadeOutFader.BeginFade();
 
-             LoadScene("Pg13Scene");
+             if (_fadeOutFader.IsComplete)
+             {
+                 LoadScene("Pg13Scene");
+             }
          }
     }
 

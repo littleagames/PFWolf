@@ -16,7 +16,6 @@ public class TitleScene : Scene
     {
         Components.Add(Graphic.Create("title", 0, 0));
         Components.Add(_timer);
-        Components.Add(new Fader()); // color, time, callback function?
         
         _timer.OnStart();
     }
@@ -26,7 +25,6 @@ public class TitleScene : Scene
          if (_timer.GetTime() > 300)
          {
              _timer.Stop();
-             // TODO: FadeOut
 
              LoadScene("CreditsScene");
          }

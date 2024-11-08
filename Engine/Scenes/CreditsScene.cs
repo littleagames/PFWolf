@@ -16,7 +16,7 @@ public class CreditsScene : Scene
     {
         Components.Add(Graphic.Create("credits", 0, 0));
         Components.Add(_timer);
-        Components.Add(new Fader()); // color, time, callback function?
+        //Components.Add(new Fader()); // color, time, callback function?
         
         _timer.OnStart();
     }

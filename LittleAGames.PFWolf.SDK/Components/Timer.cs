@@ -2,30 +2,36 @@
 
 public class Timer : Component
 {
-    private long _timeinTics;
+    private long _timeInTics;
     private bool _paused;
+    
     public Timer()
     {
-        _timeinTics = 0;
+        _timeInTics = 0;
         _paused = true;
     }
 
-    public override void OnStart()
+    public bool IsRunning => !_paused;
+
+    /// <summary>
+    /// Begins the timer
+    /// </summary>
+    public void Start()
     {
         _paused = false;
     }
     
-    public void Pause() => _paused = true;
-    public void Resume() => _paused = false;
-    
     public override void OnUpdate()
     {
         if (!_paused)
-            _timeinTics++;
+            _timeInTics++;
     }
 
-    public long GetTime() => _timeinTics;
+    public long GetTime() => _timeInTics;
 
+    /// <summary>
+    /// Stops the timer
+    /// </summary>
     public void Stop()
     {
         _paused = true;

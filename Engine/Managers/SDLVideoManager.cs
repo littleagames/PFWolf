@@ -22,7 +22,7 @@ public class SDLVideoManager : IVideoManager
     private int ScaleFactorX => _screenSize.Width / 320;
     private int ScaleFactorY => _screenSize.Height / 200;
 
-    private readonly uint[] _yLookup = null!;
+    private readonly uint[] _yLookup;
 
     // SDL pointers
     private IntPtr _screen, _screenBuffer, _texture, _renderer, _window;
@@ -113,7 +113,7 @@ public class SDLVideoManager : IVideoManager
         _isInitialized = true;
     }
 
-    public void DrawComponent(Component component)
+    public void Update(Component component)
     {
         if (!_isInitialized)
             throw new InvalidOperationException("Video Manager is not initialized");
@@ -133,18 +133,16 @@ public class SDLVideoManager : IVideoManager
                 // TODO: Placeholder for missing graphic?
                 return;
             }
+            
             MemToScreen(graphicAsset.RawData, graphicAsset.Dimensions.Width, graphicAsset.Dimensions.Height, graphic.X, graphic.Y);
         }
-    }
 
-    public void FadeOut()
-    {
-        FadeOut(steps: 30);
-    }
-    
-    public void FadeOut(int steps)
-    {
-        FadeOut(start: 0, end: 255, red: 0, green: 0, blue: 0, steps);
+        if (component.GetType().IsAssignableTo(typeof(Fader)))
+        {
+            var fader = (Fader)component;
+            if (fader.IsFading)
+                ShiftPalette(fader.Red, fader.Green, fader.Blue, fader.CurrentOpacity);
+        }
     }
 
     public void UpdateScreen()
@@ -172,6 +170,32 @@ public class SDLVideoManager : IVideoManager
     }
     
     #region Private Methods
+
+    private void ShiftPalette(byte red, byte green, byte blue, float opacity)
+    {
+        int i, j, orig, delta;
+        SDL_Color[] palette2 = new SDL_Color[256];
+        
+        //Array.Copy(_currentPalette, palette1, 256);
+        Array.Copy(_gamePalette, palette2, 256);
+        // start and end are 0 to 255
+        // its possible to only fade out specific colors of the palette
+        for (j = 0; j <= 255; j++)
+        {
+            var originalColor = _gamePalette[j];
+            orig = originalColor.r;
+            delta = red - orig;
+            palette2[j].r = (byte)(orig + delta * opacity);
+            orig = originalColor.g;
+            delta = green - orig;
+            palette2[j].g = (byte)(orig + delta * opacity);
+            orig = originalColor.b;
+            delta = blue - orig;
+            palette2[j].b = (byte)(orig + delta * opacity);
+        }
+        
+        SetPalette(palette2, true);
+    }
     
     private void FadeOut(int start, int end, byte red, byte green, byte blue, int steps)
     {
