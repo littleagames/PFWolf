@@ -17,9 +17,9 @@ public class GameManager
     {
         _videoManager.Initialize();
         
-        var sceneManager = new SceneManager(_videoManager);
         // asset manager GetAsset(Script, "SignonScene")
-        sceneManager.LoadScene("SignonScene");
+        var sceneManager = new SceneManager(_videoManager/*, assetManager*/);
+        sceneManager.LoadScene("wolf3d:SignonScene");
         
         // GameLoop
         // Main loop flag

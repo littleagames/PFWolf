@@ -10,7 +10,7 @@ public class PG13Scene : Scene
     private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
     
     public PG13Scene()
-        : base("PG13Scene")
+        : base("wolf3d:PG13Scene")
     {
     }
 
@@ -43,7 +43,7 @@ public class PG13Scene : Scene
 
             if (_fadeOutFader.IsComplete)
             {
-                LoadScene("TitleScene");
+                LoadScene("wolf3d:TitleScene");
             }
         }
         // else if (Inputs.AnyKeyPressed)

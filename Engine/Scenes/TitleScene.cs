@@ -10,7 +10,7 @@ public class TitleScene : Scene
     private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
     
     public TitleScene()
-        : base("TitleScene")
+        : base("wolf3d:TitleScene")
     {
     }
 
@@ -43,7 +43,7 @@ public class TitleScene : Scene
             
             if (_fadeOutFader.IsComplete)
             {
-                LoadScene("CreditsScene");
+                LoadScene("wolf3d:CreditsScene");
             }
         }
         // else if (Inputs.AnyKeyPressed)

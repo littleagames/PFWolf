@@ -10,7 +10,7 @@ public class CreditsScene : Scene
     private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
     
     public CreditsScene()
-        : base("CreditsScene")
+        : base("wolf3d:CreditsScene")
     {
     }
 
@@ -44,7 +44,7 @@ public class CreditsScene : Scene
             if (_fadeOutFader.IsComplete)
             {
                 // View scores?
-                LoadScene("MainMenuScene");
+                LoadScene("wolf3d:ViewScoresScene");
             }
         }
         // else if (Inputs.AnyKeyPressed)

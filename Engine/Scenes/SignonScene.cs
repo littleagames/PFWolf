@@ -9,7 +9,7 @@ public class SignonScene : Scene
     private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
     
     public SignonScene()
-        : base("SignonScene")
+        : base("wolf3d:SignonScene")
     {
     }
 
@@ -32,8 +32,8 @@ public class SignonScene : Scene
 
              if (_fadeOutFader.IsComplete)
              {
-                 LoadScene("MainMenuScene");
-                 //LoadScene("Pg13Scene");
+                // LoadScene("wolf3d:MainMenuScene");
+                 LoadScene("wolf3d:Pg13Scene");
              }
          }
     }

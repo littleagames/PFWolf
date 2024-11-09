@@ -17,25 +17,29 @@ public class SceneManager
     public void LoadScene(string sceneName)
     {
         // assetManager.Scripts(AssetType.ScriptScene, sceneName)
-        if (sceneName == "SignonScene")
+        if (sceneName == "wolf3d:SignonScene")
         {
             _currentScene = new SignonScene();
         }
-        else if (sceneName == "Pg13Scene")
+        else if (sceneName == "wolf3d:Pg13Scene")
         {
             _currentScene = new PG13Scene();
         }
-        else if (sceneName == "TitleScene")
+        else if (sceneName == "wolf3d:TitleScene")
         {
             _currentScene = new TitleScene();
         }
-        else if (sceneName == "CreditsScene")
+        else if (sceneName == "wolf3d:CreditsScene")
         {
             _currentScene = new CreditsScene();
         }
-        else if (sceneName == "MainMenuScene")
+        else if (sceneName == "wolf3d:MainMenuScene")
         {
             _currentScene = new MainMenuScene();
+        }
+        else if (sceneName == "wolf3d:ViewScoresScene")
+        {
+            _currentScene = new ViewScoresScene();
         }
 
         // Unload all other scenes
