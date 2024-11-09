@@ -129,13 +129,6 @@ public class SDLVideoManager : IVideoManager
             }
         }
         
-        if (component.GetType().IsAssignableTo(typeof(Stripe)))
-        {
-            var stripe = (Stripe)component;
-            MemToScreen(stripe.RawData, stripe.Width, stripe.Height, stripe.X, stripe.Y);
-            return;
-        }
-        
         if (component.GetType().IsAssignableTo(typeof(Rectangle)))
         {
             var rect = (Rectangle)component;
