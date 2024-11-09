@@ -87,7 +87,7 @@ public class SDLVideoManager : IVideoManager
         SDL_Surface sdlScreen = (SDL.SDL_Surface)Marshal.PtrToStructure(_screen, typeof(SDL.SDL_Surface))!;
         SDL_PixelFormat sdlScreenFormat = (SDL.SDL_PixelFormat)Marshal.PtrToStructure(sdlScreen.format, typeof(SDL.SDL_PixelFormat))!;
        
-        SDL_SetPaletteColors(sdlScreenFormat.palette, _gamePalette, 0, 256);
+        SDL_SetPaletteColors(sdlScreenFormat.palette, _currentPalette, 0, 256);
 
         // Set palette global variable
 
@@ -99,7 +99,7 @@ public class SDLVideoManager : IVideoManager
         SDL_Surface sdlScreenBuffer = (SDL.SDL_Surface)Marshal.PtrToStructure(_screenBuffer, typeof(SDL.SDL_Surface))!;
         SDL_PixelFormat sdlScreenBufferFormat = (SDL.SDL_PixelFormat)Marshal.PtrToStructure(sdlScreenBuffer.format, typeof(SDL.SDL_PixelFormat))!;
 
-        SDL_SetPaletteColors(sdlScreenBufferFormat.palette, _gamePalette, 0, 256);
+        SDL_SetPaletteColors(sdlScreenBufferFormat.palette, _currentPalette, 0, 256);
 
         _texture = SDL_CreateTexture(
             _renderer,
@@ -215,53 +215,44 @@ public class SDLVideoManager : IVideoManager
 
     private void MemToScreen(byte[] source, int width, int height, int x, int y)
     {
-         MemToScreenScaledCoord(_screenBuffer, source, width, height, ScaleFactorX * x, ScaleFactorY * y);
+         MemToScreenScaledCoord(source, width, height, ScaleFactorX * x, ScaleFactorY * y);
     }
 
-    private void MemToScreenScaledCoord(IntPtr screenBuffer, byte[] source, int width, int height, int destx, int desty)
+    private void MemToScreenScaledCoord(byte[] source, int width, int height, int destx, int desty)
     {
         byte[] dest;
         int i, j, sci, scj;
         uint m, n;
 
-        IntPtr dest_ptr = LockSurface(screenBuffer);
-        if (dest_ptr == IntPtr.Zero) return;
-
-        int size = _screenSize.Width * _screenSize.Height; // screen size
-        dest = new byte[size];
-        Marshal.Copy(dest_ptr, dest, 0, size);
-
-        for (j = 0, scj = 0; j < height; j++, scj += ScaleFactorX)
+        var surfacePtr = LockSurface(_screenBuffer);
+        unsafe
         {
-            for (i = 0, sci = 0; i < width; i++, sci += ScaleFactorX)
-            {
-                byte col = source[(j * width) + i];
-                for (m = 0; m < ScaleFactorY; m++)
-                {
-                    for (n = 0; n < ScaleFactorX; n++)
-                    {
-                        if (col == 0xff) continue;
+            byte* pixels = (byte*)surfacePtr;
 
-                        var xlength = sci + n + destx;
-                        var ylength = scj + m + desty;
-                        if (ylength > _yLookup.Length || (_yLookup[scj + m + desty] + xlength) > dest.Length) return;
-                        dest[_yLookup[scj + m + desty] + sci + n + destx] = col;
+            // Set each pixel to a red color (ARGB format)
+            
+            for (j = 0, scj = 0; j < height; j++, scj += ScaleFactorX)
+            {
+                for (i = 0, sci = 0; i < width; i++, sci += ScaleFactorX)
+                {
+                    byte col = source[(j * width) + i];
+                    for (m = 0; m < ScaleFactorY; m++)
+                    {
+                        for (n = 0; n < ScaleFactorX; n++)
+                        {
+                            if (col == 0xff) continue;
+            
+                            var xlength = sci + n + destx;
+                            var ylength = scj + m + desty;
+                            if (ylength > _yLookup.Length || (_yLookup[scj + m + desty] + xlength) > (_screenSize.Width * _screenSize.Height)) return;
+                            pixels[_yLookup[scj + m + desty] + sci + n + destx] = col;
+                        }
                     }
                 }
             }
         }
-
-        SDL_Surface sdlScreenBuffer = (SDL_Surface)Marshal.PtrToStructure(screenBuffer, typeof(SDL_Surface))!;
         
-        IntPtr ptr = Marshal.AllocHGlobal(dest.Length);
-        Marshal.Copy(dest, 0, ptr, dest.Length);
-        sdlScreenBuffer.pixels = ptr;
-        
-        Marshal.StructureToPtr(sdlScreenBuffer, screenBuffer, false);
-        
-        UnlockSurface(screenBuffer);
-        // Free the allocated unmanaged memory
-        Marshal.FreeHGlobal(ptr);
+        UnlockSurface(_screenBuffer);
     }
     
     private void DrawRectangle(int x, int y, int width, int height, byte color)
@@ -271,42 +262,24 @@ public class SDLVideoManager : IVideoManager
     
     private void DrawRectangleScaledCoord(int scaledX, int scaledY, int scaledWidth, int scaledHeight, byte color)
     {
-        byte[] dest;
-        IntPtr dest_ptr = LockSurface(_screenBuffer);
-        if (dest_ptr == IntPtr.Zero) return;
-
-        int size = _screenSize.Width * _screenSize.Height; // screen size
-        dest = new byte[size];
-        Marshal.Copy(dest_ptr, dest, 0, size);
-
-        if (scaledY > _yLookup.Length) return;
-        var firstPosition = _yLookup[scaledY] + scaledX;
-        var position = firstPosition;
-
-        for (int i = 0; i < scaledHeight; i++)
+        var surfacePtr = LockSurface(_screenBuffer);
+        unsafe
         {
-            for (int scw = 0; scw < scaledWidth; scw++)
+            int width = _screenSize.Width;
+            int height = _screenSize.Height;
+            byte* pixels = (byte*)surfacePtr;
+
+            // Set each pixel to a red color (ARGB format)
+            for (int y = scaledY; y < height && y < (scaledY+scaledHeight); y++)
             {
-                if ((position + scw) >= dest.Length)
-                    continue;
-
-                dest[position + scw] = color;
+                for (int x = scaledX; x < width && x < (scaledX+scaledWidth); x++)
+                {
+                    pixels[y * width + x] = color;
+                }
             }
-
-            position += _bufferPitch;
         }
-
-        SDL_Surface sdlScreenBuffer = (SDL_Surface)Marshal.PtrToStructure(_screenBuffer, typeof(SDL_Surface))!;
-        
-        IntPtr ptr = Marshal.AllocHGlobal(dest.Length);
-        Marshal.Copy(dest, 0, ptr, dest.Length);
-        sdlScreenBuffer.pixels = ptr;
-        
-        Marshal.StructureToPtr(sdlScreenBuffer, _screenBuffer, false);
         
         UnlockSurface(_screenBuffer);
-        // Free the allocated unmanaged memory
-        Marshal.FreeHGlobal(ptr);
     }
     
     private IntPtr LockSurface(IntPtr surface)
