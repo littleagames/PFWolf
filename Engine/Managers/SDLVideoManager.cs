@@ -120,10 +120,27 @@ public class SDLVideoManager : IVideoManager
         if (!_isInitialized)
             throw new InvalidOperationException("Video Manager is not initialized");
 
+        if (component.GetType().IsAssignableTo(typeof(GroupedRenderComponent)))
+        {
+            var groupedComponent = (GroupedRenderComponent)component;
+            foreach (var innerComponent in groupedComponent.Components)
+            {
+                Update(innerComponent);
+            }
+        }
+        
+        if (component.GetType().IsAssignableTo(typeof(Stripe)))
+        {
+            var stripe = (Stripe)component;
+            MemToScreen(stripe.RawData, stripe.Width, stripe.Height, stripe.X, stripe.Y);
+            return;
+        }
+        
         if (component.GetType().IsAssignableTo(typeof(Rectangle)))
         {
             var rect = (Rectangle)component;
             DrawRectangle(rect.X, rect.Y, rect.Width, rect.Height, rect.Color);
+            return;
         }
         
         if (component.GetType().IsAssignableTo(typeof(Graphic)))
@@ -137,6 +154,7 @@ public class SDLVideoManager : IVideoManager
             }
             
             MemToScreen(graphicAsset.RawData, graphicAsset.Dimensions.Width, graphicAsset.Dimensions.Height, graphic.X, graphic.Y);
+            return;
         }
 
         if (component.GetType().IsAssignableTo(typeof(Fader)))
@@ -147,6 +165,8 @@ public class SDLVideoManager : IVideoManager
                 var shiftedPalette = ShiftPalette(fader.Red, fader.Green, fader.Blue, fader.CurrentOpacity);
                 SetPalette(shiftedPalette, true);
             }
+            
+            return;
         }
     }
 

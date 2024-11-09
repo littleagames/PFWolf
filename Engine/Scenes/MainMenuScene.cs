@@ -17,8 +17,10 @@ public class MainMenuScene : Scene
     public override void OnStart()
     {
         Components.Add(Background.Create(0x29));
-        Components.Add(Graphic.Create("c_options", 0, 0));
-        Components.Add(Graphic.Create("c_mouselback", 0, 0));
+        Components.Add(Graphic.Create("c_mouselback", 112, 184));
+        Components.Add(Stripe.Create(10, 0x2c));
+        Components.Add(Graphic.Create("c_options", 84, 0));
+        Components.Add(Wolf3DBorderedWindow.Create(68, 55, 178, 13*9+6));
         Components.Add(_timer);
         Components.Add(_fadeInFader);
         Components.Add(_fadeOutFader);

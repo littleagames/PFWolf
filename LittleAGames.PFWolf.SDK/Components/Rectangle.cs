@@ -8,7 +8,7 @@ public class Rectangle : RenderComponent
     public int Height { get; }
     public byte Color { get; }
 
-    public Rectangle(int x, int y, int width, int height, byte color)
+    protected Rectangle(int x, int y, int width, int height, byte color)
     {
         X = x;
         Y = y;
@@ -16,4 +16,7 @@ public class Rectangle : RenderComponent
         Height = height;
         Color = color;
     }
+    
+    public static Rectangle Create(int x, int y, int width, int height, byte color)
+        => new(x, y, width, height, color);
 }
