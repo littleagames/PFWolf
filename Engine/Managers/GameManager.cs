@@ -4,22 +4,23 @@ namespace Engine.Managers;
 
 public class GameManager
 {
-    private readonly AssetManager _assetManager;
+    private readonly IAssetManager _assetManager;
     private readonly IVideoManager _videoManager;
+    private readonly GameConfiguration _gameConfig;
 
-    public GameManager(AssetManager assetManager, IVideoManager videoManager)
+    public GameManager(IAssetManager assetManager, IVideoManager videoManager, GameConfiguration gameConfig)
     {
         _assetManager = assetManager;
         _videoManager = videoManager;
+        _gameConfig = gameConfig;
     }
     
     public void Start()
     {
         _videoManager.Initialize();
         
-        // asset manager GetAsset(Script, "SignonScene")
-        var sceneManager = new SceneManager(_videoManager/*, assetManager*/);
-        sceneManager.LoadScene("wolf3d:SignonScene");
+        var sceneManager = new SceneManager(_videoManager, _assetManager);
+        sceneManager.LoadScene(_gameConfig.StartingScene);
         
         // GameLoop
         // Main loop flag

@@ -220,7 +220,6 @@ public class SDLVideoManager : IVideoManager
 
     private void MemToScreenScaledCoord(byte[] source, int width, int height, int destx, int desty)
     {
-        byte[] dest;
         int i, j, sci, scj;
         uint m, n;
 

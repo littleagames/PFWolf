@@ -18,5 +18,15 @@ public enum AssetType
     Palette,
     Text,
     Texture,
-    Sprite
+    Sprite,
+    
+    /// <summary>
+    /// A generic script
+    /// </summary>
+    Script,
+    
+    /// <summary>
+    /// A script for building scenes
+    /// </summary>
+    ScriptScene
 }

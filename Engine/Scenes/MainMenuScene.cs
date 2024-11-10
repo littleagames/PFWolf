@@ -1,8 +1,8 @@
-﻿using LittleAGames.PFWolf.SDK.Components;
+﻿using LittleAGames.PFWolf.SDK;
+using LittleAGames.PFWolf.SDK.Components;
 using Timer = LittleAGames.PFWolf.SDK.Components.Timer;
 
-namespace Engine.Scenes;
-
+[PfWolfScript("wolf3d:MainMenuScene")]
 public class MainMenuScene : Scene
 {
     private readonly Timer _timer = new();
@@ -10,7 +10,6 @@ public class MainMenuScene : Scene
     private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
     
     public MainMenuScene()
-        : base("wolf3d:MainMenuScene")
     {
     }
 

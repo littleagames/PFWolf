@@ -1,4 +1,5 @@
 ﻿using Engine.Scenes;
+using LittleAGames.PFWolf.SDK.Assets;
 using LittleAGames.PFWolf.SDK.Components;
 using Timer = LittleAGames.PFWolf.SDK.Components.Timer;
 
@@ -7,40 +8,31 @@ namespace Engine.Managers;
 public class SceneManager
 {
     private readonly IVideoManager _videoManager;
+    private readonly IAssetManager _assetManager;
 
-    public SceneManager(IVideoManager videoManager)
+    public SceneManager(IVideoManager videoManager, IAssetManager assetManager)
     {
         _videoManager = videoManager;
+        _assetManager = assetManager;
     }
     
     private Scene? _currentScene = null;
     public void LoadScene(string sceneName)
     {
-        // assetManager.Scripts(AssetType.ScriptScene, sceneName)
-        if (sceneName == "wolf3d:SignonScene")
+#if FALSE // DEBUG
+        _currentScene = new PG13Scene();
+#else
+        var scriptAsset = (ScriptAsset?)_assetManager.FindAsset(AssetType.ScriptScene, sceneName);
+        if (scriptAsset == null)
         {
-            _currentScene = new SignonScene();
+            throw new InvalidDataException($"The specified scene \"{sceneName}\" does not exist.");
         }
-        else if (sceneName == "wolf3d:Pg13Scene")
+        _currentScene = (Scene?)Activator.CreateInstance(scriptAsset.Script);
+        if (_currentScene is null)
         {
-            _currentScene = new PG13Scene();
+            throw new InvalidDataException($"Could not properly build the script for scene \"{sceneName}\"");
         }
-        else if (sceneName == "wolf3d:TitleScene")
-        {
-            _currentScene = new TitleScene();
-        }
-        else if (sceneName == "wolf3d:CreditsScene")
-        {
-            _currentScene = new CreditsScene();
-        }
-        else if (sceneName == "wolf3d:MainMenuScene")
-        {
-            _currentScene = new MainMenuScene();
-        }
-        else if (sceneName == "wolf3d:ViewScoresScene")
-        {
-            _currentScene = new ViewScoresScene();
-        }
+#endif
 
         // Unload all other scenes
         // TODO: Make "scene" current scene
@@ -63,9 +55,10 @@ public class SceneManager
         _videoManager.UpdateScreen();
         
         _currentScene.OnUpdate();
-        if (_currentScene._changeScene)
+        if (_currentScene.ChangeScene)
         {
-            var nextScene = _currentScene._nextScene;
+            var nextScene = _currentScene.SceneQueuedToLoad;
+            // TODO: VerifyScene(nextScene); // Make sure scene exists before destroying and loading
             _currentScene?.OnDestroy();
             LoadScene(nextScene);
         }

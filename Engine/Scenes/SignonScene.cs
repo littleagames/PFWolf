@@ -1,15 +1,14 @@
-﻿using LittleAGames.PFWolf.SDK.Components;
+﻿using LittleAGames.PFWolf.SDK;
+using LittleAGames.PFWolf.SDK.Components;
 using Timer = LittleAGames.PFWolf.SDK.Components.Timer;
 
-namespace Engine.Scenes;
-
+[PfWolfScript("wolf3d:SignonScene")]
 public class SignonScene : Scene
 {
     private readonly Timer _timer = new();
     private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
     
     public SignonScene()
-        : base("wolf3d:SignonScene")
     {
     }
 
@@ -24,6 +23,8 @@ public class SignonScene : Scene
 
     public override void OnUpdate()
     {
+        // TODO: Load information
+        // "Press Any Key"
          if (_timer.GetTime() > 210 /*|| Inputs.AnyKeyPressed*/)
          {
              _timer.Stop();

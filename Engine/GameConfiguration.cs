@@ -18,4 +18,5 @@ public class GameConfiguration
     
     public bool FullScreen { get; set; } = false;
     public byte ScreenBits { get; set; } = 8;
+    public string StartingScene { get; set; } = "wolf3d:SignonScene";
 }

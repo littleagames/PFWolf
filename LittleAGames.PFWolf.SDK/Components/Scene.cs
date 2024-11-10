@@ -2,14 +2,8 @@
 
 public abstract class Scene : RunnableBase
 {
-    public Scene(string name)
-    {
-        _name = name;
-    }
-
-    private string _name;
-    public bool _changeScene;
-    public string _nextScene;
+    public bool ChangeScene { get; private set; } = false;
+    public string? SceneQueuedToLoad { get; private set; } = null;
 
     public ComponentCollection Components { get; private set; } = new();
 
@@ -26,9 +20,9 @@ public abstract class Scene : RunnableBase
     {
     }
 
-    public void LoadScene(string sceneName)
+    protected void LoadScene(string sceneName)
     {
-        _changeScene = true;
-        _nextScene = sceneName;
+        ChangeScene = true;
+        SceneQueuedToLoad = sceneName;
     }
 }

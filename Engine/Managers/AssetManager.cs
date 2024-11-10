@@ -6,7 +6,7 @@ using LittleAGames.PFWolf.SDK.FileLoaders;
 
 namespace Engine.Managers;
 
-public class AssetManager
+public class AssetManager : IAssetManager
 {
     private readonly FileLoader _fileLoader;
     private readonly List<Asset> _assets = new List<Asset>();
