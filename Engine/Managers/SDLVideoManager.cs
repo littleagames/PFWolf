@@ -150,6 +150,19 @@ public class SDLVideoManager : IVideoManager
             return;
         }
 
+        if (component.GetType().IsAssignableTo(typeof(Text)))
+        {
+            var text = (Text)component;
+            var fontAsset = _assetManager.FindAsset(AssetType.Font, text.FontAssetName) as FontAsset;
+            if (fontAsset == null)
+            {
+                // TODO: Placeholder for missing font?
+                return;
+            }
+            
+            DrawTextString(text.X, text.Y, text.String, fontAsset, text.Color);
+        }
+
         if (component.GetType().IsAssignableTo(typeof(Fader)))
         {
             var fader = (Fader)component;
@@ -212,7 +225,49 @@ public class SDLVideoManager : IVideoManager
         var delta = destinationColor - originalColor;
         return (byte)((originalColor + delta * opacity));
     }
-
+    
+    public void DrawTextString(int startX, int startY, string text, FontAsset font, byte color)
+    {
+        var printX = startX;
+        var printY = startY;
+    
+        foreach(char textChar in text)
+        {
+            var asciiIndex = (int)textChar;
+            var fontChar = font.FontCharacters[asciiIndex];
+    
+            if (fontChar.RawData.Length > 0)
+            {
+                var modifiedFontData = new byte[fontChar.RawData.Length];
+                for (var i = 0; i < fontChar.RawData.Length; i++)
+                {
+                    var fontFlag = fontChar.RawData[i] > 0;
+                    modifiedFontData[i] = fontFlag ? color : (byte)0xff;
+                }
+    
+                MemToScreen(modifiedFontData, fontChar.Width, fontChar.Height, printX, printY);
+            }
+    
+            if (textChar == '\n')
+            {
+                printX = startX;
+                printY = printY + fontChar.Height;
+                continue;
+            }
+    
+            printX += fontChar.Width;
+        }
+    
+        // TODO: Loop through each character in "text"
+        // Or I can build the text in byte array size
+        //      can send that once to MemToScreen
+    
+        //MemToScreen(colorizedFont)
+    
+        // get each character and print it to the byte[] pixels
+    
+    }
+    
     private void MemToScreen(byte[] source, int width, int height, int x, int y)
     {
          MemToScreenScaledCoord(source, width, height, ScaleFactorX * x, ScaleFactorY * y);
