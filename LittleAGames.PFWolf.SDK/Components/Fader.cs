@@ -1,6 +1,6 @@
 ﻿namespace LittleAGames.PFWolf.SDK.Components;
 
-public class Fader : Timer
+public class Fader : PfTimer
 {
     public float CurrentOpacity { get; private set; }
     public float OpacityBegin { get; }

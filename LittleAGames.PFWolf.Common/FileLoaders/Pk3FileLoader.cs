@@ -154,6 +154,7 @@ public class Pk3FileLoader : BaseFileLoader
             // handle exceptions
             foreach (var diagnostic in result.Diagnostics)
             {
+                throw new Exception(diagnostic.GetMessage());
                 // TODO: Report this in the console
                 // Console.ResetColor();
                 // if (diagnostic.Severity == DiagnosticSeverity.Error)

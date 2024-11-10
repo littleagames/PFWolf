@@ -56,15 +56,6 @@
     <Compile Update="old\DataModels\ListMenuItem.cs">
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
     </Compile>
-    <Compile Update="Scenes\PG13Scene.cs">
-      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
-    </Compile>
-    <Compile Update="Scenes\TitleScene.cs">
-      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
-    </Compile>
-    <Compile Update="Scenes\CreditsScene.cs">
-      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
-    </Compile>
     <Compile Update="Scenes\MainMenuScene.cs">
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
     </Compile>

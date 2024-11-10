@@ -12,10 +12,18 @@ public abstract class Scene : RunnableBase
         
     }
 
+    public virtual void OnPreUpdate()
+    {
+    }
+    
     public virtual void OnUpdate()
     {
     }
 
+    public virtual void OnPostUpdate()
+    {
+    }
+    
     public virtual void OnDestroy()
     {
     }

@@ -1,6 +1,5 @@
 ﻿using LittleAGames.PFWolf.SDK;
 using LittleAGames.PFWolf.SDK.Components;
-using Timer = LittleAGames.PFWolf.SDK.Components.Timer;
 
 [PfWolfScript("wolf3d:ViewScoresScene")]
 public class ViewScoresScene : TitleCardScene

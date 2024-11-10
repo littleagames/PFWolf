@@ -1,7 +1,5 @@
-﻿using Engine.Scenes;
-using LittleAGames.PFWolf.SDK.Assets;
+﻿using LittleAGames.PFWolf.SDK.Assets;
 using LittleAGames.PFWolf.SDK.Components;
-using Timer = LittleAGames.PFWolf.SDK.Components.Timer;
 
 namespace Engine.Managers;
 
@@ -19,8 +17,8 @@ public class SceneManager
     private Scene? _currentScene = null;
     public void LoadScene(string sceneName)
     {
-#if FALSE // DEBUG
-        _currentScene = new PG13Scene();
+#if DEBUG
+        _currentScene = new MainMenuScene();
 #else
         var scriptAsset = (ScriptAsset?)_assetManager.FindAsset(AssetType.ScriptScene, sceneName);
         if (scriptAsset == null)
@@ -34,8 +32,6 @@ public class SceneManager
         }
 #endif
 
-        // Unload all other scenes
-        // TODO: Make "scene" current scene
         _currentScene?.OnStart();
     }
 
@@ -44,7 +40,7 @@ public class SceneManager
         if (_currentScene == null)
             return;
         
-        //_currentScene.OnPreUpdate();
+        _currentScene.OnPreUpdate();
         
         foreach (var component in _currentScene.Components.GetComponents())
         {
@@ -58,8 +54,11 @@ public class SceneManager
         if (_currentScene.ChangeScene)
         {
             var nextScene = _currentScene.SceneQueuedToLoad;
-            // TODO: VerifyScene(nextScene); // Make sure scene exists before destroying and loading
-            _currentScene?.OnDestroy();
+            if (nextScene == null)
+            {
+                throw new Exception($"{_currentScene.GetType().Name} does not have a scene set to load.");
+            }
+                
             LoadScene(nextScene);
         }
         // TODO: Use _currentScene to check if scene name has changed, if so, end the scene, and create a new one with that name

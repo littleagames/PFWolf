@@ -8,7 +8,7 @@ public class TitleCardScene : Scene
     private readonly bool _useFadeOut;
     private readonly int _timeOnScene;
     
-    private readonly Timer _timer = new();
+    private readonly PfTimer _pfTimer = new();
     private readonly Fader _fadeInFader = Fader.Create(1.0f, 0.0f, 0x00, 0x00, 0x00, 20);
     private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
 
@@ -24,7 +24,7 @@ public class TitleCardScene : Scene
 
     public override void OnStart()
     {
-        Components.Add(_timer);
+        Components.Add(_pfTimer);
         Components.Add(_fadeInFader);
         Components.Add(_fadeOutFader);
     }
@@ -41,12 +41,12 @@ public class TitleCardScene : Scene
         }
 
         // Start wait timer after fade in
-        if (!_timer.IsRunning)
-            _timer.Start();
+        if (!_pfTimer.IsRunning)
+            _pfTimer.Start();
         
-        if (_timer.GetTime() > _timeOnScene) 
+        if (_pfTimer.GetTime() > _timeOnScene) 
         {
-            _timer.Stop();
+            _pfTimer.Stop();
 
             if (_useFadeOut)
             {

@@ -1,11 +1,10 @@
 ﻿using LittleAGames.PFWolf.SDK;
 using LittleAGames.PFWolf.SDK.Components;
-using Timer = LittleAGames.PFWolf.SDK.Components.Timer;
 
 [PfWolfScript("wolf3d:MainMenuScene")]
 public class MainMenuScene : Scene
 {
-    private readonly Timer _timer = new();
+    private readonly PfTimer _pfTimer = new();
     private readonly Fader _fadeInFader = Fader.Create(1.0f, 0.0f, 0x00, 0x00, 0x00, 20);
     private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
     
@@ -20,7 +19,7 @@ public class MainMenuScene : Scene
         Components.Add(Stripe.Create(10, 0x2c));
         Components.Add(Graphic.Create("c_options", 84, 0));
         Components.Add(Wolf3DBorderedWindow.Create(68, 55, 178, 13*9+6));
-        Components.Add(_timer);
+        Components.Add(_pfTimer);
         Components.Add(_fadeInFader);
         Components.Add(_fadeOutFader);
     }
@@ -32,30 +31,9 @@ public class MainMenuScene : Scene
 
         if (!_fadeInFader.IsComplete)
             return;
-        
-        // // Start wait timer after fade in
-        // if (!_timer.IsRunning)
-        //     _timer.Start();
-        //
-        // if (_timer.GetTime() > 300) 
-        // {
-        //     _timer.Stop();
-        //     
-        //     if (!_fadeOutFader.IsFading)
-        //         _fadeOutFader.BeginFade();
-        //     
-        //     if (_fadeOutFader.IsComplete)
-        //     {
-        //         LoadScene("CreditsScene");
-        //     }
-        // }
-        // else if (Inputs.AnyKeyPressed)
-        // {
-        //     LoadScene("MainMenu");
-        // }
     }
 
-    // protected override void OnEnd()
+    // protected override void OnDestroy()
     // {
     //     throw new NotImplementedException();
     // }

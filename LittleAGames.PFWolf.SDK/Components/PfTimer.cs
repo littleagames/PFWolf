@@ -1,11 +1,11 @@
 ﻿namespace LittleAGames.PFWolf.SDK.Components;
 
-public class Timer : Component
+public class PfTimer : Component
 {
     private long _timeInTics;
     private bool _paused;
     
-    public Timer()
+    public PfTimer()
     {
         _timeInTics = 0;
         _paused = true;
