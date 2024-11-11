@@ -7,17 +7,32 @@ public class MainMenuScene : Scene
     private readonly PfTimer _pfTimer = new();
     private readonly Fader _fadeInFader = Fader.Create(1.0f, 0.0f, 0x00, 0x00, 0x00, 20);
     private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
-    private readonly Text _newGameText = Text.Create("New Game", 76+24, 55+13*0, "LargeFont", 0x13);
-    private readonly Text _soundText = Text.Create("Sound", 76+24, 55+13*1, "LargeFont", 0x17);
-    private readonly Text _ctrlText = Text.Create("Control", 76+24, 55+13*2, "LargeFont", 0x17);
-    private readonly Text _loadGameText = Text.Create("Load Game", 76+24, 55+13*3, "LargeFont", 0x17);
-    private readonly Text _saveGameText = Text.Create("Save Game", 76+24, 55+13*4, "LargeFont", 0x2b);
-    private readonly Text _changeViewText = Text.Create("Change View", 76+24, 55+13*5, "LargeFont", 0x17);
-    private readonly Text _readThisText = Text.Create("Read This!", 76+24, 55+13*6, "LargeFont", 0x4a);
-    private readonly Text _backToGameText = Text.Create("Back to Demo", 76+24, 55+13*7, "LargeFont", 0x17);
-    private readonly Text _quitText = Text.Create("Quit", 76+24, 55+13*8, "LargeFont", 0x17);
+    private readonly Menu _menu;
     
     public MainMenuScene()
+    {
+        var menuX = 76;
+        var menuY = 55;
+        var menuIndent = 24;
+        var lineSpacing = 13;
+       
+        _menu = Menu.Create(menuX, menuY, menuIndent, lineSpacing);
+        _menu.AddMenuItem("New Game", activeState: 1, NewGame);
+        _menu.AddMenuItem("Sound", activeState: 1, NoOp);
+        _menu.AddMenuItem("Control", activeState: 1, NoOp);
+        _menu.AddMenuItem("Load Game", activeState: 1, NoOp);
+        _menu.AddMenuItem("Save Game", activeState: 0, NoOp);
+        _menu.AddMenuItem("Change View", activeState: 1, NoOp);
+        _menu.AddMenuItem("Read This!", activeState: 2, NoOp);
+        _menu.AddMenuItem("Back to Demo", activeState: 1, NoOp);
+        _menu.AddMenuItem("Quit", activeState: 1, NoOp);
+    }
+
+    public void NewGame()
+    {
+    }
+
+    public void NoOp()
     {
     }
 
@@ -30,15 +45,7 @@ public class MainMenuScene : Scene
         Components.Add(Wolf3DBorderedWindow.Create(68, 52, 178, 13*9+6));
         
         Components.Add(Graphic.Create("C_Cursor1", 72, 55+13*0));
-        Components.Add(_newGameText);
-        Components.Add(_soundText);
-        Components.Add(_ctrlText);
-        Components.Add(_loadGameText);
-        Components.Add(_saveGameText);
-        Components.Add(_changeViewText);
-        Components.Add(_readThisText);
-        Components.Add(_backToGameText);
-        Components.Add(_quitText);
+        Components.Add(_menu);
         
         Components.Add(_pfTimer);
         Components.Add(_fadeInFader);

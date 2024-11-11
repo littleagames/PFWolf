@@ -8,7 +8,7 @@ public class Text : RenderComponent
     public string FontAssetName { get; }
     public byte Color { get; }
 
-    private Text(string text, int x, int y, string fontAssetName, byte color)
+    protected Text(string text, int x, int y, string fontAssetName, byte color)
     {
         String = text;
         X = x;

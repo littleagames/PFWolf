@@ -20,10 +20,7 @@ public class TitleCardScene : Scene
         _useFadeIn = useFadeIn;
         _useFadeOut = useFadeOut;
         _timeOnScene = timeOnScene;
-    }
-
-    public override void OnStart()
-    {
+        
         Components.Add(_pfTimer);
         Components.Add(_fadeInFader);
         Components.Add(_fadeOutFader);
@@ -31,6 +28,8 @@ public class TitleCardScene : Scene
 
     public override void OnUpdate()
     {
+        // TODO: This needs to be called OnUpdate, but anything overriding it will no longer call this
+        // What is the better choice to call this AND that, without a base.OnUpdate?
         if (_useFadeIn)
         {
             if (!_fadeInFader.IsFading)
@@ -68,9 +67,4 @@ public class TitleCardScene : Scene
         //     LoadScene(_cutToScene);
         // }
     }
-
-    // protected override void OnEnd()
-    // {
-    //     throw new NotImplementedException();
-    // }
 }

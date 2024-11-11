@@ -120,15 +120,6 @@ public class SDLVideoManager : IVideoManager
         if (!_isInitialized)
             throw new InvalidOperationException("Video Manager is not initialized");
 
-        if (component.GetType().IsAssignableTo(typeof(GroupedRenderComponent)))
-        {
-            var groupedComponent = (GroupedRenderComponent)component;
-            foreach (var innerComponent in groupedComponent.Components)
-            {
-                Update(innerComponent);
-            }
-        }
-        
         if (component.GetType().IsAssignableTo(typeof(Rectangle)))
         {
             var rect = (Rectangle)component;
@@ -226,7 +217,7 @@ public class SDLVideoManager : IVideoManager
         return (byte)((originalColor + delta * opacity));
     }
     
-    public void DrawTextString(int startX, int startY, string text, FontAsset font, byte color)
+    private void DrawTextString(int startX, int startY, string text, FontAsset font, byte color)
     {
         var printX = startX;
         var printY = startY;

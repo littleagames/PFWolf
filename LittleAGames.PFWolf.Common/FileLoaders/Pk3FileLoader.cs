@@ -106,7 +106,8 @@ public class Pk3FileLoader : BaseFileLoader
                     scriptAssets.Add(new UnpackedScript// TODO: This should be an "unpacked script" object that's not associated to Asset
                     {
                         ScriptName = CleanName(entry.Name),
-                        RawData = rawData
+                        RawData = rawData,
+                        Location = entry.FullName
                     });
                 }
             }
@@ -126,7 +127,7 @@ public class Pk3FileLoader : BaseFileLoader
         foreach (var asset in scripts)
         {
             var code = System.Text.Encoding.Default.GetString(asset.RawData);
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code);
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code, path: asset.Location);
             syntaxes.Add(syntaxTree);
         }
 
@@ -141,6 +142,7 @@ public class Pk3FileLoader : BaseFileLoader
             .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
             .AddReferences(
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                MetadataReference.CreateFromFile(coreDir.FullName + Path.DirectorySeparatorChar + "System.Collections.dll"),
                 MetadataReference.CreateFromFile(coreDir.FullName + Path.DirectorySeparatorChar + "mscorlib.dll"),
                 MetadataReference.CreateFromFile(coreDir.FullName + Path.DirectorySeparatorChar + "System.Runtime.dll"),
                 pfWolfSdkReference

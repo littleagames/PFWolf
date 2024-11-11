@@ -44,8 +44,12 @@ public class SceneManager
         
         foreach (var component in _currentScene.Components.GetComponents())
         {
-            component.OnUpdate();
-            _videoManager.Update(component);
+            ComponentUpdate(component);
+            
+            foreach (var innerComponent in component.Children.GetComponents())
+            {
+                ComponentUpdate(innerComponent);
+            }
         }
         
         _videoManager.UpdateScreen();
@@ -69,5 +73,11 @@ public class SceneManager
     public void UnloadScene(string sceneName)
     {
         _currentScene?.OnDestroy();
+    }
+
+    private void ComponentUpdate(Component component)
+    {
+        component.OnUpdate();
+        _videoManager.Update(component);
     }
 }
