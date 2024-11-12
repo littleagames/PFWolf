@@ -18,7 +18,7 @@ public class SceneManager
     private Scene? _currentScene = null;
     public void LoadScene(string sceneName, dynamic? contextData = null)
     {
-#if DEBUG
+#if FALSE//DEBUG
         if (sceneName.Equals("wolf3d:MainMenuScene", StringComparison.CurrentCultureIgnoreCase))
             _currentScene = new MainMenuScene();
         else if (sceneName.Equals("wolf3d:EpisodeSelectScene", StringComparison.CurrentCultureIgnoreCase))
@@ -50,9 +50,6 @@ public class SceneManager
         if (_currentScene == null)
             return;
 
-        //StoreContextData(_currentScene.ContextData);
-        
-        //_currentScene.UpdateInputHandler(_inputManager.InputHandler); // convert input manager into pfwolfinputmanager
         _currentScene.OnPreUpdate();
         
         foreach (var component in _currentScene.Components.GetComponents())

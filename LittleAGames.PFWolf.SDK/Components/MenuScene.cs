@@ -23,7 +23,6 @@ public class MenuScene : Scene
 
     protected void ReturnToParent()
     {
-        
         if (ContextData == null)
             return;
 

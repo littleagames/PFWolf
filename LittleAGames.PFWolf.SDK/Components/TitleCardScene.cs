@@ -3,7 +3,7 @@
 public class TitleCardScene : Scene
 {
     private readonly string _waitScene;
-    private readonly string _cutToScene;
+    private readonly string? _cutToScene;
     private readonly bool _useFadeIn;
     private readonly bool _useFadeOut;
     private readonly int _timeOnScene;
@@ -12,6 +12,7 @@ public class TitleCardScene : Scene
     private readonly Fader _fadeInFader = Fader.Create(1.0f, 0.0f, 0x00, 0x00, 0x00, 20);
     private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0x00, 0x00, 0x00, 20);
 
+    private bool _skipSceneKeyPressed = false;
     
     public TitleCardScene(string waitScene, string cutToScene, bool useFadeIn, bool useFadeOut, int timeOnScene)
     {
@@ -39,11 +40,14 @@ public class TitleCardScene : Scene
                 return;
         }
 
+        if (Input.IsAnyKeyPressed && !_skipSceneKeyPressed)
+            _skipSceneKeyPressed = true;
+        
         // Start wait timer after fade in
         if (!_pfTimer.IsRunning)
             _pfTimer.Start();
         
-        if (_pfTimer.GetTime() > _timeOnScene) 
+        if (_pfTimer.GetTime() > _timeOnScene || _skipSceneKeyPressed) 
         {
             _pfTimer.Stop();
 
@@ -54,7 +58,12 @@ public class TitleCardScene : Scene
 
                 if (_fadeOutFader.IsComplete)
                 {
-                    LoadScene(_waitScene);
+                    if (!string.IsNullOrWhiteSpace(_cutToScene))
+                    {
+                        LoadScene(_cutToScene);
+                    }
+                    else
+                        LoadScene(_waitScene);
                 }
             }
             else
@@ -62,9 +71,5 @@ public class TitleCardScene : Scene
                 LoadScene(_waitScene);
             }
         }
-        // else if (Inputs.AnyKeyPressed)
-        // {
-        //     LoadScene(_cutToScene);
-        // }
     }
 }

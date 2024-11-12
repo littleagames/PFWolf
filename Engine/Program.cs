@@ -1,4 +1,5 @@
-﻿using Engine;
+﻿using System.Reflection;
+using Engine;
 using Engine.Managers;
 using LittleAGames.PFWolf.Common;
 using LittleAGames.PFWolf.Common.GamePacks;
@@ -22,6 +23,7 @@ var assetManager = new AssetManager(fileLoader);
 
 assetManager.AddGamePack(gamePack, directory);
 assetManager.AddModPack("D:\\PFWolf-Assets", "pfwolf.pk3");
+assetManager.AddAssembly(typeof(LittleAGames.PFWolf.ExternalPk3ModPack.NoOp).Assembly);
 Console.WriteLine($"Assets loaded: {assetManager.AssetCount}");
 
 var inputManager = new SDLInputManager();

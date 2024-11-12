@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LittleAGames.PFWolf.Common\LittleAGames.PFWolf.Common.csproj" />
+    <ProjectReference Include="..\LittleAGames.PFWolf.ExternalPk3ModPack\LittleAGames.PFWolf.ExternalPk3ModPack.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,9 +55,6 @@
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
     </Compile>
     <Compile Update="old\DataModels\ListMenuItem.cs">
-      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
-    </Compile>
-    <Compile Update="Scenes\MainMenuScene.cs">
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
     </Compile>
   </ItemGroup>

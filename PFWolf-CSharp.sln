@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleAGames.PFWolf.Launche
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleAGames.PFWolf.SDK.Tests", "UnitTests\LittleAGames.PFWolf.SDK.Tests\LittleAGames.PFWolf.SDK.Tests.csproj", "{35C43BB9-02D9-4298-8574-7AE470164F6A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleAGames.PFWolf.ExternalPk3ModPack", "LittleAGames.PFWolf.ExternalPk3ModPack\LittleAGames.PFWolf.ExternalPk3ModPack.csproj", "{393C48D8-4938-45ED-AC18-131425F13D71}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -103,6 +105,10 @@ Global
 		{35C43BB9-02D9-4298-8574-7AE470164F6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35C43BB9-02D9-4298-8574-7AE470164F6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35C43BB9-02D9-4298-8574-7AE470164F6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{393C48D8-4938-45ED-AC18-131425F13D71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{393C48D8-4938-45ED-AC18-131425F13D71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{393C48D8-4938-45ED-AC18-131425F13D71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{393C48D8-4938-45ED-AC18-131425F13D71}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,6 +124,7 @@ Global
 		{2C2FE681-60F3-4564-BB90-EB771376DDC8} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
 		{C67143B3-BF8F-465F-849B-366111F9EEBA} = {1D3CDBE0-D17B-4E64-923F-02B107BB5D50}
 		{35C43BB9-02D9-4298-8574-7AE470164F6A} = {113BC611-B500-4F98-A406-458ED7DD4A64}
+		{393C48D8-4938-45ED-AC18-131425F13D71} = {113BC611-B500-4F98-A406-458ED7DD4A64}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FA7EFAAB-37D3-4C59-A41E-EB9AFA16CF83}

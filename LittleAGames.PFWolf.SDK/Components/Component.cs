@@ -22,4 +22,5 @@ public abstract class Component
 
 public abstract class RenderComponent : Component
 {
+    public bool Hidden { get; set; } = false;
 }

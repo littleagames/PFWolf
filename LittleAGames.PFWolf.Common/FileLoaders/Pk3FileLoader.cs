@@ -1,5 +1,6 @@
 ﻿using System.IO.Compression;
 using System.Reflection;
+using LittleAGames.PFWolf.Common.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
@@ -148,7 +149,8 @@ public class Pk3FileLoader : BaseFileLoader
             // handle exceptions
             foreach (var diagnostic in result.Diagnostics)
             {
-                throw new Exception(diagnostic.GetMessage());
+                if (diagnostic.Severity == DiagnosticSeverity.Error)
+                    throw new Exception(diagnostic.GetMessage());
                 // TODO: Report this in the console
                 // Console.ResetColor();
                 // if (diagnostic.Severity == DiagnosticSeverity.Error)
@@ -167,31 +169,8 @@ public class Pk3FileLoader : BaseFileLoader
                 // load this 'virtual' DLL so that we can use
                 ms.Seek(0, SeekOrigin.Begin);
                 Assembly assembly = Assembly.Load(ms.ToArray());
-
-                var allScripts = assembly.ExportedTypes.Where(s => s.IsSubclassOf(typeof(RunnableBase)));
                 
-                foreach (var runnable in allScripts)
-                {
-                    var attribute = runnable.GetCustomAttribute<PfWolfSceneAttribute>();
-                    if (runnable.IsSubclassOf(typeof(Scene)))
-                    {
-                        scriptAssets.Add(new SceneAsset
-                        {
-                            Name = attribute?.ScriptName ?? runnable.Name,
-                            AssetType = AssetType.ScriptScene,
-                            Script = runnable
-                        });
-                    }
-                    else
-                    {
-                        scriptAssets.Add(new ScriptAsset
-                        {
-                            Name = attribute?.ScriptName ?? runnable.Name,
-                            AssetType = AssetType.Script,
-                            Script = runnable
-                        });
-                    }
-                }
+                scriptAssets = AssemblyScriptHelper.LoadScriptsFromAssembly(assembly);
             }
         }
         

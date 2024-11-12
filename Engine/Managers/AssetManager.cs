@@ -1,8 +1,7 @@
-﻿using LittleAGames.PFWolf.Common;
+﻿using System.Reflection;
+using LittleAGames.PFWolf.Common;
 using LittleAGames.PFWolf.Common.FileLoaders;
-using LittleAGames.PFWolf.SDK;
-using LittleAGames.PFWolf.SDK.Assets;
-using LittleAGames.PFWolf.SDK.FileLoaders;
+using LittleAGames.PFWolf.Common.Helpers;
 
 namespace Engine.Managers;
 
@@ -30,6 +29,20 @@ public class AssetManager : IAssetManager
         var loader = new Pk3FileLoader(directory, pk3File);
         var pk3Assets = loader.Load();
         _assets.AddRange(pk3Assets);
+    }
+
+    public void AddAssembly(Assembly assembly)
+    {
+        var scriptAssets = AssemblyScriptHelper.LoadScriptsFromAssembly(assembly);
+        foreach (var scriptAsset in scriptAssets)
+        {
+            var existing = _assets.FirstOrDefault(x =>
+                scriptAsset.Name.Equals(x.Name, StringComparison.InvariantCultureIgnoreCase));
+            if (existing != null)
+                _assets.Remove(existing);
+            
+            _assets.Add(scriptAsset);
+        }
     }
     
     public List<Asset> GetAssets(AssetType assetType)
