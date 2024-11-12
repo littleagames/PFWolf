@@ -1,8 +1,14 @@
-﻿[PfWolfScript("wolf3d:MainMenuScene")]
+﻿[PfWolfScene("wolf3d:MainMenuScene")]
 public class MainMenuScene : MenuScene
 {
+    private const int MenuX = 76;
+    private const int MenuY = 55;
+    private const int MenuWidth = 178;
+    private const int MenuHeight = 13 * 9 + 6;
+    private const int MenuIndent = 24;
+    private const int LineSpacing = 13;
     public MainMenuScene() 
-        : base (76, 55, 178, 13*9+6, 24, 13)
+        : base (MenuX, MenuY, MenuWidth, MenuHeight, MenuIndent, LineSpacing)
     {
         Menu.AddMenuItem("New Game", ActiveState.Active, NewGame);
         Menu.AddMenuItem("Sound", ActiveState.Active, NoOp);
@@ -14,18 +20,26 @@ public class MainMenuScene : MenuScene
         Menu.AddMenuItem("Back to Demo", ActiveState.Active, NoOp);
         Menu.AddMenuItem("Quit", ActiveState.Active, NoOp);
         
+        Components.Add(Graphic.Create("c_mouselback", 112, 184));
+        Components.Add(Stripe.Create(10, 0x2c));
         Components.Add(Graphic.Create("c_options", 84, 0));
+        Components.Add(Wolf3DBorderedWindow.Create(MenuX-8, MenuY-3, MenuWidth, MenuHeight));
+        
+        // Added here for priority
+        Components.Add(Menu);
+        Components.Add(Cursor);
     }
 
     public void NewGame()
     {
-        // TODO: Store data in the scene
-        /*
-         * { ParentMenu: { Scene: "wolf3d:MainMenuScene", MenuIndex: CurrentIndex } }
-         * 
-         */
-        LoadScene("wolf3d:EpisodeSelectScene"/*, data*/);
-        return;
+        // TODO: Fade out
+        
+        var sceneName = GetSceneName();
+        LoadScene("wolf3d:EpisodeSelectScene", new SceneContext
+        {
+            { "ParentMenu:Scene", sceneName },
+            { "ParentMenu:LastIndex", Menu.CurrentIndex }
+        });
     }
 
     public void NoOp()
@@ -57,6 +71,7 @@ public class MainMenuScene : MenuScene
         {
             Menu.MoveUp();
             Input.ClearKeysDown();
+            Cursor.SetPosition(Menu.GetCursorPosition());
             return;
         }
         
@@ -72,12 +87,8 @@ public class MainMenuScene : MenuScene
         {
             //Menu.PerformExitAction(Menu.ParentMenu); // TODO: Action would either be a "GoToMenu(menu.ParentMenu)" or "ConfirmDialog"
             Input.ClearKeysDown();
+            Cursor.SetPosition(Menu.GetCursorPosition());
             return;
         }
     }
-
-    // protected override void OnDestroy()
-    // {
-    //     throw new NotImplementedException();
-    // }
 }

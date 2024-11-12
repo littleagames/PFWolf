@@ -14,10 +14,11 @@ public class Graphic : RenderComponent
     }
 
     public static Graphic Create(string assetName, int x, int y)
-    {
-        return new Graphic(assetName, x, y);
-    }
+        => new Graphic(assetName, x, y);
 
+    public static Graphic Create(string assetName, Position position)
+        =>  new Graphic(assetName, position.X, position.Y);
+    
     public void SetPosition(Position position)
     {
         X = position.X;

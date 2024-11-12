@@ -172,7 +172,7 @@ public class Pk3FileLoader : BaseFileLoader
                 
                 foreach (var runnable in allScripts)
                 {
-                    var attribute = runnable.GetCustomAttribute<PfWolfScriptAttribute>();
+                    var attribute = runnable.GetCustomAttribute<PfWolfSceneAttribute>();
                     if (runnable.IsSubclassOf(typeof(Scene)))
                     {
                         scriptAssets.Add(new SceneAsset

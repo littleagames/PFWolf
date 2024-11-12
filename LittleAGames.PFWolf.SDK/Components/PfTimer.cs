@@ -13,6 +13,8 @@ public class PfTimer : Component
 
     public bool IsRunning => !_paused;
 
+    public long GetTime() => _timeInTics;
+
     /// <summary>
     /// Begins the timer
     /// </summary>
@@ -27,13 +29,16 @@ public class PfTimer : Component
             _timeInTics++;
     }
 
-    public long GetTime() => _timeInTics;
-
     /// <summary>
     /// Stops the timer
     /// </summary>
     public void Stop()
     {
         _paused = true;
+    }
+
+    public void Reset()
+    {
+        _timeInTics = 0;
     }
 }

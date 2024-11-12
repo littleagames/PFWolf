@@ -5,6 +5,8 @@ public class SceneManager
     private readonly IVideoManager _videoManager;
     private readonly IAssetManager _assetManager;
     private readonly IInputManager _inputManager;
+    
+    private dynamic? _contextData = null;
 
     public SceneManager(IVideoManager videoManager, IAssetManager assetManager, IInputManager inputManager)
     {
@@ -14,13 +16,15 @@ public class SceneManager
     }
     
     private Scene? _currentScene = null;
-    public void LoadScene(string sceneName)
+    public void LoadScene(string sceneName, dynamic? contextData = null)
     {
 #if DEBUG
         if (sceneName.Equals("wolf3d:MainMenuScene", StringComparison.CurrentCultureIgnoreCase))
             _currentScene = new MainMenuScene();
         else if (sceneName.Equals("wolf3d:EpisodeSelectScene", StringComparison.CurrentCultureIgnoreCase))
             _currentScene = new EpisodeSelectScene();
+        else if (sceneName.Equals("wolf3d:SkillSelectScene"))
+            _currentScene = new SkillSelectScene();
         else
             _currentScene = new MainMenuScene();
 #else
@@ -36,6 +40,7 @@ public class SceneManager
         }
 #endif
 
+        _currentScene.StoreContextData(contextData);
         _currentScene?.UpdateInputHandler(_inputManager.InputHandler);
         _currentScene?.OnStart();
     }
@@ -44,6 +49,8 @@ public class SceneManager
     {
         if (_currentScene == null)
             return;
+
+        //StoreContextData(_currentScene.ContextData);
         
         //_currentScene.UpdateInputHandler(_inputManager.InputHandler); // convert input manager into pfwolfinputmanager
         _currentScene.OnPreUpdate();
@@ -69,7 +76,7 @@ public class SceneManager
                 throw new Exception($"{_currentScene.GetType().Name} does not have a scene set to load.");
             }
                 
-            LoadScene(nextScene);
+            LoadScene(nextScene, _currentScene.ContextData);
         }
         // TODO: Use _currentScene to check if scene name has changed, if so, end the scene, and create a new one with that name
         // If the new one doesn't exist, error, and don't destroy current scene or do anything
@@ -85,5 +92,13 @@ public class SceneManager
     {
         component.OnUpdate();
         _videoManager.Update(component);
+    }
+    
+    private void StoreContextData(dynamic? data)
+    {
+        if (data != null)
+        {
+            _contextData = data;
+        }
     }
 }

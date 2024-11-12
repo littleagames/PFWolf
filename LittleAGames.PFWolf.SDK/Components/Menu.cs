@@ -63,9 +63,16 @@ public class Menu : RenderComponent
 
         CurrentIndex = next;
     }
-    
+
     public Position GetCursorPosition()
-        => new Position(X, Y+CurrentIndex*LineSpacing);
+    {
+        if (!MenuItems.Any())
+        {
+            return new Position(X & -8, Y);
+        }
+        
+        return new Position((MenuItems[CurrentIndex].X - MenuTextIndent) & -8, MenuItems[CurrentIndex].Y);
+    }
 
     public void PerformAction()
     {

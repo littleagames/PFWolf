@@ -1,43 +1,98 @@
-﻿
-using LittleAGames.PFWolf.SDK;
-using LittleAGames.PFWolf.SDK.Components;
-
-[PfWolfScript("wolf3d:EpisodeSelectScene")]
+﻿[PfWolfScene("wolf3d:EpisodeSelectScene")]
 public class EpisodeSelectScene : MenuScene
 {
-    private readonly PfTimer _pfTimer = new();
-    private readonly Fader _fadeInFader = Fader.Create(1.0f, 0.0f, 0xFF, 0x00, 0x00, 20);
-    private readonly Fader _fadeOutFader = Fader.Create(0.0f, 1.0f, 0xFF, 0x00, 0x00, 20);
-
+    private const int MenuX = 10;
+    private const int MenuY = 23;
+    private const int MenuWidth = 300;
+    private const int MenuHeight = 154;
+    private const int MenuIndent = 88;
+    private const int LineSpacing = 13;
+    
     public EpisodeSelectScene()
-    :base (10, 23, 300, 254, 88, 13)
+        :base (MenuX, MenuY, MenuWidth, MenuHeight, MenuIndent, LineSpacing)
     {
-        Menu.AddMenuItem("Episode 1", ActiveState.Active, NoOp);
-        Menu.AddMenuItem("Escape from Wolfenstein", ActiveState.Disabled, null);
-        Menu.AddMenuItem("Episode 2", ActiveState.Active, NoOp);
-        Menu.AddMenuItem("Operation: Eisenfaust", ActiveState.Disabled, null);
-        Menu.AddMenuItem("Episode 3", ActiveState.Active, NoOp);
-        Menu.AddMenuItem("Die, Fuhrer, Die!", ActiveState.Disabled, null);
-        Menu.AddMenuItem("Episode 4", ActiveState.Active, NoOp);
-        Menu.AddMenuItem("A Dark Secret", ActiveState.Disabled, null);
-        Menu.AddMenuItem("Episode 5", ActiveState.Active, NoOp);
-        Menu.AddMenuItem("Trail of the Madman", ActiveState.Disabled, null);
-        Menu.AddMenuItem("Episode 6", ActiveState.Active, NoOp);
-        Menu.AddMenuItem("Confrontation", ActiveState.Disabled, null);
+        Menu.AddMenuItem("Episode 1\nEscape from Wolfenstein", ActiveState.Active, SelectEpisode);
+        Menu.AddMenuItem("", ActiveState.Disabled, null);
+        Menu.AddMenuItem("Episode 2\nOperation: Eisenfaust", ActiveState.Active, SelectEpisode);
+        Menu.AddMenuItem("", ActiveState.Disabled, null);
+        Menu.AddMenuItem("Episode 3\nDie, Fuhrer, Die!", ActiveState.Active, SelectEpisode);
+        Menu.AddMenuItem("", ActiveState.Disabled, null);
+        Menu.AddMenuItem("Episode 4\nA Dark Secret", ActiveState.Active, SelectEpisode);
+        Menu.AddMenuItem("", ActiveState.Disabled, null);
+        Menu.AddMenuItem("Episode 5\nTrail of the Madman", ActiveState.Active, SelectEpisode);
+        Menu.AddMenuItem("", ActiveState.Disabled, null);
+        Menu.AddMenuItem("Episode 6\nConfrontation", ActiveState.Active, SelectEpisode);
+        Menu.AddMenuItem("", ActiveState.Disabled, null);
         
-        Components.Add(Wolf3DBorderedWindow.Create(68, 52, 178, 13*9+6));
+        Components.Add(Graphic.Create("c_mouselback", 112, 184));
+        Components.Add(Wolf3DBorderedWindow.Create(MenuX-4, MenuY-4, MenuWidth+8, MenuHeight+8));
+        
+        // Added here for priority
         Components.Add(Menu);
+        Components.Add(Cursor);
         
-        Components.Add(Graphic.Create("C_Cursor1", 10, 23+13*0));
-        
-        Components.Add(_pfTimer);
-        Components.Add(_fadeInFader);
-        Components.Add(_fadeOutFader);
+        // TODO: Orientation.Centered
+        Components.Add(Text.Create("Which Episode to Play?", MenuX, 2, "LargeFont", 0x47));
+        Components.Add(Graphic.Create("c_episode1", MenuX + 32, MenuY));
+        Components.Add(Graphic.Create("c_episode2", MenuX + 32, MenuY + 1 * 26));
+        Components.Add(Graphic.Create("c_episode3", MenuX + 32, MenuY + 2 * 26));
+        Components.Add(Graphic.Create("c_episode4", MenuX + 32, MenuY + 3 * 26));
+        Components.Add(Graphic.Create("c_episode5", MenuX + 32, MenuY + 4 * 26));
+        Components.Add(Graphic.Create("c_episode6", MenuX + 32, MenuY + 5 * 26));
+    }
+
+    public override void OnStart()
+    {
+        if (!FadeInFader.IsFading)
+            FadeInFader.BeginFade();
     }
     
-    public void NoOp()
+    public override void OnUpdate()
     {
-        return;
-    }
+        if (!FadeInFader.IsComplete)
+            return;
 
+        // TODO: This should be in a HandleMenu call
+        if (Input.IsKeyDown(Keys.Down))
+        {
+            Menu.MoveDown();
+            Input.ClearKeysDown();
+            Cursor.SetPosition(Menu.GetCursorPosition());
+            return;
+        }
+        
+        if (Input.IsKeyDown(Keys.Up))
+        {
+            Menu.MoveUp();
+            Input.ClearKeysDown();
+            Cursor.SetPosition(Menu.GetCursorPosition());
+            return;
+        }
+        
+        if (Input.IsKeyDown(Keys.Return))
+        {
+            Menu.PerformAction(); // GoToMenu(menu.ActionMenu)
+            Input.ClearKeysDown();
+            Cursor.SetPosition(Menu.GetCursorPosition());
+            return;
+        }
+        
+        if (Input.IsKeyDown(Keys.Escape))
+        {
+            ReturnToParent();
+            return;
+        }
+    }
+    
+    public void SelectEpisode()
+    {
+        // TODO: Check ContextData["IsInGame"]
+        var sceneName = GetSceneName();
+        LoadScene("wolf3d:SkillSelectScene", new SceneContext
+        {
+            { "ParentMenu:Scene", sceneName },
+            { "ParentMenu:LastIndex", Menu.CurrentIndex },
+            { "SelectedEpisode", Menu.CurrentIndex / 2 }
+        });
+    }
 }

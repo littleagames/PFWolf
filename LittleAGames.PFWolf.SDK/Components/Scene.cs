@@ -9,6 +9,8 @@ public abstract class Scene : RunnableBase
 
     public ComponentCollection Components { get; private set; } = new();
 
+    public SceneContext? ContextData { get; private set; }
+    
     public InputHandler Input { get; private set; } = new();
 
     public virtual void OnStart()
@@ -32,14 +34,33 @@ public abstract class Scene : RunnableBase
     {
     }
 
-    protected void LoadScene(string sceneName)
+    protected void LoadScene(string sceneName, SceneContext? data = null)
     {
+        StoreContextData(data);
         ChangeScene = true;
         SceneQueuedToLoad = sceneName;
+        // TODO: Store data (overwrite whatever was there?)
+    }
+
+    public void StoreContextData(SceneContext? data)
+    {
+        if (data != null)
+        {
+            ContextData = data;
+        }
     }
 
     public void UpdateInputHandler(InputHandler handler)
     {
         Input = handler;
+    }
+
+    protected string GetSceneName()
+    {
+        var attribute = Attribute.GetCustomAttributes(this.GetType(), typeof(PfWolfSceneAttribute))
+            .Cast<PfWolfSceneAttribute>()
+            .FirstOrDefault();
+        
+        return attribute?.ScriptName ?? GetType().Name;
     }
 }
