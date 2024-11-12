@@ -1,4 +1,6 @@
-﻿namespace LittleAGames.PFWolf.SDK.Components;
+﻿using LittleAGames.PFWolf.SDK.Handlers;
+
+namespace LittleAGames.PFWolf.SDK.Components;
 
 public abstract class Scene : RunnableBase
 {
@@ -6,6 +8,8 @@ public abstract class Scene : RunnableBase
     public string? SceneQueuedToLoad { get; private set; } = null;
 
     public ComponentCollection Components { get; private set; } = new();
+
+    public InputHandler Input { get; private set; } = new();
 
     public virtual void OnStart()
     {
@@ -32,5 +36,10 @@ public abstract class Scene : RunnableBase
     {
         ChangeScene = true;
         SceneQueuedToLoad = sceneName;
+    }
+
+    public void UpdateInputHandler(InputHandler handler)
+    {
+        Input = handler;
     }
 }

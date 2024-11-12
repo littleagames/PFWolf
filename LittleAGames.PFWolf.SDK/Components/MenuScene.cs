@@ -2,5 +2,5 @@
 
 public class MenuScene : Scene
 {
-    protected Menu Menu { get; set; }
+    protected Menu Menu { get; init; } = null!;
 }

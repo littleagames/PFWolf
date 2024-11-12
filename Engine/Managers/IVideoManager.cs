@@ -8,5 +8,7 @@ public interface IVideoManager
     void Update(Component component);
     void UpdateScreen();
 
+    void LimitFrameRate(int frames);
+
     void Shutdown();
 }

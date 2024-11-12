@@ -7,11 +7,13 @@ public class SceneManager
 {
     private readonly IVideoManager _videoManager;
     private readonly IAssetManager _assetManager;
+    private readonly IInputManager _inputManager;
 
-    public SceneManager(IVideoManager videoManager, IAssetManager assetManager)
+    public SceneManager(IVideoManager videoManager, IAssetManager assetManager, IInputManager inputManager)
     {
         _videoManager = videoManager;
         _assetManager = assetManager;
+        _inputManager = inputManager;
     }
     
     private Scene? _currentScene = null;
@@ -32,6 +34,7 @@ public class SceneManager
         }
 #endif
 
+        _currentScene.UpdateInputHandler(_inputManager.InputHandler);
         _currentScene?.OnStart();
     }
 
@@ -40,6 +43,7 @@ public class SceneManager
         if (_currentScene == null)
             return;
         
+        //_currentScene.UpdateInputHandler(_inputManager.InputHandler); // convert input manager into pfwolfinputmanager
         _currentScene.OnPreUpdate();
         
         foreach (var component in _currentScene.Components.GetComponents())

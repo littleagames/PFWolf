@@ -6,6 +6,8 @@ public class ComponentCollection
 
     public void Add(Component component)
     {
+        if (component == null)
+            throw new Exception("Cannot add null component");
         _components.Add(component);
     }
     

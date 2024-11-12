@@ -24,9 +24,12 @@ assetManager.AddGamePack(gamePack, directory);
 assetManager.AddModPack("D:\\PFWolf-Assets", "pfwolf.pk3");
 Console.WriteLine($"Assets loaded: {assetManager.AssetCount}");
 
+var inputManager = new SDLInputManager();
+
 var videoManager = new SDLVideoManager(assetManager, gameConfig);
 
 new GameManager(
     assetManager,
     videoManager,
+    inputManager,
     gameConfig).Start();

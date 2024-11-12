@@ -180,6 +180,18 @@ public class SDLVideoManager : IVideoManager
         UpdateScreen(_screenBuffer);
     }
 
+    public void LimitFrameRate(int frames)
+    {
+        // ulong end = SDL.SDL_GetPerformanceCounter();
+        // var elapsedMs = (end - start) / (float)SDL.SDL_GetPerformanceFrequency() * 1000.0f;
+        //     
+        // var frameMs = 14.28571428571429f;
+        // if (elapsedMs < frameMs)
+        // {
+        //     SDL.SDL_Delay((uint)(frameMs - elapsedMs));
+        // }
+    }
+
     public void Shutdown()
     {
         // Clean up the resources that were created.
