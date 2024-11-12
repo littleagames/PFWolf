@@ -26,7 +26,7 @@ public class Menu : RenderComponent
     public static Menu Create(int x, int y, int menuTextIndent, int lineSpacing)
         => new Menu(x, y, menuTextIndent, lineSpacing);
 
-    public void AddMenuItem(string text, ActiveState activeState, Action action)
+    public void AddMenuItem(string text, ActiveState activeState, Action? action)
     {
         var menuIndex = MenuItems.Count;
         var itemX = X + MenuTextIndent;
@@ -63,6 +63,9 @@ public class Menu : RenderComponent
 
         CurrentIndex = next;
     }
+    
+    public Position GetCursorPosition()
+        => new Position(X, Y+CurrentIndex*LineSpacing);
 
     public void PerformAction()
     {

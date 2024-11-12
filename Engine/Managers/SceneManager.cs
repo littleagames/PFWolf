@@ -1,7 +1,4 @@
-﻿using LittleAGames.PFWolf.SDK.Assets;
-using LittleAGames.PFWolf.SDK.Components;
-
-namespace Engine.Managers;
+﻿namespace Engine.Managers;
 
 public class SceneManager
 {
@@ -20,7 +17,12 @@ public class SceneManager
     public void LoadScene(string sceneName)
     {
 #if DEBUG
-        _currentScene = new MainMenuScene();
+        if (sceneName.Equals("wolf3d:MainMenuScene", StringComparison.CurrentCultureIgnoreCase))
+            _currentScene = new MainMenuScene();
+        else if (sceneName.Equals("wolf3d:EpisodeSelectScene", StringComparison.CurrentCultureIgnoreCase))
+            _currentScene = new EpisodeSelectScene();
+        else
+            _currentScene = new MainMenuScene();
 #else
         var scriptAsset = (ScriptAsset?)_assetManager.FindAsset(AssetType.ScriptScene, sceneName);
         if (scriptAsset == null)
@@ -34,7 +36,7 @@ public class SceneManager
         }
 #endif
 
-        _currentScene.UpdateInputHandler(_inputManager.InputHandler);
+        _currentScene?.UpdateInputHandler(_inputManager.InputHandler);
         _currentScene?.OnStart();
     }
 

@@ -1,6 +1,4 @@
-﻿using LittleAGames.PFWolf.SDK.Assets;
-
-namespace Engine;
+﻿namespace Engine;
 
 public class GameConfiguration
 {

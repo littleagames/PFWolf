@@ -1,15 +1,11 @@
-﻿namespace LittleAGames.PFWolf.SDK.Assets;
+﻿using LittleAGames.PFWolf.SDK.Models;
+
+namespace LittleAGames.PFWolf.SDK.Assets;
 
 public abstract class VgaAsset : Asset
 {
     public override string Name { get; set; } = null!;
     public override byte[] RawData { get; set; } = [];
-}
-
-public class Dimension(ushort width, ushort height)
-{
-    public ushort Width { get; private set; } = width;
-    public ushort Height { get; private set; } = height;
 }
 
 public class StructPicAsset : VgaAsset

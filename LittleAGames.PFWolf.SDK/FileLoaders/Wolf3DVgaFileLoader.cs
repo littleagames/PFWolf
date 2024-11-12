@@ -1,9 +1,4 @@
-﻿using LittleAGames.PFWolf.SDK.Abstract;
-using LittleAGames.PFWolf.SDK.Assets;
-using LittleAGames.PFWolf.SDK.Compression;
-using LittleAGames.PFWolf.SDK.Utilities;
-
-namespace LittleAGames.PFWolf.SDK.FileLoaders;
+﻿namespace LittleAGames.PFWolf.SDK.FileLoaders;
 
 public class Wolf3DVgaFileLoader : BaseFileLoader
 {
