@@ -7,6 +7,8 @@ public class SkillSelectScene : MenuScene
     private const int MenuHeight = 13*4+15;
     private const int MenuIndent = 24;
     private const int LineSpacing = 13;
+
+    private Graphic _skillGraphic;
     
     public SkillSelectScene()
         :base (MenuX, MenuY, MenuWidth, MenuHeight, MenuIndent, LineSpacing)
@@ -24,8 +26,8 @@ public class SkillSelectScene : MenuScene
         // Added here for priority
         Components.Add(Menu);
         Components.Add(Cursor);
-        
-        Components.Add(Graphic.Create("c_babymode", MenuX + 185, MenuY + 7));
+        _skillGraphic = Graphic.Create("c_babymode", MenuX + 185, MenuY + 7);
+        Components.Add(_skillGraphic);
     }
 
     public override void OnStart()
@@ -45,6 +47,7 @@ public class SkillSelectScene : MenuScene
             Menu.MoveDown();
             Input.ClearKeysDown();
             Cursor.SetPosition(Menu.GetCursorPosition());
+            UpdateSkillGraphic(Menu.CurrentIndex);
             return;
         }
         
@@ -53,6 +56,7 @@ public class SkillSelectScene : MenuScene
             Menu.MoveUp();
             Input.ClearKeysDown();
             Cursor.SetPosition(Menu.GetCursorPosition());
+            UpdateSkillGraphic(Menu.CurrentIndex);
             return;
         }
         
@@ -79,5 +83,18 @@ public class SkillSelectScene : MenuScene
             { "SelectedSkill", Menu.CurrentIndex },
             { "SelectedEpisode", episode }
         });
+    }
+
+    private void UpdateSkillGraphic(int skillIndex)
+    {
+        var skillAssets = new[]
+        {
+            "C_BabyMode",
+            "C_Easy",
+            "C_Normal",
+            "C_Hard"
+        };
+        
+        _skillGraphic.SetAsset(skillAssets[skillIndex]);
     }
 }

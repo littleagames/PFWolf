@@ -2,7 +2,7 @@
 
 public class Graphic : RenderComponent
 {
-    public string AssetName { get; }
+    public string AssetName { get; private set; }
     public int X { get; private set; }
     public int Y { get; private set; }
 
@@ -23,5 +23,10 @@ public class Graphic : RenderComponent
     {
         X = position.X;
         Y = position.Y;
+    }
+
+    public void SetAsset(string assetName)
+    {
+        AssetName = assetName;
     }
 }
