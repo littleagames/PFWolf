@@ -12,6 +12,7 @@ public abstract class Scene : RunnableBase
     public SceneContext? ContextData { get; private set; }
     
     public InputHandler Input { get; private set; } = new();
+    public RenderHandler Renderer { get; private set; } = new();
 
     public virtual void OnStart()
     {
@@ -55,6 +56,10 @@ public abstract class Scene : RunnableBase
         Input = handler;
     }
 
+    public void UpdateRenderHandler(RenderHandler handler)
+    {
+        Renderer = handler;
+    }
     protected string GetSceneName()
     {
         var attribute = Attribute.GetCustomAttributes(this.GetType(), typeof(PfWolfSceneAttribute))

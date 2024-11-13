@@ -10,7 +10,7 @@ public class MenuScene : Scene
 
     public MenuScene(int x, int y, int width, int height, int menuIndent, int lineSpacing)
     {
-        FadeInFader = Fader.Create(1.0f, 0.0f, 0xFF, 0x00, 0x00, 20);
+        FadeInFader = Fader.Create(1.0f, 0.0f, 0x00, 0x00, 0x00, 20);
         FadeOutFader = Fader.Create(0.0f, 1.0f, 0xFF, 0x00, 0x00, 20);
         Menu = Menu.Create(x, y, menuIndent, lineSpacing);
         Components.Add(Background.Create(0x29));

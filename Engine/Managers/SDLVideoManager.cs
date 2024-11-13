@@ -111,12 +111,36 @@ public class SDLVideoManager : IVideoManager
         
         _isInitialized = true;
     }
+    public static byte[] Convert2DArrayTo1D(byte[,] array2D)
+    {
+        int rows = array2D.GetLength(0);
+        int cols = array2D.GetLength(1);
+        byte[] array1D = new byte[rows * cols];
 
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                array1D[i * cols + j] = array2D[i, j];
+            }
+        }
+
+        return array1D;
+    }
     public void Update(Component component)
     {
         if (!_isInitialized)
             throw new InvalidOperationException("Video Manager is not initialized");
 
+        
+        if (component.GetType().IsAssignableTo(typeof(Render)))
+        {
+            if (((RenderComponent)component).Hidden)
+                return;
+            var rect = (Render)component;
+            MemToScreen(Convert2DArrayTo1D(rect.Data), rect.Width, rect.Height, rect.X, rect.Y);
+            return;
+        }
         
         if (component.GetType().IsAssignableTo(typeof(Rectangle)))
         {
