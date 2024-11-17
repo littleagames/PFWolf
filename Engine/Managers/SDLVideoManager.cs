@@ -138,7 +138,7 @@ public class SDLVideoManager : IVideoManager
             if (((RenderComponent)component).Hidden)
                 return;
             var rect = (Render)component;
-            MemToScreen(Convert2DArrayTo1D(rect.Data), rect.Width, rect.Height, rect.X, rect.Y);
+            MemToScreenScaledCoord(rect.Data, rect.Width, rect.Height, rect.X, rect.Y);
             return;
         }
         
@@ -303,6 +303,11 @@ public class SDLVideoManager : IVideoManager
     {
          MemToScreenScaledCoord(source, width, height, ScaleFactorX * x, ScaleFactorY * y);
     }
+    
+    private void MemToScreen(byte[,] source, int width, int height, int x, int y)
+    {
+        MemToScreenScaledCoord(source, width, height, ScaleFactorX * x, ScaleFactorY * y);
+    }
 
     private void MemToScreenScaledCoord(byte[] source, int width, int height, int destx, int desty)
     {
@@ -321,6 +326,42 @@ public class SDLVideoManager : IVideoManager
                 for (i = 0, sci = 0; i < width; i++, sci += ScaleFactorX)
                 {
                     byte col = source[(j * width) + i];
+                    for (m = 0; m < ScaleFactorY; m++)
+                    {
+                        for (n = 0; n < ScaleFactorX; n++)
+                        {
+                            if (col == 0xff) continue;
+            
+                            var xlength = sci + n + destx;
+                            var ylength = scj + m + desty;
+                            if (ylength > _yLookup.Length || (_yLookup[scj + m + desty] + xlength) > (_screenSize.Width * _screenSize.Height)) return;
+                            pixels[_yLookup[scj + m + desty] + sci + n + destx] = col;
+                        }
+                    }
+                }
+            }
+        }
+        
+        UnlockSurface(_screenBuffer);
+    }
+    
+    private void MemToScreenScaledCoord(byte[,] source, int width, int height, int destx, int desty)
+    {
+        int i, j, sci, scj;
+        uint m, n;
+
+        var surfacePtr = LockSurface(_screenBuffer);
+        unsafe
+        {
+            byte* pixels = (byte*)surfacePtr;
+
+            // Set each pixel to a red color (ARGB format)
+            
+            for (j = 0, scj = 0; j < height; j++, scj += ScaleFactorX)
+            {
+                for (i = 0, sci = 0; i < width; i++, sci += ScaleFactorX)
+                {
+                    byte col = source[i, j];
                     for (m = 0; m < ScaleFactorY; m++)
                     {
                         for (n = 0; n < ScaleFactorX; n++)

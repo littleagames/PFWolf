@@ -20,7 +20,7 @@ internal class RaycastingEngine : Form
 
     public RaycastingEngine()
     {
-        this.Width = 800;
+        this.Width = 640;
         this.Height = 400;
         this.Text = "Raycasting Engine";
         renderTimer = new Timer();

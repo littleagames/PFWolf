@@ -7,13 +7,15 @@ public class GameManager
     private readonly IAssetManager _assetManager;
     private readonly IVideoManager _videoManager;
     private readonly IInputManager _inputManager;
+    private readonly IMapManager _mapManager;
     private readonly GameConfiguration _gameConfig;
 
-    public GameManager(IAssetManager assetManager, IVideoManager videoManager, IInputManager inputManager, GameConfiguration gameConfig)
+    public GameManager(IAssetManager assetManager, IVideoManager videoManager, IInputManager inputManager, IMapManager mapManager, GameConfiguration gameConfig)
     {
         _assetManager = assetManager;
         _videoManager = videoManager;
         _inputManager = inputManager;
+        _mapManager = mapManager;
         _gameConfig = gameConfig;
     }
     
@@ -21,7 +23,7 @@ public class GameManager
     {
         _videoManager.Initialize();
         
-        var sceneManager = new SceneManager(_videoManager, _assetManager, _inputManager);
+        var sceneManager = new SceneManager(_videoManager, _assetManager, _inputManager, _mapManager);
         sceneManager.LoadScene(_gameConfig.StartingScene);
         
         // GameLoop
@@ -39,7 +41,7 @@ public class GameManager
             quit = _inputManager.IsQuitTriggered;
             
             // Handle physics
-           // sceneManager.OnPreUpdate();
+            sceneManager.OnPreUpdate();
             
             _videoManager.LimitFrameRate(70);
             ulong end = SDL.SDL_GetPerformanceCounter();
@@ -53,7 +55,7 @@ public class GameManager
             
             // Handle rendering
             sceneManager.OnUpdate();
-            //sceneManager.OnPostUpdate();
+            sceneManager.OnPostUpdate();
         }
         
         Quit();

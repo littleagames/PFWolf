@@ -35,6 +35,18 @@ public abstract class Scene : RunnableBase
     {
     }
 
+    public Asset? GetComponent<T>() where T : Component
+    {
+        var foundComponent = Components.GetComponents().FirstOrDefault(x => x.GetType() == typeof(T));
+        if (foundComponent == null) return null;
+
+        if (foundComponent is Map)
+        {
+        }
+
+        throw new NotImplementedException();
+    }
+
     protected void LoadScene(string sceneName, SceneContext? data = null)
     {
         StoreContextData(data);
@@ -56,10 +68,6 @@ public abstract class Scene : RunnableBase
         Input = handler;
     }
 
-    public void UpdateRenderHandler(RenderHandler handler)
-    {
-        Renderer = handler;
-    }
     protected string GetSceneName()
     {
         var attribute = Attribute.GetCustomAttributes(this.GetType(), typeof(PfWolfSceneAttribute))

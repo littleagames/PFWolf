@@ -10,14 +10,24 @@ public class InitializeGameScene : Scene
     
     
     private int[,] map = {
-        {1, 1, 1, 1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 1, 0, 1, 0, 0, 1},
-        {1, 0, 0, 0, 0, 1, 0, 1},
-        {1, 1, 1, 1, 1, 1, 1, 1}
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     };
-    private float posX = 3.5f, posY = 3.5f; // Player's position
-    private float dirX = -1, dirY = 0; // Initial direction vector
+    private float posX = 12.5f, posY = 3.5f; // Player's position
+    private float dirX = 0, dirY = 0; // Initial direction vector
     private float planeX = 0, planeY = 0.66f; // Camera plane (determines FOV)
 
     
@@ -58,11 +68,13 @@ public class InitializeGameScene : Scene
     {
         if (Input.IsKeyDown(Keys.Left))
         {
+            posX -= 0.1f;
             PlayerAngle = (PlayerAngle - 1.0f) % 360;
             Console.WriteLine($"PlayerAngle: {PlayerAngle}");
         }
         else if (Input.IsKeyDown(Keys.Right))
         {
+            posX += 0.1f;
             PlayerAngle = (PlayerAngle + 1.0f) % 360;
             Console.WriteLine($"PlayerAngle: {PlayerAngle}");
         }
@@ -70,18 +82,21 @@ public class InitializeGameScene : Scene
         if (Input.IsKeyDown(Keys.Up))
         {
             Console.WriteLine($"Move up");
+            posY += 0.1f;
         }
         else if (Input.IsKeyDown(Keys.Down))
         {
             Console.WriteLine($"Move back");
+            posY -= 0.1f;
         }
         // TODO: Play loop scene?
     }
 
     private void ThreeDRefresh()
     {
-        int screenWidth = 320;
-        int screenHeight = 200;
+        _render.Clear();
+        int screenWidth = _render.Width;
+        int screenHeight = _render.Height;
 
         for (int x = 0; x < screenWidth; x++)
         {
@@ -149,7 +164,7 @@ public class InitializeGameScene : Scene
             int drawEnd = lineHeight / 2 + screenHeight / 2;
 
             //Color color = (side == 1) ? Color.DarkGray : Color.Gray;
-            byte color = (byte)((side == 1) ? 0x1f : 0x13);
+            byte color = (byte)((side == 1) ? 0x13 : 0x1a);
 
             _render.DrawLine(x, drawStart, x, drawEnd, color);
         }

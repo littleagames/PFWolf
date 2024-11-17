@@ -5,28 +5,23 @@ public class SceneManager
     private readonly IVideoManager _videoManager;
     private readonly IAssetManager _assetManager;
     private readonly IInputManager _inputManager;
-    
+    private readonly IMapManager _mapManager;
+
     private dynamic? _contextData = null;
 
-    public SceneManager(IVideoManager videoManager, IAssetManager assetManager, IInputManager inputManager)
+    public SceneManager(IVideoManager videoManager, IAssetManager assetManager, IInputManager inputManager, IMapManager mapManager)
     {
         _videoManager = videoManager;
         _assetManager = assetManager;
         _inputManager = inputManager;
+        _mapManager = mapManager;
     }
     
     private Scene? _currentScene = null;
     public void LoadScene(string sceneName, dynamic? contextData = null)
     {
-#if FALSE//DEBUG
-        if (sceneName.Equals("wolf3d:MainMenuScene", StringComparison.CurrentCultureIgnoreCase))
-            _currentScene = new MainMenuScene();
-        else if (sceneName.Equals("wolf3d:EpisodeSelectScene", StringComparison.CurrentCultureIgnoreCase))
-            _currentScene = new EpisodeSelectScene();
-        else if (sceneName.Equals("wolf3d:SkillSelectScene"))
-            _currentScene = new SkillSelectScene();
-        else
-            _currentScene = new MainMenuScene();
+#if DEBUG
+            _currentScene = new GameLoopScene();
 #else
         var scriptAsset = (ScriptAsset?)_assetManager.FindAsset(AssetType.ScriptScene, sceneName);
         if (scriptAsset == null)
@@ -40,9 +35,46 @@ public class SceneManager
         }
 #endif
 
+        if (_currentScene == null)
+            return;
+        
         _currentScene.StoreContextData(contextData);
-        _currentScene?.UpdateInputHandler(_inputManager.InputHandler);
-        _currentScene?.OnStart();
+        _currentScene.UpdateInputHandler(_inputManager.InputHandler);
+        _currentScene.OnStart();
+        
+        foreach (var component in _currentScene.Components.GetComponents())
+        {
+            if (component is Map)
+            {
+                var map = (Map)component;
+                _mapManager.BuildMap(map /*, mapDefinitions*/);
+            }
+            
+            component.OnStart();
+            
+            foreach (var innerComponent in component.Children.GetComponents())
+            {
+                innerComponent.OnStart();
+            }
+        }
+    }
+
+    public void OnPreUpdate()
+    {
+        if (_currentScene == null)
+            return;
+        
+        // foreach (var component in _currentScene.Components.GetComponents())
+        // {
+        //     ComponentUpdate(component);
+        //     
+        //     foreach (var innerComponent in component.Children.GetComponents())
+        //     {
+        //         ComponentUpdate(innerComponent);
+        //     }
+        // }
+        
+        _currentScene.OnPreUpdate();
     }
 
     public void OnUpdate()
@@ -50,8 +82,6 @@ public class SceneManager
         if (_currentScene == null)
             return;
 
-        _currentScene.OnPreUpdate();
-        
         foreach (var component in _currentScene.Components.GetComponents())
         {
             ComponentUpdate(component);
@@ -80,6 +110,14 @@ public class SceneManager
         // This will omit the scene loader
     }
 
+    public void OnPostUpdate()
+    {
+        if (_currentScene == null)
+            return;
+        
+        _currentScene.OnPostUpdate();
+    }
+
     public void UnloadScene(string sceneName)
     {
         _currentScene?.OnDestroy();
@@ -88,6 +126,10 @@ public class SceneManager
     private void ComponentUpdate(Component component)
     {
         component.OnUpdate();
+        
+        
+        // TODO: If rendercomponent only
+        // TODO: Check here if any non-rendercomponents are being passed in
         _videoManager.Update(component);
     }
     
