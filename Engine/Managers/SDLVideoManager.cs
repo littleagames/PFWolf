@@ -127,25 +127,16 @@ public class SDLVideoManager : IVideoManager
 
         return array1D;
     }
-    public void Update(Component component)
+    public void Update(RenderComponent component)
     {
         if (!_isInitialized)
             throw new InvalidOperationException("Video Manager is not initialized");
 
-        
-        if (component.GetType().IsAssignableTo(typeof(Render)))
-        {
-            if (((RenderComponent)component).Hidden)
-                return;
-            var rect = (Render)component;
-            MemToScreenScaledCoord(rect.Data, rect.Width, rect.Height, rect.X, rect.Y);
+        if (component.Hidden)
             return;
-        }
         
         if (component.GetType().IsAssignableTo(typeof(Rectangle)))
         {
-            if (((RenderComponent)component).Hidden)
-                return;
             var rect = (Rectangle)component;
             DrawRectangle(rect.X, rect.Y, rect.Width, rect.Height, rect.Color);
             return;
@@ -153,8 +144,6 @@ public class SDLVideoManager : IVideoManager
         
         if (component.GetType().IsAssignableTo(typeof(Graphic)))
         {
-            if (((RenderComponent)component).Hidden)
-                return;
             var graphic = (Graphic)component;
             var graphicAsset = _assetManager.FindAsset(AssetType.Graphic, graphic.AssetName) as GraphicAsset;
             if (graphicAsset == null)
@@ -169,8 +158,6 @@ public class SDLVideoManager : IVideoManager
 
         if (component.GetType().IsAssignableTo(typeof(Text)))
         {
-            if (((RenderComponent)component).Hidden)
-                return;
             var text = (Text)component;
             var fontAsset = _assetManager.FindAsset(AssetType.Font, text.FontAssetName) as FontAsset;
             if (fontAsset == null)

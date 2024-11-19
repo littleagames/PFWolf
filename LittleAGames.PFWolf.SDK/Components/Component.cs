@@ -24,3 +24,7 @@ public abstract class RenderComponent : Component
 {
     public bool Hidden { get; set; } = false;
 }
+
+public abstract class MapComponent : Component
+{
+}

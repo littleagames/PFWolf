@@ -10,6 +10,12 @@
     <Compile Update="Components\TitleCardScene.cs">
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
     </Compile>
+    <Compile Update="Renderers\Wolf3dRaycastRenderer.cs">
+      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+    </Compile>
+    <Compile Update="Renderers\ViewportRenderer.cs">
+      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+    </Compile>
   </ItemGroup>
 
 </Project>

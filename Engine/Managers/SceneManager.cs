@@ -3,16 +3,14 @@
 public class SceneManager
 {
     private readonly IVideoManager _videoManager;
-    private readonly IAssetManager _assetManager;
     private readonly IInputManager _inputManager;
     private readonly IMapManager _mapManager;
 
     private dynamic? _contextData = null;
 
-    public SceneManager(IVideoManager videoManager, IAssetManager assetManager, IInputManager inputManager, IMapManager mapManager)
+    public SceneManager(IVideoManager videoManager, IInputManager inputManager, IMapManager mapManager)
     {
         _videoManager = videoManager;
-        _assetManager = assetManager;
         _inputManager = inputManager;
         _mapManager = mapManager;
     }
@@ -39,23 +37,12 @@ public class SceneManager
             return;
         
         _currentScene.StoreContextData(contextData);
-        _currentScene.UpdateInputHandler(_inputManager.InputHandler);
+        _currentScene.UpdateInputHandler(_inputManager.InputHandler); // TODO: Turn this into a component, remove this, and inputs are updated with the OnUpdate()
         _currentScene.OnStart();
         
         foreach (var component in _currentScene.Components.GetComponents())
         {
-            if (component is Map)
-            {
-                var map = (Map)component;
-                _mapManager.BuildMap(map /*, mapDefinitions*/);
-            }
-            
-            component.OnStart();
-            
-            foreach (var innerComponent in component.Children.GetComponents())
-            {
-                innerComponent.OnStart();
-            }
+            ComponentStart(component);
         }
     }
 
@@ -63,16 +50,6 @@ public class SceneManager
     {
         if (_currentScene == null)
             return;
-        
-        // foreach (var component in _currentScene.Components.GetComponents())
-        // {
-        //     ComponentUpdate(component);
-        //     
-        //     foreach (var innerComponent in component.Children.GetComponents())
-        //     {
-        //         ComponentUpdate(innerComponent);
-        //     }
-        // }
         
         _currentScene.OnPreUpdate();
     }
@@ -82,19 +59,15 @@ public class SceneManager
         if (_currentScene == null)
             return;
 
+        _currentScene.OnUpdate();
+        
         foreach (var component in _currentScene.Components.GetComponents())
         {
             ComponentUpdate(component);
-            
-            foreach (var innerComponent in component.Children.GetComponents())
-            {
-                ComponentUpdate(innerComponent);
-            }
         }
         
         _videoManager.UpdateScreen();
         
-        _currentScene.OnUpdate();
         if (_currentScene.ChangeScene)
         {
             var nextScene = _currentScene.SceneQueuedToLoad;
@@ -103,6 +76,8 @@ public class SceneManager
                 throw new Exception($"{_currentScene.GetType().Name} does not have a scene set to load.");
             }
                 
+            // TODO: Store the context data in a dictionary that is <sceneName, ContextData>
+            // TODO: Unload scene (so the previous scene can run its OnDestroy (or OnSleep(), or OnAwake())
             LoadScene(nextScene, _currentScene.ContextData);
         }
         // TODO: Use _currentScene to check if scene name has changed, if so, end the scene, and create a new one with that name
@@ -122,22 +97,42 @@ public class SceneManager
     {
         _currentScene?.OnDestroy();
     }
+    
+    private void ComponentStart(Component component)
+    {
+        component.OnStart();
+        foreach (var innerComponent in component.Children.GetComponents())
+        {
+            ComponentStart(innerComponent);
+        }
+        // if (component is InputComponent)
+        //     _inputManager.Start((InputComponent)component);
+        
+        // if (component is MapComponent)
+        //     _mapManager.Start((MapComponent)component);
+        
+        // if (component is RenderComponent)
+        //     _videoManager.Start((RenderComponent)component);
+        //
+    }
 
     private void ComponentUpdate(Component component)
     {
         component.OnUpdate();
         
+        // if (component is InputComponent)
+        //     _inputManager.Update((InputComponent)component);
+
+        if (component is MapComponent)
+            _mapManager.Update((MapComponent)component);
         
-        // TODO: If rendercomponent only
-        // TODO: Check here if any non-rendercomponents are being passed in
-        _videoManager.Update(component);
-    }
-    
-    private void StoreContextData(dynamic? data)
-    {
-        if (data != null)
+        if (component is RenderComponent)
+            _videoManager.Update((RenderComponent)component);
+        
+        
+        foreach (var innerComponent in component.Children.GetComponents())
         {
-            _contextData = data;
+            ComponentUpdate(innerComponent);
         }
     }
 }

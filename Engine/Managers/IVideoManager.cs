@@ -5,7 +5,7 @@ namespace Engine.Managers;
 public interface IVideoManager
 {
     void Initialize();
-    void Update(Component component);
+    void Update(RenderComponent component);
     void UpdateScreen();
 
     void LimitFrameRate(int frames);

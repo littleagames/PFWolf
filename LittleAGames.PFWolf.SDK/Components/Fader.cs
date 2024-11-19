@@ -1,7 +1,8 @@
 ﻿namespace LittleAGames.PFWolf.SDK.Components;
 
-public class Fader : PfTimer
+public class Fader : RenderComponent
 {
+    public PfTimer Timer;
     public float CurrentOpacity { get; private set; }
     public float OpacityBegin { get; }
     public float OpacityFinish { get; }
@@ -12,8 +13,8 @@ public class Fader : PfTimer
     
     public short Duration { get; }
 
-    public bool IsFading => GetTime() > 0 && !IsComplete;
-    public bool IsComplete => (Duration - GetTime()) <= 0;
+    public bool IsFading => Timer.GetTime() > 0 && !IsComplete;
+    public bool IsComplete => (Duration - Timer.GetTime()) <= 0;
 
     public static Fader Create(float opacityBegin, float opacityFinish, byte red, byte green, byte blue, short duration)
         => new(opacityBegin, opacityFinish, red, green, blue, duration);
@@ -35,6 +36,8 @@ public class Fader : PfTimer
         Blue = blue;
         
         Duration = duration;
+        Timer = new();
+        Children.Add(Timer);
     }
 
     public override void OnStart()
@@ -47,14 +50,14 @@ public class Fader : PfTimer
         if (IsFading)
             return;
         // Start the timer
-        base.Start();
+        Timer.Start();
     }
 
     public override void OnUpdate()
     {
         base.OnUpdate();
 
-        var currentTime = GetTime();
+        var currentTime = Timer.GetTime();
         if (currentTime > Duration)
             currentTime = Duration;
         
@@ -64,7 +67,7 @@ public class Fader : PfTimer
             // Prevent any precision errors
             // Just set it flat to finish value
             CurrentOpacity = OpacityFinish;
-            base.Stop();
+            Timer.Stop();
             return;
         }
 

@@ -26,7 +26,7 @@ assetManager.AddModPack("D:\\PFWolf-Assets", "pfwolf.pk3");
 assetManager.AddAssembly(typeof(LittleAGames.PFWolf.ExternalPk3ModPack.NoOp).Assembly);
 Console.WriteLine($"Assets loaded: {assetManager.AssetCount}");
 
-var mapManager = new MapManager(assetManager, new Wolf3dMapHandler()); // TODO: Choose map handler from game pack?
+var mapManager = new MapManager(assetManager); // TODO: Choose map handler from game pack?
 
 var inputManager = new SDLInputManager();
 

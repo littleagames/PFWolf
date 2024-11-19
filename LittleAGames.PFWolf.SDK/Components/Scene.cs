@@ -12,7 +12,7 @@ public abstract class Scene : RunnableBase
     public SceneContext? ContextData { get; private set; }
     
     public InputHandler Input { get; private set; } = new();
-    public RenderHandler Renderer { get; private set; } = new();
+    //public RenderHandler Renderer { get; private set; } = new();
 
     public virtual void OnStart()
     {
@@ -33,18 +33,6 @@ public abstract class Scene : RunnableBase
     
     public virtual void OnDestroy()
     {
-    }
-
-    public Asset? GetComponent<T>() where T : Component
-    {
-        var foundComponent = Components.GetComponents().FirstOrDefault(x => x.GetType() == typeof(T));
-        if (foundComponent == null) return null;
-
-        if (foundComponent is Map)
-        {
-        }
-
-        throw new NotImplementedException();
     }
 
     protected void LoadScene(string sceneName, SceneContext? data = null)

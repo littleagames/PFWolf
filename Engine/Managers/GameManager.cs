@@ -23,7 +23,7 @@ public class GameManager
     {
         _videoManager.Initialize();
         
-        var sceneManager = new SceneManager(_videoManager, _assetManager, _inputManager, _mapManager);
+        var sceneManager = new SceneManager(_videoManager, _inputManager, _mapManager);
         sceneManager.LoadScene(_gameConfig.StartingScene);
         
         // GameLoop
@@ -36,8 +36,7 @@ public class GameManager
             ulong start = SDL.SDL_GetPerformanceCounter();
 
             // Handle events
-            /*var inputHandler = */_inputManager.PollEvents();
-            //_sceneManager.UpdateInputHandler(inputHandler);
+            _inputManager.PollEvents();;
             quit = _inputManager.IsQuitTriggered;
             
             // Handle physics
