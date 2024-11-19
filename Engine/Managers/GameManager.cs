@@ -36,7 +36,7 @@ public class GameManager
             ulong start = SDL.SDL_GetPerformanceCounter();
 
             // Handle events
-            _inputManager.PollEvents();;
+            _inputManager.PollEvents();
             quit = _inputManager.IsQuitTriggered;
             
             // Handle physics

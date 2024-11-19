@@ -1,11 +1,9 @@
-﻿using LittleAGames.PFWolf.SDK.Handlers;
-using SDL2;
+﻿using SDL2;
 
 namespace Engine.Managers;
 
 public class SDLInputManager : IInputManager
 {
-    public InputHandler InputHandler { get; } = new();
     public bool IsQuitTriggered { get; private set; } = false;
 
     public void PollEvents()
@@ -17,13 +15,39 @@ public class SDLInputManager : IInputManager
                 case SDL.SDL_EventType.SDL_QUIT:
                     IsQuitTriggered = true;
                     break;
+                // case SDL.SDL_EventType.SDL_KEYDOWN:
+                //     var keyDown = MapKey(polledEvent.key.keysym.sym); //scancode, keymod?
+                //     InputHandler.SetKeyDown(keyDown);
+                //     break;
+                // case SDL.SDL_EventType.SDL_KEYUP:
+                //     var keyUp = MapKey(polledEvent.key.keysym.sym); //scancode, keymod?
+                //     InputHandler.SetKeyUp(keyUp);
+                //     break;
+            }
+        } 
+    }
+
+    public void Initialize(InputComponent component)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Update(InputComponent component)
+    {
+        while (SDL.SDL_PollEvent(out var polledEvent) != 0)
+        {
+            switch (polledEvent.type)
+            {
+                case SDL.SDL_EventType.SDL_QUIT:
+                    IsQuitTriggered = true;
+                    break;
                 case SDL.SDL_EventType.SDL_KEYDOWN:
                     var keyDown = MapKey(polledEvent.key.keysym.sym); //scancode, keymod?
-                    InputHandler.SetKeyDown(keyDown);
+                    component.SetKeyDown(keyDown);
                     break;
                 case SDL.SDL_EventType.SDL_KEYUP:
                     var keyUp = MapKey(polledEvent.key.keysym.sym); //scancode, keymod?
-                    InputHandler.SetKeyUp(keyUp);
+                    component.SetKeyUp(keyUp);
                     break;
             }
         } 

@@ -1,11 +1,12 @@
-﻿using LittleAGames.PFWolf.SDK.Handlers;
-
-namespace Engine.Managers;
+﻿namespace Engine.Managers;
 
 public interface IInputManager
 {
-    InputHandler InputHandler { get; }
     bool IsQuitTriggered { get; }
-
     void PollEvents();
+
+    void Initialize(InputComponent component);
+
+    void Update(InputComponent component);
+
 }

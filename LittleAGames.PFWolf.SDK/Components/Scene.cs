@@ -1,6 +1,4 @@
-﻿using LittleAGames.PFWolf.SDK.Handlers;
-
-namespace LittleAGames.PFWolf.SDK.Components;
+﻿namespace LittleAGames.PFWolf.SDK.Components;
 
 public abstract class Scene : RunnableBase
 {
@@ -11,8 +9,12 @@ public abstract class Scene : RunnableBase
 
     public SceneContext? ContextData { get; private set; }
     
-    public InputHandler Input { get; private set; } = new();
-    //public RenderHandler Renderer { get; private set; } = new();
+    public InputComponent Input { get; private set; } = new();
+
+    public Scene()
+    {
+        Components.Add(Input);
+    }
 
     public virtual void OnStart()
     {
@@ -50,12 +52,7 @@ public abstract class Scene : RunnableBase
             ContextData = data;
         }
     }
-
-    public void UpdateInputHandler(InputHandler handler)
-    {
-        Input = handler;
-    }
-
+    
     protected string GetSceneName()
     {
         var attribute = Attribute.GetCustomAttributes(this.GetType(), typeof(PfWolfSceneAttribute))
