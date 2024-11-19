@@ -22,6 +22,7 @@ public abstract class Component
 
 public abstract class RenderComponent : Component
 {
+    // TODO: X and Y? Width and Height? Do all render components have this?
     public bool Hidden { get; set; } = false;
 }
 

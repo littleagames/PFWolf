@@ -111,22 +111,7 @@ public class SDLVideoManager : IVideoManager
         
         _isInitialized = true;
     }
-    public static byte[] Convert2DArrayTo1D(byte[,] array2D)
-    {
-        int rows = array2D.GetLength(0);
-        int cols = array2D.GetLength(1);
-        byte[] array1D = new byte[rows * cols];
-
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < cols; j++)
-            {
-                array1D[i * cols + j] = array2D[i, j];
-            }
-        }
-
-        return array1D;
-    }
+    
     public void Update(RenderComponent component)
     {
         if (!_isInitialized)
@@ -134,51 +119,50 @@ public class SDLVideoManager : IVideoManager
 
         if (component.Hidden)
             return;
-        
-        if (component.GetType().IsAssignableTo(typeof(Rectangle)))
-        {
-            var rect = (Rectangle)component;
-            DrawRectangle(rect.X, rect.Y, rect.Width, rect.Height, rect.Color);
-            return;
-        }
-        
-        if (component.GetType().IsAssignableTo(typeof(Graphic)))
-        {
-            var graphic = (Graphic)component;
-            var graphicAsset = _assetManager.FindAsset(AssetType.Graphic, graphic.AssetName) as GraphicAsset;
-            if (graphicAsset == null)
-            {
-                // TODO: Placeholder for missing graphic?
-                return;
-            }
-            
-            MemToScreen(graphicAsset.RawData, graphicAsset.Dimensions.Width, graphicAsset.Dimensions.Height, graphic.X, graphic.Y);
-            return;
-        }
 
-        if (component.GetType().IsAssignableTo(typeof(Text)))
+        switch (component)
         {
-            var text = (Text)component;
-            var fontAsset = _assetManager.FindAsset(AssetType.Font, text.FontAssetName) as FontAsset;
-            if (fontAsset == null)
+            case ViewPort viewPort:
+                // TODO: Draw viewport to screen
+                MemToScreen(viewPort.Render(), viewPort.Width, viewPort.Height, viewPort.X, viewPort.Y);
+                break;
+            case Rectangle rect:
+                DrawRectangle(rect.X, rect.Y, rect.Width, rect.Height, rect.Color);
+                break;
+            case Graphic graphic:
             {
-                // TODO: Placeholder for missing font?
-                return;
-            }
+                var graphicAsset = _assetManager.FindAsset(AssetType.Graphic, graphic.AssetName) as GraphicAsset;
+                if (graphicAsset == null)
+                {
+                    // TODO: Placeholder for missing graphic?
+                    break;
+                }
             
-            DrawTextString(text.X, text.Y, text.String, fontAsset, text.Color);
-        }
-
-        if (component.GetType().IsAssignableTo(typeof(Fader)))
-        {
-            var fader = (Fader)component;
-            if (fader.IsFading)
+                MemToScreen(graphicAsset.RawData, graphicAsset.Dimensions.Width, graphicAsset.Dimensions.Height, graphic.X, graphic.Y);
+                break;
+            }
+            case Text text:
             {
-                var shiftedPalette = ShiftPalette(fader.Red, fader.Green, fader.Blue, fader.CurrentOpacity);
-                SetPalette(shiftedPalette, true);
-            }
+                var fontAsset = _assetManager.FindAsset(AssetType.Font, text.FontAssetName) as FontAsset;
+                if (fontAsset == null)
+                {
+                    // TODO: Placeholder for missing font?
+                    break;
+                }
             
-            return;
+                DrawTextString(text.X, text.Y, text.String, fontAsset, text.Color);
+                break;
+            }
+            case Fader fader:
+            {
+                if (fader.IsFading)
+                {
+                    var shiftedPalette = ShiftPalette(fader.Red, fader.Green, fader.Blue, fader.CurrentOpacity);
+                    SetPalette(shiftedPalette, true);
+                }
+            
+                break;
+            }
         }
     }
 

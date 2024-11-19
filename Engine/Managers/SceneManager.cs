@@ -39,7 +39,6 @@ public class SceneManager
         _currentScene.StoreContextData(contextData);
         _currentScene.UpdateInputHandler(_inputManager.InputHandler); // TODO: Turn this into a component, remove this, and inputs are updated with the OnUpdate()
         _currentScene.OnStart();
-        
         foreach (var component in _currentScene.Components.GetComponents())
         {
             ComponentStart(component);
@@ -108,8 +107,8 @@ public class SceneManager
         // if (component is InputComponent)
         //     _inputManager.Start((InputComponent)component);
         
-        // if (component is MapComponent)
-        //     _mapManager.Start((MapComponent)component);
+        if (component is MapComponent)
+            _mapManager.Initialize((MapComponent)component);
         
         // if (component is RenderComponent)
         //     _videoManager.Start((RenderComponent)component);

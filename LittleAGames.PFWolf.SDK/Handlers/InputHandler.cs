@@ -1,5 +1,6 @@
 ﻿namespace LittleAGames.PFWolf.SDK.Handlers;
 
+[Obsolete("To be replaced with the InputComponent")]
 public class InputHandler
 {
     private readonly HashSet<Keys> _keysPressed = new();
