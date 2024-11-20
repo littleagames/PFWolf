@@ -25,7 +25,7 @@ public class AutoMapRenderer : Renderer
     {
         _camera = camera;
         _map = map;
-        Scale = 1.0f;
+        Scale = 16.0f;
     }
 
     public static AutoMapRenderer Create(Camera camera, Map map)
@@ -61,14 +61,16 @@ public class AutoMapRenderer : Renderer
                 if (x >= scaleWidth)
                     continue;
                 
-                int originalX = (int) (x / Scale);
-                int originalY = (int) (y / Scale);
+                var originalX = (int) (x / Scale);
+                var originalY = (int) (y / Scale);
 
                 // TODO: How do I get asset raw data here?
                 var wall = _map.Walls[originalX, originalY];
                 if (wall != null && wall.North != null)
                 {
-                    graphic[y * width + x] = wall.North[0]; // TODO: Just the first pixel's color
+                    var gfxX =(int)((x - (Scale*originalX)) * 64/Scale); // TODO: Replace 64 with graphic width/height
+                    var gfxY =(int)((y - (Scale*originalY)) * 64/Scale);
+                    graphic[y * width + x] = wall.North[gfxX * 64 + gfxY]; // TODO: Raw data is rotated for easier vertical line rendering in raycast
                 }
                 else
                 {
