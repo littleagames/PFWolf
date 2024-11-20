@@ -2,7 +2,8 @@
 
 public abstract class Actor
 {
-    public virtual Position Position { get; private set; } = new(0,0);
+    public Position Position { get; private set; } = new(0,0);
+    public double Angle { get; private set; } = 0.0;
 
     public virtual void UpdatePosition(Position position)
     {
@@ -12,5 +13,10 @@ public abstract class Actor
     public virtual void UpdatePosition(int x, int y)
     {
         Position = new Position(x, y);
+    }
+
+    public virtual void UpdateAngle(double angle)
+    {
+        Angle = angle;
     }
 }

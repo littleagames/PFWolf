@@ -29,12 +29,12 @@ public class SDLInputManager : IInputManager
 
     public void Initialize(InputComponent component)
     {
-        throw new NotImplementedException();
     }
 
     public void Update(InputComponent component)
     {
-        while (SDL.SDL_PollEvent(out var polledEvent) != 0)
+        // TODO: This isn't exactly registering how I expected
+        if (SDL.SDL_PollEvent(out var polledEvent) != 0)
         {
             switch (polledEvent.type)
             {
@@ -63,6 +63,10 @@ public class SDLInputManager : IInputManager
             SDL.SDL_Keycode.SDLK_RIGHT => Keys.Right,
             SDL.SDL_Keycode.SDLK_RETURN => Keys.Return,
             SDL.SDL_Keycode.SDLK_ESCAPE => Keys.Escape,
+            SDL.SDL_Keycode.SDLK_MINUS => Keys.Minus,
+            SDL.SDL_Keycode.SDLK_EQUALS => Keys.Equals,
+            SDL.SDL_Keycode.SDLK_a => Keys.A,
+            SDL.SDL_Keycode.SDLK_d => Keys.D,
             _ => Keys.None
         };
     }

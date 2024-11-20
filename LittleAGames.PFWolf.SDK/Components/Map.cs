@@ -13,7 +13,7 @@ public class Map : MapComponent
         => new(assetName);
     
     
-    public Wall[,] Walls { get; set; }
+    public Wall?[,] Walls { get; set; }
     
     public int Width { get; set; }
     
@@ -27,8 +27,8 @@ public class Map : MapComponent
 
 public class Wall
 {
-    public string North { get; init; }
-    public string South { get; init; }
-    public string East { get; init; }
-    public string West { get; init; }
+    public byte[] North { get; init; }
+    public byte[] South { get; init; }
+    public byte[] East { get; init; }
+    public byte[] West { get; init; }
 }

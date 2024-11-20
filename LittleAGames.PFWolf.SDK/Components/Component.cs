@@ -38,6 +38,7 @@ public class InputComponent : Component
 
     public void SetKeyDown(Keys keyCode)
     {
+        Console.WriteLine($"Key down: {keyCode}");
         _keysPressed.Add(keyCode);
     }
 
@@ -45,6 +46,7 @@ public class InputComponent : Component
 
     public void SetKeyUp(Keys keyCode)
     {
+        Console.WriteLine($"Key up: {keyCode}");
         _keysPressed.Remove(keyCode);
     }
     
@@ -62,5 +64,9 @@ public enum Keys
     Left,
     Right,
     Return,
-    Escape
+    Escape,
+    A,
+    D,
+    Equals,
+    Minus
 }

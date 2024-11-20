@@ -50,6 +50,10 @@ public class SceneManager
             return;
         
         _currentScene.OnPreUpdate();
+        foreach (var component in _currentScene.Components.GetComponents())
+        {
+            ComponentPreUpdate(component);
+        }
     }
 
     public void OnUpdate()
@@ -115,20 +119,35 @@ public class SceneManager
         //
     }
 
+    private void ComponentPreUpdate(Component component)
+    {
+        if (component is InputComponent input)
+            _inputManager.Update(input);
+        
+        foreach (var innerComponent in component.Children.GetComponents())
+        {
+            ComponentPreUpdate(innerComponent);
+        }
+    }
+    
     private void ComponentUpdate(Component component)
     {
         component.OnUpdate();
         
-        if (component is InputComponent)
-            _inputManager.Update((InputComponent)component);
+        switch (component)
+        {
+            case InputComponent input:
+                _inputManager.Update(input);
+                break;
+            case MapComponent map:
+                _mapManager.Update(map);
+                break;
+            case RenderComponent render:
+                _videoManager.Update(render);
+                break;
+        }
 
-        if (component is MapComponent)
-            _mapManager.Update((MapComponent)component);
-        
-        if (component is RenderComponent)
-            _videoManager.Update((RenderComponent)component);
-        
-        
+
         foreach (var innerComponent in component.Children.GetComponents())
         {
             ComponentUpdate(innerComponent);

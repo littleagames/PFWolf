@@ -54,6 +54,8 @@ public class MapManager : IMapManager
 
     private void BuildWalls(Map map, MapAsset mapAsset)
     {
+        Dictionary<string, byte[]> wallAssets = new();
+        
         // TODO: Should I make a "MapRenderComponent" that takes MapComponent and RenderComponent, and translates between the two?
         // Currently the video manager runs AFTER the map manager (so i can manipulate the data at first
         var wallPlane = mapAsset.PlaneData[0];
@@ -67,13 +69,16 @@ public class MapManager : IMapManager
             {
                 var wallLight = $"WALL{((wallNum - 1) * 2):D5}";
                 var wallDark = $"WALL{(((wallNum - 1) * 2) + 1):D5}";
+                // TODO: Add to dictionary?
+                var wallLightTexture = _assetManager.FindAsset(AssetType.Texture, wallLight);
+                var wallDarkTexture = _assetManager.FindAsset(AssetType.Texture, wallDark);
                 // TODO: Add these to a HashSet for assets to load
                 map.Walls[x, y] = new Wall
                 {
-                    North = wallLight,
-                    South = wallLight,
-                    East = wallDark,
-                    West = wallDark
+                    North = wallLightTexture.RawData,
+                    South = wallLightTexture.RawData,
+                    East = wallDarkTexture.RawData,
+                    West = wallDarkTexture.RawData,
                 };
             }
         }
