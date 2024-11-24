@@ -27,7 +27,7 @@ public class TitleCardScene : Scene
         Components.Add(_fadeOutFader);
     }
 
-    public override void OnUpdate()
+    public override void OnUpdate(float deltaTime)
     {
         // TODO: This needs to be called OnUpdate, but anything overriding it will no longer call this
         // What is the better choice to call this AND that, without a base.OnUpdate?

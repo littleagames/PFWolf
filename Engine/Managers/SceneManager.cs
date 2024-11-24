@@ -44,24 +44,24 @@ public class SceneManager
         }
     }
 
-    public void OnPreUpdate()
+    public void OnPreUpdate(float deltaTime)
     {
         if (_currentScene == null)
             return;
         
-        _currentScene.OnPreUpdate();
+        _currentScene.OnPreUpdate(deltaTime);
         foreach (var component in _currentScene.Components.GetComponents())
         {
             ComponentPreUpdate(component);
         }
     }
 
-    public void OnUpdate()
+    public void OnUpdate(float deltaTime)
     {
         if (_currentScene == null)
             return;
 
-        _currentScene.OnUpdate();
+        _currentScene.OnUpdate(deltaTime);
         
         foreach (var component in _currentScene.Components.GetComponents())
         {

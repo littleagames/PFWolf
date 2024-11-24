@@ -31,6 +31,7 @@ public class GameManager
         bool quit = false;
 
         // Main loop
+        float elapsedMs = 0;
         while (!quit)
         {
             ulong start = SDL.SDL_GetPerformanceCounter();
@@ -38,11 +39,11 @@ public class GameManager
             quit = _inputManager.IsQuitTriggered;
             
             // Handle physics
-            sceneManager.OnPreUpdate();
+            sceneManager.OnPreUpdate(elapsedMs);
             
-            _videoManager.LimitFrameRate(70);
+            //_videoManager.LimitFrameRate(70);
             ulong end = SDL.SDL_GetPerformanceCounter();
-            var elapsedMs = (end - start) / (float)SDL.SDL_GetPerformanceFrequency() * 1000.0f;
+            elapsedMs = (end - start) / (float)SDL.SDL_GetPerformanceFrequency() * 1000.0f;
             
             var frameMs = 14.28571428571429f;
             if (elapsedMs < frameMs)
@@ -51,7 +52,7 @@ public class GameManager
             }
             
             // Handle rendering
-            sceneManager.OnUpdate();
+            sceneManager.OnUpdate(elapsedMs);
             sceneManager.OnPostUpdate();
         }
         

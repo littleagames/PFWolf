@@ -21,11 +21,11 @@ public abstract class Scene : RunnableBase
         
     }
 
-    public virtual void OnPreUpdate()
+    public virtual void OnPreUpdate(float deltaTime)
     {
     }
     
-    public virtual void OnUpdate()
+    public virtual void OnUpdate(float deltaTimes)
     {
     }
 

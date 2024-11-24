@@ -1,6 +1,8 @@
-﻿namespace LittleAGames.PFWolf.SDK.Models;
+﻿using LittleAGames.PFWolf.SDK.Components;
 
-public abstract class Actor
+namespace LittleAGames.PFWolf.SDK.Models;
+
+public abstract class Actor : Component
 {
     public Position Position { get; private set; } = new(0,0);
     public double Angle { get; private set; } = 0.0;

@@ -68,5 +68,7 @@ public enum Keys
     A,
     D,
     Equals,
-    Minus
+    Minus,
+    LeftShift,
+    RightShift
 }

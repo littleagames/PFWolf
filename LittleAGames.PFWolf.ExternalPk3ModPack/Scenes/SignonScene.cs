@@ -29,7 +29,7 @@ public class SignonScene : Scene
         _pfTimer.Start();
     }
 
-    public override void OnUpdate()
+    public override void OnUpdate(float deltaTime)
     {
         if (_loadingConsoleData && _pfTimer.GetTime() <= 70)
             return;

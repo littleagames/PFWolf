@@ -53,7 +53,7 @@ public class MainMenuScene : MenuScene
             FadeInFader.BeginFade();
     }
 
-    public override void OnUpdate()
+    public override void OnUpdate(float deltaTime)
     {
         if (!FadeInFader.IsComplete)
             return;
