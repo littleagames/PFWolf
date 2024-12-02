@@ -44,8 +44,8 @@ public class GameManager
             //_videoManager.LimitFrameRate(70);
             ulong end = SDL.SDL_GetPerformanceCounter();
             elapsedMs = (end - start) / (float)SDL.SDL_GetPerformanceFrequency() * 1000.0f;
-            
-            var frameMs = 14.28571428571429f;
+
+            var frameMs = 100.0f / 7.0f;
             if (elapsedMs < frameMs)
             {
                 SDL.SDL_Delay((uint)(frameMs - elapsedMs));

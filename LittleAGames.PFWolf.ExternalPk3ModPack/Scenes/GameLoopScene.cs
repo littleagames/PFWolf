@@ -1,11 +1,11 @@
 ﻿[PfWolfScene("wolf3d:GameLoopScene")]
 public class GameLoopScene : Scene
 {
-    private Camera _camera ;
+    private Camera _camera;
     private Renderer _renderer;
     private ViewPort _viewPort;
     private Map _map;
-    private Player _player;
+    private Player? _player;
     
     public GameLoopScene()
     {
@@ -21,23 +21,25 @@ public class GameLoopScene : Scene
         // TODO: Get "mapassetname" from scene.DataContext
         // TODO: Change assetname for map "E1M1" or something defined in the asset
         _map = Map.Create("Wolf1 Map1");
-        _player = new Player();
-        _player.UpdatePosition(29,57); // TODO: _map Player Position
-        _camera = Camera.Create(_player);
-        Components.Add(_camera);
-        Components.Add(_player);
-        _renderer = AutoMapRenderer.Create(_camera, _map);
+        _camera = Camera.Create();
+        _renderer = AutoMapRenderer.Create(_camera, _map); // TODO: Camera just tells position to start
         _viewPort = ViewPort.Create(8, 8, 304, 144, _renderer);
         Components.Add(_viewPort);
         Components.Add(_map);
+        Components.Add(_camera);
     }
 
     public override void OnPreUpdate(float deltaTime)
     {
+        // TODO: Set camera to player 0
+        if (_camera.AttachedActor == null)
+        {
+            _player = _map.FindComponent<Player>();
+            if (_player != null)
+                _camera.Attach(_player);
+        }
+
         // Do events
-        // TODO: "Normalize" controls
-        MovePlayer(deltaTime);
-        MoveAutomap();
         return;
     }
 
@@ -45,79 +47,65 @@ public class GameLoopScene : Scene
     {
         if (Input.IsKeyDown(Keys.Equals))
         {
-            _renderer.UpdateScale(_renderer.Scale + 0.1f);
+            _renderer.UpdateScale(_renderer.Scale + 1);
         }
         else if (Input.IsKeyDown(Keys.Minus))
         {
-            _renderer.UpdateScale(_renderer.Scale - 0.1f);
+            _renderer.UpdateScale(_renderer.Scale - 1);
         }
     }
 
     private void MovePlayer(float deltaTime)
     {
-        var tics = deltaTime * 1000;
-        tics = Math.Max(tics, 10);
-        tics = Math.Min(tics, -10);
+        if (_player == null)
+            return;
+        // TODO: "How fast does player move per frame?"
+        // Player moves 35 units per frame (70 if running)
         
         const int runMove = 70;
         const int baseMove = 35;
         var controlX = 0;
         var controlY = 0;
-        int max, min;
         
-        int delta = (int)(Input.IsKeyDown(Keys.RightShift) ? runMove * tics : baseMove * tics);
+        var delta = (Input.IsKeyDown(Keys.RightShift) ? runMove : baseMove);
         
         if (Input.IsKeyDown(Keys.Down))
         {
-            controlX -= delta;
+            controlY -= delta;
         }
         else if (Input.IsKeyDown(Keys.Up))
         {
-            controlX += delta;
+            controlY += delta;
         }
         
         if (Input.IsKeyDown(Keys.Left))
         {
-            controlY -= delta;
+            controlX -= delta;
         }
         else if (Input.IsKeyDown(Keys.Right))
         {
-            controlY += delta;
+            controlX += delta;
         }
-//
-// bound movement to a maximum
-//
-        max = (int)(100 * tics);
-        min = -max;
-        if (controlX > max)
-            controlX = max;
-        else if (controlX < min)
-            controlX = min;
 
-        if (controlY> max)
-            controlY = max;
-        else if (controlY < min)
-            controlY = min;
-        if (controlX != 0 && controlY != 0)
+        if (controlX != 0)
         {
-            Console.WriteLine($"ControlX: {controlX}, ControlY: {controlY}");
+            _player.Rotate(CalcAngleFromForce(controlX));
         }
-        //_player.UpdatePosition(controlX, controlY);
-        //
-        // if (Input.IsKeyDown(Keys.A))
-        // {
-        //     _player.UpdatePosition(_player.Position.X-1, _player.Position.Y-1);
-        // }
-        // else if (Input.IsKeyDown(Keys.D))
-        // {
-        //     _player.UpdatePosition(_player.Position.X+1, _player.Position.Y+1);
-        // }
-        
-        //Console.WriteLine($"Player X:{_player.Position.X} Y:{_player.Position.Y}");
+    }
+
+    private static float CalcAngleFromForce(float force)
+    {
+        // TODO: Apply force to a rate min/max per frame
+        // TODO: Calculate # of degrees to change
+        var degrees = force / 20;
+        return degrees;
     }
     
     public override void OnUpdate(float deltaTime)
     {
+        // TODO: "Normalize" controls
+        MovePlayer(deltaTime);
+        MoveAutomap();
         // Do pushwalls
         // Do physics
         // Do Actors

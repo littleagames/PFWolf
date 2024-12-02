@@ -18,16 +18,48 @@ public abstract class Component
     {
         
     }
+
+    public T? FindComponent<T>() where T : Component
+    {
+        foreach (var child in Children.GetComponents())
+        {
+            if (child is T component)
+            {
+                return component;
+            }
+            
+            child.FindComponent<T>();
+        }
+
+        return null;
+    }
+    
+    public IEnumerable<T> FindComponents<T>() where T : Component
+    {
+        foreach (var child in Children.GetComponents())
+        {
+            if (child is T component)
+            {
+                yield return component;
+            }
+            
+            child.FindComponent<T>();
+        }
+    }
 }
 
 public abstract class RenderComponent : Component
 {
-    // TODO: X and Y? Width and Height? Do all render components have this?
     public bool Hidden { get; set; } = false;
 }
 
 public abstract class MapComponent : Component
 {
+    public int X { get; init; }
+    public int Y { get; init; }
+    public int Width => Data.GetLength(0);
+    public int Height => Data.GetLength(1);
+    public byte[,] Data { get; set; } = new byte[0,0];
 }
 
 public class InputComponent : Component

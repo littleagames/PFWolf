@@ -6,7 +6,7 @@ using LittleAGames.PFWolf.Common.GamePacks;
 
 var fileLoader = new FileLoader();
 var gamePack = new Wolfenstein3DApogee();
-var directory = "D:\\Wolf3D_Games\\wolf3d-v1.4-apogee";
+var directory = "D:\\projects\\Wolf3D\\Wolf3D_Games\\wolf3d-v1.4-apogee";
 var isValidPack = fileLoader.Validate(gamePack, directory);
 if (!isValidPack)
 {
@@ -22,7 +22,7 @@ GameConfiguration gameConfig = new()
 var assetManager = new AssetManager(fileLoader);
 
 assetManager.AddGamePack(gamePack, directory);
-assetManager.AddModPack("D:\\PFWolf-Assets", "pfwolf.pk3");
+assetManager.AddModPack("D:\\projects\\Wolf3D\\PFWolf\\PFWolf-Assets", "pfwolf.pk3");
 assetManager.AddAssembly(typeof(LittleAGames.PFWolf.ExternalPk3ModPack.NoOp).Assembly);
 Console.WriteLine($"Assets loaded: {assetManager.AssetCount}");
 

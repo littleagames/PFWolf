@@ -19,8 +19,17 @@ public class Camera : Component
     public static Camera Create(Actor attachedActor)
         => new Camera(attachedActor);
 
+    public static Camera Create()
+        => new Camera(0, 0);
+
     public static Camera Create(int x, int y)
         => new Camera(x, y);
+
+    public void Attach(Actor actor)
+    {
+        AttachedActor = actor;
+        Position = new(AttachedActor.Position.X, AttachedActor.Position.Y);
+    }
 
     public override void OnUpdate()
     {

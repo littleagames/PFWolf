@@ -1,4 +1,6 @@
-﻿namespace Engine.Managers;
+﻿using LittleAGames.PFWolf.SDK.Utilities;
+
+namespace Engine.Managers;
 
 public interface IMapManager
 {
@@ -38,7 +40,7 @@ public class MapManager : IMapManager
             
             BuildWalls(map, mapAsset);
             BuildDoors(mapAsset);
-            BuildActors(mapAsset);
+            BuildActors(map, mapAsset);
             BuildStatics(mapAsset);
             BuildFlats(mapAsset);
             
@@ -59,7 +61,7 @@ public class MapManager : IMapManager
         // TODO: Should I make a "MapRenderComponent" that takes MapComponent and RenderComponent, and translates between the two?
         // Currently the video manager runs AFTER the map manager (so i can manipulate the data at first
         var wallPlane = mapAsset.PlaneData[0];
-        map.Walls = new Wall[mapAsset.Width, mapAsset.Height];
+       // map.Walls = new Wall[mapAsset.Width, mapAsset.Height];
         
         for (var y = 0; y < mapAsset.Height; y++)
         for (var x = 0; x < mapAsset.Width; x++)
@@ -73,13 +75,16 @@ public class MapManager : IMapManager
                 var wallLightTexture = _assetManager.FindAsset(AssetType.Texture, wallLight);
                 var wallDarkTexture = _assetManager.FindAsset(AssetType.Texture, wallDark);
                 // TODO: Add these to a HashSet for assets to load
-                map.Walls[x, y] = new Wall
+                map.Children.Add(new Wall
                 {
+                    X = x, // TileX
+                    Y = y, // TileY
+                    Data = wallLightTexture.RawData.To2DArray(64,64),
                     North = wallLightTexture.RawData,
                     South = wallLightTexture.RawData,
                     East = wallDarkTexture.RawData,
                     West = wallDarkTexture.RawData,
-                };
+                });
             }
         }
         
@@ -98,10 +103,34 @@ public class MapManager : IMapManager
     {
     }
 
-    private void BuildActors(MapAsset mapAsset)
+    private void BuildActors(Map map, MapAsset mapAsset)
     {
         var objectsPlane = mapAsset.PlaneData[1];
-        var uniqueObjects = objectsPlane.GroupBy(x => x);
+        
+        for (var y = 0; y < mapAsset.Height; y++)
+        for (var x = 0; x < mapAsset.Width; x++)
+        {
+            var objectNum = objectsPlane[y * mapAsset.Width + x];
+            SpriteAsset? automapPlayerArrow = _assetManager.FindAsset(AssetType.Sprite, "player-arrow") as SpriteAsset;
+            switch (objectNum)
+            {
+                case 19: // North
+                    map.Children.Add(new Player(new Position(x,y), 90.0f));
+                    break;
+                case 20: // East
+                    map.Children.Add(new Player(new Position(x,y), 0.0f));
+                    break;
+                case 21: // South
+                    map.Children.Add(new Player(new Position(x,y), 270.0f));
+                    break;
+                case 22: // West
+                    map.Children.Add(new Player(new Position(x,y), 180.0f));
+                    break;
+            }
+            if (automapPlayerArrow != null)
+                map.Children.Add(new Sprite { Data = automapPlayerArrow.RawData });
+        }
+        //var uniqueObjects = objectsPlane.GroupBy(x => x);
         // Group
         // Find all assets
         // All of these numbers should translate to an object list defined in the pk3
