@@ -4,9 +4,9 @@ namespace LittleAGames.PFWolf.SDK.Models;
 
 public abstract class Actor : Component
 {
-    public Actor(int x, int y, float angle)
+    public Actor(int tileX, int tileY, float angle)
     {
-        Position = new Position(x, y);
+        Position = new Position(tileX, tileY);
         Angle = angle;
     }
 
@@ -16,7 +16,11 @@ public abstract class Actor : Component
         Angle = angle;
     }
     public Position Position { get; private set; }
-    
+
+    public Position FinePosition => new Position(
+        (Position.X << (int)Helpers.TILESHIFT) + (int)(Helpers.TILEGLOBAL / 2),
+        (Position.Y << (int)Helpers.TILESHIFT) + (int)(Helpers.TILEGLOBAL / 2)
+    );
     public double Angle { get; private set; } = 0.0;
 
     public virtual void UpdatePosition(Position position)

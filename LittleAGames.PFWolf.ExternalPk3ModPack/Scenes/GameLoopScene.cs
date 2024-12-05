@@ -22,8 +22,8 @@ public class GameLoopScene : Scene
         // TODO: Change assetname for map "E1M1" or something defined in the asset
         _map = Map.Create("Wolf1 Map1");
         _camera = Camera.Create();
-        _renderer = AutoMapRenderer.Create(_camera, _map); // TODO: Camera just tells position to start
-        _viewPort = ViewPort.Create(8, 8, 304, 144, _renderer);
+        _renderer = RaycastRenderer.Create(_camera, _map, 304*2, 144*2);//AutoMapRenderer.Create(_camera, _map); // TODO: Camera just tells position to start
+        _viewPort = ViewPort.Create(8*2, 8*2, 304*2, 144*2, _renderer);
         Components.Add(_viewPort);
         Components.Add(_map);
         Components.Add(_camera);
@@ -43,17 +43,17 @@ public class GameLoopScene : Scene
         return;
     }
 
-    private void MoveAutomap()
-    {
-        if (Input.IsKeyDown(Keys.Equals))
-        {
-            _renderer.UpdateScale(_renderer.Scale + 1);
-        }
-        else if (Input.IsKeyDown(Keys.Minus))
-        {
-            _renderer.UpdateScale(_renderer.Scale - 1);
-        }
-    }
+    // private void MoveAutomap()
+    // {
+    //     if (Input.IsKeyDown(Keys.Equals))
+    //     {
+    //         _renderer.UpdateScale(_renderer.Scale + 1);
+    //     }
+    //     else if (Input.IsKeyDown(Keys.Minus))
+    //     {
+    //         _renderer.UpdateScale(_renderer.Scale - 1);
+    //     }
+    // }
 
     private void MovePlayer(float deltaTime)
     {
@@ -105,7 +105,7 @@ public class GameLoopScene : Scene
     {
         // TODO: "Normalize" controls
         MovePlayer(deltaTime);
-        MoveAutomap();
+        //MoveAutomap();
         // Do pushwalls
         // Do physics
         // Do Actors

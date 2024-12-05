@@ -123,8 +123,7 @@ public class SDLVideoManager : IVideoManager
         switch (component)
         {
             case ViewPort viewPort:
-                // TODO: Draw viewport to screen
-                MemToScreen(viewPort.Render(), viewPort.Width, viewPort.Height, viewPort.X, viewPort.Y);
+                MemToScreenFull(viewPort.Render(), viewPort.X, viewPort.Y);
                 break;
             case Rectangle rect:
                 DrawRectangle(rect.X, rect.Y, rect.Width, rect.Height, rect.Color);
@@ -352,6 +351,35 @@ public class SDLVideoManager : IVideoManager
         UnlockSurface(_screenBuffer);
     }
     
+    private void MemToScreenFull(byte[,] source, int x, int y)
+    {
+        int i, j;
+
+        var surfacePtr = LockSurface(_screenBuffer);
+        unsafe
+        {
+            byte* pixels = (byte*)surfacePtr;
+
+            // Set each pixel to a red color (ARGB format)
+
+            for (j = 0; j < source.GetLength(1); j++)
+            {
+                for (i = 0; i < source.GetLength(0); i++)
+                {
+                    byte col = source[i, j];
+                    if (col == 0xff) continue;
+
+                    var xlength = i + x;
+                    var ylength = j + y;
+                    if (ylength > _yLookup.Length ||
+                        (_yLookup[ylength] + xlength) > (_screenSize.Width * _screenSize.Height)) return;
+                    pixels[_yLookup[ylength] + xlength] = col;
+                }
+            }
+        }
+
+        UnlockSurface(_screenBuffer);
+    }
     private void DrawRectangle(int x, int y, int width, int height, byte color)
     {
         DrawRectangleScaledCoord(ScaleFactorX * x, ScaleFactorY * y, ScaleFactorX * width, ScaleFactorY * height, color);

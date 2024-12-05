@@ -3,17 +3,25 @@
 public class Camera : Component
 {
     public Position Position { get; private set; }
+    public Position FinePosition { get; private set; }
+    public double Angle { get; private set; }
+    public double Pitch { get; private set; } = 0;
     public Actor? AttachedActor { get; private set; }
     
     private Camera(Actor attachedActor)
     {
         Position = new(attachedActor.Position.X, attachedActor.Position.Y);
+        FinePosition = new(attachedActor.FinePosition.X, attachedActor.FinePosition.Y);
         AttachedActor = attachedActor;
     }
     
     private Camera(int x, int y)
     {
         Position = new(x, y);
+        FinePosition = new(
+            (Position.X << (int)Helpers.TILESHIFT) + (int)(Helpers.TILEGLOBAL / 2),
+            (Position.Y << (int)Helpers.TILESHIFT) + (int)(Helpers.TILEGLOBAL / 2)
+        );
     }
     
     public static Camera Create(Actor attachedActor)
@@ -29,6 +37,8 @@ public class Camera : Component
     {
         AttachedActor = actor;
         Position = new(AttachedActor.Position.X, AttachedActor.Position.Y);
+        FinePosition = new(AttachedActor.FinePosition.X, AttachedActor.FinePosition.Y);
+        Angle = actor.Angle;
     }
 
     public override void OnUpdate()
@@ -36,6 +46,8 @@ public class Camera : Component
         if (AttachedActor != null)
         {
             Position = new(AttachedActor.Position.X, AttachedActor.Position.Y);
+            FinePosition = new(AttachedActor.FinePosition.X, AttachedActor.FinePosition.Y);
+            Angle = AttachedActor.Angle;
         }
     }
 }

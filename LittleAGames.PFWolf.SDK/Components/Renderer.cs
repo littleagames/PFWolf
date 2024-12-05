@@ -2,25 +2,16 @@
 
 public abstract class Renderer : RenderComponent
 {
-    protected Camera? Camera = null;
+    protected Camera Camera;
+    protected int Width;
+    protected int Height;
     
-    /// <summary>
-    /// Number of pixels per tile
-    /// </summary>
-    public int Scale { get; protected set; }
-    
-    public abstract byte[] Render(int width, int height);
-    
-    public void UpdateScale(int scale)
-    {
-        if (scale < 0)
-            Scale = 0;
-        else
-            Scale = scale;
-    }
-
-    public void SetCamera(Camera camera)
+    protected Renderer(Camera camera, int width, int height)
     {
         Camera = camera;
+        Width = width;
+        Height = height;
     }
+
+    public abstract byte[,] Render();
 }
