@@ -99,6 +99,8 @@ public enum Keys
     Escape,
     A,
     D,
+    S,
+    W,
     Equals,
     Minus,
     LeftShift,

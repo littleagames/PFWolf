@@ -62,18 +62,18 @@ public class GameLoopScene : Scene
         // TODO: "How fast does player move per frame?"
         // Player moves 35 units per frame (70 if running)
         
-        const int runMove = 70;
-        const int baseMove = 35;
+        const int runMove = 300*70;
+        const int baseMove = 150*70;
         var controlX = 0;
         var controlY = 0;
         
         var delta = (Input.IsKeyDown(Keys.RightShift) ? runMove : baseMove);
         
-        if (Input.IsKeyDown(Keys.Down))
+        if (Input.IsKeyDown(Keys.Down) || Input.IsKeyDown(Keys.S))
         {
             controlY -= delta;
         }
-        else if (Input.IsKeyDown(Keys.Up))
+        else if (Input.IsKeyDown(Keys.Up)|| Input.IsKeyDown(Keys.W))
         {
             controlY += delta;
         }
@@ -87,6 +87,17 @@ public class GameLoopScene : Scene
             controlX += delta;
         }
 
+        if (Input.IsKeyDown(Keys.A)) // strafe left
+        {
+            _player.Move(delta, 90);
+            Console.WriteLine($"Player -> Angle: {_player.Angle}, X: {_player.TileX}, Y: {_player.TileY}");
+        }
+        else if (Input.IsKeyDown(Keys.D)) // strafe right
+        {
+            _player.Move(delta, -90);
+            Console.WriteLine($"Player -> Angle: {_player.Angle}, X: {_player.TileX}, Y: {_player.TileY}");
+        }
+
         if (controlX != 0)
         {
             _player.Rotate(CalcAngleFromForce(controlX));
@@ -95,7 +106,7 @@ public class GameLoopScene : Scene
 
         if (controlY != 0)
         {
-            _player.Move(controlY*150, 0f);
+            _player.Move(controlY, 0f);
             Console.WriteLine($"Player -> Angle: {_player.Angle}, X: {_player.TileX}, Y: {_player.TileY}");
         }
     }
@@ -104,7 +115,7 @@ public class GameLoopScene : Scene
     {
         // TODO: Apply force to a rate min/max per frame
         // TODO: Calculate # of degrees to change
-        var degrees = force / 20;
+        var degrees = force / (70*100);
         return degrees;
     }
     
