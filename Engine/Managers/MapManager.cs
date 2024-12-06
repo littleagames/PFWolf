@@ -115,16 +115,16 @@ public class MapManager : IMapManager
             switch (objectNum)
             {
                 case 19: // North
-                    map.Children.Add(new Player(new Position(x,y), 90.0f));
+                    map.Children.Add(new Player(x, y, 90.0f));
                     break;
                 case 20: // East
-                    map.Children.Add(new Player(new Position(x,y), 0.0f));
+                    map.Children.Add(new Player(x, y, 0.0f));
                     break;
                 case 21: // South
-                    map.Children.Add(new Player(new Position(x,y), 270.0f));
+                    map.Children.Add(new Player(x, y, 270.0f));
                     break;
                 case 22: // West
-                    map.Children.Add(new Player(new Position(x,y), 180.0f));
+                    map.Children.Add(new Player(x, y, 180.0f));
                     break;
             }
             if (automapPlayerArrow != null)

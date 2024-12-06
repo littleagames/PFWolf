@@ -90,6 +90,13 @@ public class GameLoopScene : Scene
         if (controlX != 0)
         {
             _player.Rotate(CalcAngleFromForce(controlX));
+            Console.WriteLine($"Player -> Angle: {_player.Angle}, X: {_player.TileX}, Y: {_player.TileY}");
+        }
+
+        if (controlY != 0)
+        {
+            _player.Move(controlY*150, 0f);
+            Console.WriteLine($"Player -> Angle: {_player.Angle}, X: {_player.TileX}, Y: {_player.TileY}");
         }
     }
 

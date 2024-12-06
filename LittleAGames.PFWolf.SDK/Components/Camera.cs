@@ -2,26 +2,20 @@
 
 public class Camera : Component
 {
-    public Position Position { get; private set; }
-    public Position FinePosition { get; private set; }
+    public int X { get; set; }
+    public int Y { get; set; }
     public double Angle { get; private set; }
-    public double Pitch { get; private set; } = 0;
     public Actor? AttachedActor { get; private set; }
     
     private Camera(Actor attachedActor)
     {
-        Position = new(attachedActor.Position.X, attachedActor.Position.Y);
-        FinePosition = new(attachedActor.FinePosition.X, attachedActor.FinePosition.Y);
         AttachedActor = attachedActor;
     }
     
     private Camera(int x, int y)
     {
-        Position = new(x, y);
-        FinePosition = new(
-            (Position.X << (int)Helpers.TILESHIFT) + (int)(Helpers.TILEGLOBAL / 2),
-            (Position.Y << (int)Helpers.TILESHIFT) + (int)(Helpers.TILEGLOBAL / 2)
-        );
+        X = x;
+        Y = y;
     }
     
     public static Camera Create(Actor attachedActor)
@@ -36,8 +30,8 @@ public class Camera : Component
     public void Attach(Actor actor)
     {
         AttachedActor = actor;
-        Position = new(AttachedActor.Position.X, AttachedActor.Position.Y);
-        FinePosition = new(AttachedActor.FinePosition.X, AttachedActor.FinePosition.Y);
+        X = actor.X;
+        Y = actor.Y;
         Angle = actor.Angle;
     }
 
@@ -45,8 +39,8 @@ public class Camera : Component
     {
         if (AttachedActor != null)
         {
-            Position = new(AttachedActor.Position.X, AttachedActor.Position.Y);
-            FinePosition = new(AttachedActor.FinePosition.X, AttachedActor.FinePosition.Y);
+            X = AttachedActor.X;
+            Y = AttachedActor.Y;
             Angle = AttachedActor.Angle;
         }
     }

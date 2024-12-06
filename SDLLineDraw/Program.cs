@@ -78,6 +78,9 @@ class Program
         
         //glLineWidth(4);
         SDL.SDL_RenderDrawLine(renderer, (int)px, (int)py,(int)(px+pdx*20),(int)(py+pdy*20));
+        SDL.SDL_RenderDrawLine(renderer, (int)px+1, (int)py,(int)(px+pdx*20)+1,(int)(py+pdy*20));
+        SDL.SDL_RenderDrawLine(renderer, (int)px+2, (int)py,(int)(px+pdx*20)+2,(int)(py+pdy*20));
+        SDL.SDL_RenderDrawLine(renderer, (int)px+3, (int)py,(int)(px+pdx*20)+3,(int)(py+pdy*20));
     }
     
     void Buttons(SDL.SDL_Keycode key)
@@ -113,7 +116,8 @@ void drawRays2D(IntPtr renderer)
     SDL.SDL_RenderDrawLine(renderer, 1006, 320, 526,320);
     SDL.SDL_RenderDrawLine(renderer, 526,320, 526, 160);	 	
 	
- int r,mx,my,mp,dof,side; float vx,vy,rx,ry,ra,xo=0,yo=0,disV,disH; 
+ int r,mx,my,mp,dof,side;
+ float vx,vy,rx,ry,ra,xo=0,yo=0,disV,disH; 
  
  ra=FixAng(pa+30);                                                              //ray set back 30 degrees
  
@@ -166,6 +170,7 @@ void drawRays2D(IntPtr renderer)
   //glBegin(GL_LINES);
   
   SDL.SDL_RenderDrawLine(renderer, (int)px, (int)py, (int)rx, (int)ry);
+  SDL.SDL_RenderDrawLine(renderer, (int)px+1, (int)py, (int)rx+1, (int)ry);
     
   int ca=(int)FixAng(pa-ra); disH=disH*(float)Math.Cos(degToRad(ca));                            //fix fisheye 
   int lineH = (int)((mapS*320)/(disH)); if(lineH>320){ lineH=320;}                     //line height and limit
@@ -174,7 +179,14 @@ void drawRays2D(IntPtr renderer)
   //glLineWidth(8);
   //glBegin(GL_LINES);
   
+  SDL.SDL_RenderDrawLine(renderer, r*8-3+530,lineOff, r*8-3+530,lineOff+lineH);
+  SDL.SDL_RenderDrawLine(renderer, r*8-2+530,lineOff, r*8-2+530,lineOff+lineH);
+  SDL.SDL_RenderDrawLine(renderer, r*8-1+530,lineOff, r*8-1+530,lineOff+lineH);
   SDL.SDL_RenderDrawLine(renderer, r*8+530,lineOff, r*8+530,lineOff+lineH);
+  SDL.SDL_RenderDrawLine(renderer, r*8+1+530,lineOff, r*8+1+530,lineOff+lineH);
+  SDL.SDL_RenderDrawLine(renderer, r*8+2+530,lineOff, r*8+2+530,lineOff+lineH);
+  SDL.SDL_RenderDrawLine(renderer, r*8+3+530,lineOff, r*8+3+530,lineOff+lineH);
+  SDL.SDL_RenderDrawLine(renderer, r*8+4+530,lineOff, r*8+4+530,lineOff+lineH);
 
   ra=FixAng(ra-1);                                                              //go to next ray
  }
