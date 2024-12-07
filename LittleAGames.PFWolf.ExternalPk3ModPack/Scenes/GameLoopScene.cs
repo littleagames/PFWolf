@@ -22,7 +22,9 @@ public class GameLoopScene : Scene
         // TODO: Change assetname for map "E1M1" or something defined in the asset
         _map = Map.Create("Wolf1 Map1");
         _camera = Camera.Create();
-        _renderer = RaycastRenderer.Create(_camera, _map, 304*2, 144*2);//AutoMapRenderer.Create(_camera, _map); // TODO: Camera just tells position to start
+        _renderer = //RaycastRenderer
+                AutoMapRenderer
+            .Create(_camera, _map, 304*2, 144*2);
         _viewPort = ViewPort.Create(8*2, 8*2, 304*2, 144*2, _renderer);
         Components.Add(_viewPort);
         Components.Add(_map);
@@ -116,7 +118,7 @@ public class GameLoopScene : Scene
         // TODO: Apply force to a rate min/max per frame
         // TODO: Calculate # of degrees to change
         var degrees = force / (70*100);
-        return degrees;
+        return -degrees;
     }
     
     public override void OnUpdate(float deltaTime)

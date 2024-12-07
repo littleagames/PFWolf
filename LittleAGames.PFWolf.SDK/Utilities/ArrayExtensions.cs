@@ -2,25 +2,19 @@
 
 public static class ArrayExtensions
 {
-    public static T[] To1DArray<T>(this T[,] input)
+    public static void Fill<T>(this T[,] array, T value)
     {
-        var rows = input.GetLength(0);
-        var cols = input.GetLength(1);
-        if (input.Length != rows * cols)
-            throw new ArgumentException("The size of the input array must match the specified dimensions.");
-
-        T[] result = new T[rows * cols];
-
-        for (int x = 0; x < rows; x++)
+        if (array is null) throw new ArgumentNullException(nameof(array));
+        
+        for (var row = 0; row < array.GetLength(0); row++)
         {
-            for (int y = 0; y < cols; y++)
+            for (var column = 0; column < array.GetLength(1); column++)
             {
-                result[x * rows + y] = input[x, y];
+                array[row, column] = value;
             }
         }
-
-        return result;
     }
+    
     public static T[,] To2DArray<T>(this T[] input, int rows, int cols)
     {
         if (input.Length != rows * cols)

@@ -4,6 +4,10 @@ public class Camera : Component
 {
     public int X { get; set; }
     public int Y { get; set; }
+    
+    public short TileX => (short)(X >> 16);
+    public short TileY => (short)(Y >> 16);
+    
     public double Angle { get; private set; }
     public Actor? AttachedActor { get; private set; }
     
