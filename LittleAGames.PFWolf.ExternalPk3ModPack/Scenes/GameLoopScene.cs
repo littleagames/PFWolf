@@ -22,8 +22,9 @@ public class GameLoopScene : Scene
         // TODO: Change assetname for map "E1M1" or something defined in the asset
         _map = Map.Create("Wolf1 Map1");
         _camera = Camera.Create();
-        _renderer = //RaycastRenderer
-                AutoMapRenderer
+        _renderer = //Wolf3DRaycastRenderer
+            RaycastRenderer
+                //AutoMapRenderer
             .Create(_camera, _map, 304*2, 144*2);
         _viewPort = ViewPort.Create(8*2, 8*2, 304*2, 144*2, _renderer);
         Components.Add(_viewPort);

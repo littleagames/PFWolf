@@ -48,15 +48,15 @@ public class AutoMapRenderer : Renderer
 
         // Player
         for (var scx = 0; scx < ScaleX; scx++)
-        for (var scy = 0; scy < ScaleY; scy++)
-        {
-            var drawX = Camera.TileX * ScaleX+scx+offsetX;
-            var drawY = Camera.TileY * ScaleY+scy+offsetY;
-            if (drawX < 0 || drawX >= Width || drawY < 0 || drawY >= Height)
-                continue;
-            
-            result[drawX, drawY] = 0x40;
-        }
+            for (var scy = 0; scy < ScaleY; scy++)
+            {
+                var drawX = Camera.TileX * ScaleX+scx+offsetX;
+                var drawY = Camera.TileY * ScaleY+scy+offsetY;
+                if (drawX < 0 || drawX >= Width || drawY < 0 || drawY >= Height)
+                    continue;
+                
+                result[drawX, drawY] = 0x40;
+            }
 
         double angleRad = pa * Math.PI / 180;
         DrawLine(result, Width / 2, Height / 2, angleRad, 12, 0x40);

@@ -6,29 +6,34 @@ using SDL2;
 class Program
 {
     //-----------------------------MAP----------------------------------------------
-    private const int mapX =  8;     //map width
-    private const int mapY =  8;     //map height
-    private const int mapS = 64;     //map cube size
-    private int[] map =           //the map array. Edit to change level but keep the outer walls
+    private const int MapWidth =  12;     //map width
+    private const int MapHeight = 12;     //map height
+    private const int MapShift = 5;
+    private const int MapScale = (1<<MapShift);     //map cube size
+    private readonly int[] _map =           //the map array. Edit to change level but keep the outer walls
     {
-        1,1,1,1,1,1,1,1,
-        1,0,1,0,0,0,0,1,
-        1,0,1,0,0,0,0,1,
-        1,0,1,0,0,0,0,1,
-        1,0,0,0,0,0,0,1,
-        1,0,0,0,0,1,0,1,
-        1,0,0,0,0,0,0,1,
-        1,1,1,1,1,1,1,1,	
+        1,1,1,1,1,1,1,1,1,1,1,1,
+        1,0,1,0,0,0,0,0,0,0,0,1,
+        1,0,1,0,0,0,0,0,0,1,0,1,
+        1,0,1,0,0,0,0,0,0,1,0,1,
+        1,0,0,0,0,0,0,0,0,1,0,1,
+        1,0,0,0,0,1,0,0,0,0,0,1,
+        1,0,0,0,0,1,0,0,0,0,0,1,
+        1,0,0,0,0,1,0,0,0,0,0,1,
+        1,0,0,0,0,1,0,0,0,0,0,1,
+        1,0,0,0,0,1,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,0,1,
+        1,1,1,1,1,1,1,1,1,1,1,1,	
     };
 
     private void drawMap2D(IntPtr renderer)
     {
         int x,y,xo,yo;
-        for(y=0;y<mapY;y++)
+        for(y=0;y<MapHeight;y++)
         {
-            for(x=0;x<mapX;x++)
+            for(x=0;x<MapWidth;x++)
             {
-                if (map[y * mapX + x] == 1)
+                if (_map[y * MapWidth + x] == 1)
                 {
                     // Set draw color (R, G, B, A)
                     SDL.SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -38,12 +43,12 @@ class Program
                     // Set draw color (R, G, B, A)
                     SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
                 }
-                xo=x*mapS; yo=y*mapS;
+                xo=x*MapScale; yo=y*MapScale;
                 
                 var posLeftTop = ( X:0   +xo+1, Y:0   +yo+1);  // left top
-                var posLeftBottom = ( X:0   +xo+1, Y:mapS+yo-1);  // left bottom
-                var posRightBottom = ( X:mapS+xo-1, Y:mapS+yo-1);  // right bottom
-                var posRightTop = ( X:mapS+xo-1, Y:0   +yo+1);  // right top
+                var posLeftBottom = ( X:0   +xo+1, Y:MapScale+yo-1);  // left bottom
+                var posRightBottom = ( X:MapScale+xo-1, Y:MapScale+yo-1);  // right bottom
+                var posRightTop = ( X:MapScale+xo-1, Y:0   +yo+1);  // right top
                 
                 SDL.SDL_RenderDrawLine(renderer, posLeftTop.X, posLeftTop.Y, posLeftBottom.X, posLeftBottom.Y);
                 SDL.SDL_RenderDrawLine(renderer, posLeftBottom.X, posLeftBottom.Y, posRightBottom.X, posRightBottom.Y);
@@ -54,15 +59,9 @@ class Program
     }
     
     //------------------------PLAYER------------------------------------------------
-    float degToRad(int a)
-    {
-        return (float)(a * Math.PI / 180.0d);
-    }
-    
-    float degToRad(float a)
-    {
-        return (float)(a * Math.PI / 180.0d);
-    }
+    private float degToRad(int a) => degToRad((float)a);
+
+    private static float degToRad(float a) => float.DegreesToRadians(a);
     
     int FixAng(int a){ if(a>359){ a-=360;} if(a<0){ a+=360;} return a;}
     float FixAng(float a){ if(a>359){ a-=360;} if(a<0){ a+=360;} return a;}
@@ -100,97 +99,159 @@ class Program
         return (float)Math.Cos(degToRad(ang))*(bx-ax)-(float)Math.Sin(degToRad(ang))*(by-ay);
     }
 
-void drawRays2D(IntPtr renderer)
-{
-    SDL.SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-    
-    SDL.SDL_RenderDrawLine(renderer, 526, 0, 1006, 0);
-    SDL.SDL_RenderDrawLine(renderer, 1006, 0, 1006, 160);
-    SDL.SDL_RenderDrawLine(renderer, 1006, 160, 526, 160);
-    SDL.SDL_RenderDrawLine(renderer, 526, 160, 526, 0);
- 
-    SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    
-    SDL.SDL_RenderDrawLine(renderer, 526, 160, 1006, 160);
-    SDL.SDL_RenderDrawLine(renderer, 1006, 160, 1006, 320);
-    SDL.SDL_RenderDrawLine(renderer, 1006, 320, 526,320);
-    SDL.SDL_RenderDrawLine(renderer, 526,320, 526, 160);	 	
-	
- int r,mx,my,mp,dof,side;
- float vx,vy,rx,ry,ra,xo=0,yo=0,disV,disH; 
- 
- ra=FixAng(pa+30);                                                              //ray set back 30 degrees
- 
- for(r=0;r<60;r++)
- {
-  //---Vertical--- 
-  dof=0; side=0; disV=100000;
-  float Tan=(float)Math.Tan(degToRad(ra));
-  if (Math.Cos(degToRad(ra)) > 0.001)
-  {
-      rx=(((int)px>>6)<<6)+64;
-      ry=(px-rx)*Tan+py;
-      xo= 64;
-      yo=-xo*Tan;
-  }//looking left
-  else if(Math.Cos(degToRad(ra))<-0.001){ rx=(((int)px>>6)<<6) -0.0001f; ry=(px-rx)*Tan+py; xo=-64; yo=-xo*Tan;}//looking right
-  else { rx=px; ry=py; dof=8;}                                                  //looking up or down. no hit  
+    void drawRays2D(IntPtr renderer)
+    {
+        SDL.SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
 
-  while(dof<8) 
-  { 
-   mx=(int)(rx)>>6; my=(int)(ry)>>6; mp=my*mapX+mx;                     
-   if(mp>0 && mp<mapX*mapY && map[mp]==1){ dof=8; disV=(float)Math.Cos(degToRad(ra))*(rx-px)-(float)Math.Sin(degToRad(ra))*(ry-py);}//hit         
-   else{ rx+=xo; ry+=yo; dof+=1;}                                               //check next horizontal
-  } 
-  vx=rx; vy=ry;
+        SDL.SDL_RenderDrawLine(renderer, 526, 0, 1006, 0);
+        SDL.SDL_RenderDrawLine(renderer, 1006, 0, 1006, 160);
+        SDL.SDL_RenderDrawLine(renderer, 1006, 160, 526, 160);
+        SDL.SDL_RenderDrawLine(renderer, 526, 160, 526, 0);
 
-  //---Horizontal---
-  dof=0; disH=100000;
-  Tan=1.0f/Tan; 
-       if(Math.Sin(degToRad(ra))> 0.001f){ ry=(((int)py>>6)<<6) -0.0001f; rx=(py-ry)*Tan+px; yo=-64; xo=-yo*Tan;}//looking up 
-  else if(Math.Sin(degToRad(ra))<-0.001f){ ry=(((int)py>>6)<<6)+64;      rx=(py-ry)*Tan+px; yo= 64; xo=-yo*Tan;}//looking down
-  else{ rx=px; ry=py; dof=8;}                                                   //looking straight left or right
- 
-  while(dof<8) 
-  { 
-   mx=(int)(rx)>>6; my=(int)(ry)>>6; mp=my*mapX+mx;                          
-   if(mp>0 && mp<mapX*mapY && map[mp]==1){ dof=8; disH=(float)Math.Cos(degToRad(ra))*(rx-px)-(float)Math.Sin(degToRad(ra))*(ry-py);}//hit         
-   else{ rx+=xo; ry+=yo; dof+=1;}                                               //check next horizontal
-  } 
-  
-  SDL.SDL_SetRenderDrawColor(renderer, 0, 204, 0, 255);
-  if (disV < disH)
-  {
-      rx=vx; ry=vy; 
-      disH=disV;
-      
-      SDL.SDL_SetRenderDrawColor(renderer, 0, 152, 0, 255);
-  }                  //horizontal hit first
-  //glLineWidth(2);
-  //glBegin(GL_LINES);
-  
-  SDL.SDL_RenderDrawLine(renderer, (int)px, (int)py, (int)rx, (int)ry);
-  SDL.SDL_RenderDrawLine(renderer, (int)px+1, (int)py, (int)rx+1, (int)ry);
-    
-  int ca=(int)FixAng(pa-ra); disH=disH*(float)Math.Cos(degToRad(ca));                            //fix fisheye 
-  int lineH = (int)((mapS*320)/(disH)); if(lineH>320){ lineH=320;}                     //line height and limit
-  int lineOff = 160 - (lineH>>1);                                               //line offset
-  
-  //glLineWidth(8);
-  //glBegin(GL_LINES);
-  
-  SDL.SDL_RenderDrawLine(renderer, r*8-3+530,lineOff, r*8-3+530,lineOff+lineH);
-  SDL.SDL_RenderDrawLine(renderer, r*8-2+530,lineOff, r*8-2+530,lineOff+lineH);
-  SDL.SDL_RenderDrawLine(renderer, r*8-1+530,lineOff, r*8-1+530,lineOff+lineH);
-  SDL.SDL_RenderDrawLine(renderer, r*8+530,lineOff, r*8+530,lineOff+lineH);
-  SDL.SDL_RenderDrawLine(renderer, r*8+1+530,lineOff, r*8+1+530,lineOff+lineH);
-  SDL.SDL_RenderDrawLine(renderer, r*8+2+530,lineOff, r*8+2+530,lineOff+lineH);
-  SDL.SDL_RenderDrawLine(renderer, r*8+3+530,lineOff, r*8+3+530,lineOff+lineH);
-  SDL.SDL_RenderDrawLine(renderer, r*8+4+530,lineOff, r*8+4+530,lineOff+lineH);
+        SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
 
-  ra=FixAng(ra-1);                                                              //go to next ray
- }
-}//-----------------------------------------------------------------------------
+        SDL.SDL_RenderDrawLine(renderer, 526, 160, 1006, 160);
+        SDL.SDL_RenderDrawLine(renderer, 1006, 160, 1006, 320);
+        SDL.SDL_RenderDrawLine(renderer, 1006, 320, 526, 320);
+        SDL.SDL_RenderDrawLine(renderer, 526, 320, 526, 160);
+
+        int r, mx, my, mp, dof, side;
+        float vx, vy, rx, ry, ra, xo = 0, yo = 0, disV, disH;
+
+        ra = FixAng(pa + 30); //ray set back 30 degrees
+
+        for (r = 0; r < 60; r++)
+        {
+            //---Vertical--- 
+            dof = 0;
+            side = 0;
+            disV = 100000;
+            float Tan = (float)Math.Tan(degToRad(ra));
+            if (Math.Cos(degToRad(ra)) > 0.001)
+            {
+                rx = (((int)px >> MapShift) << MapShift) + MapScale;
+                ry = (px - rx) * Tan + py;
+                xo = MapScale;
+                yo = -xo * Tan;
+            } //looking left
+            else if (Math.Cos(degToRad(ra)) < -0.001)
+            {
+                rx = (((int)px >> MapShift) << MapShift) - 0.0001f;
+                ry = (px - rx) * Tan + py;
+                xo = -MapScale;
+                yo = -xo * Tan;
+            } //looking right
+            else
+            {
+                rx = px;
+                ry = py;
+                dof = 8;
+            } //looking up or down. no hit  
+
+            while (dof < 8)
+            {
+                mx = (int)(rx) >> MapShift;
+                my = (int)(ry) >> MapShift;
+                mp = my * MapWidth + mx;
+                if (mp > 0 && mp < MapWidth * MapHeight && _map[mp] == 1)
+                {
+                    dof = 8;
+                    disV = (float)Math.Cos(degToRad(ra)) * (rx - px) - (float)Math.Sin(degToRad(ra)) * (ry - py);
+                } //hit         
+                else
+                {
+                    rx += xo;
+                    ry += yo;
+                    dof += 1;
+                } //check next horizontal
+            }
+
+            vx = rx;
+            vy = ry;
+
+            //---Horizontal---
+            dof = 0;
+            disH = 100000;
+            Tan = 1.0f / Tan;
+            if (Math.Sin(degToRad(ra)) > 0.001f)
+            {
+                ry = (((int)py >> MapShift) << MapShift) - 0.0001f;
+                rx = (py - ry) * Tan + px;
+                yo = -MapScale;
+                xo = -yo * Tan;
+            } //looking up 
+            else if (Math.Sin(degToRad(ra)) < -0.001f)
+            {
+                ry = (((int)py >> MapShift) << MapShift) + MapScale;
+                rx = (py - ry) * Tan + px;
+                yo = MapScale;
+                xo = -yo * Tan;
+            } //looking down
+            else
+            {
+                rx = px;
+                ry = py;
+                dof = 8;
+            } //looking straight left or right
+
+            while (dof < 8)
+            {
+                mx = (int)(rx) / MapScale;
+                my = (int)(ry) / MapScale;
+                mp = my * MapWidth + mx;
+                if (mp > 0 && mp < MapWidth * MapHeight && _map[mp] == 1)
+                {
+                    dof = 8;
+                    disH = (float)Math.Cos(degToRad(ra)) * (rx - px) - (float)Math.Sin(degToRad(ra)) * (ry - py);
+                } //hit         
+                else
+                {
+                    rx += xo;
+                    ry += yo;
+                    dof += 1;
+                } //check next horizontal
+            }
+
+            SDL.SDL_SetRenderDrawColor(renderer, 0, 204, 0, 255);
+            if (disV < disH)
+            {
+                rx = vx;
+                ry = vy;
+                disH = disV;
+
+                SDL.SDL_SetRenderDrawColor(renderer, 0, 152, 0, 255);
+            } //horizontal hit first
+            //glLineWidth(2);
+            //glBegin(GL_LINES);
+
+            SDL.SDL_RenderDrawLine(renderer, (int)px, (int)py, (int)rx, (int)ry);
+            SDL.SDL_RenderDrawLine(renderer, (int)px + 1, (int)py, (int)rx + 1, (int)ry);
+
+            int ca = (int)FixAng(pa - ra);
+            disH = disH * (float)Math.Cos(degToRad(ca)); //fix fisheye 
+            int lineH = (int)((MapScale * 320) / (disH));
+            if (lineH > 320)
+            {
+                lineH = 320;
+            } //line height and limit
+
+            int lineOff = 160 - (lineH >> 1); //line offset
+
+            //glLineWidth(8);
+            //glBegin(GL_LINES);
+
+            SDL.SDL_RenderDrawLine(renderer, r * 8 - 3 + 530, lineOff, r * 8 - 3 + 530, lineOff + lineH);
+            SDL.SDL_RenderDrawLine(renderer, r * 8 - 2 + 530, lineOff, r * 8 - 2 + 530, lineOff + lineH);
+            SDL.SDL_RenderDrawLine(renderer, r * 8 - 1 + 530, lineOff, r * 8 - 1 + 530, lineOff + lineH);
+            SDL.SDL_RenderDrawLine(renderer, r * 8 + 530, lineOff, r * 8 + 530, lineOff + lineH);
+            SDL.SDL_RenderDrawLine(renderer, r * 8 + 1 + 530, lineOff, r * 8 + 1 + 530, lineOff + lineH);
+            SDL.SDL_RenderDrawLine(renderer, r * 8 + 2 + 530, lineOff, r * 8 + 2 + 530, lineOff + lineH);
+            SDL.SDL_RenderDrawLine(renderer, r * 8 + 3 + 530, lineOff, r * 8 + 3 + 530, lineOff + lineH);
+            SDL.SDL_RenderDrawLine(renderer, r * 8 + 4 + 530, lineOff, r * 8 + 4 + 530, lineOff + lineH);
+
+            ra = FixAng(ra - 1); //go to next ray
+        }
+    } //-----------------------------------------------------------------------------
 
 void init(IntPtr renderer)
 {
@@ -201,7 +262,7 @@ void init(IntPtr renderer)
     SDL.SDL_SetRenderDrawColor(renderer, 77,77, 77, 255); // Red color
     //glClearColor(0.3,0.3,0.3,0);
     //gluOrtho2D(0,1024,510,0);
-    px=150; py=400; pa=90;
+    px=2.5f*MapScale; py=6.5f*MapScale; pa=90;
     pdx=(float)Math.Cos(degToRad(pa)); pdy=-(float)Math.Sin(degToRad(pa)); 
 }
 

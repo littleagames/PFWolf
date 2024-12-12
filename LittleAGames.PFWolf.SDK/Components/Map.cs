@@ -3,6 +3,7 @@
 public class Map : MapComponent
 {
     public string AssetName { get; }
+    public ushort[][,] Plane { get; set; } = new ushort[3][,];
 
     private Map(string assetName)
     {
@@ -12,12 +13,6 @@ public class Map : MapComponent
     public static Map Create(string assetName)
         => new(assetName);
     
-    
-    //[Obsolete("This should be a child component on the map")]
-    //public Wall?[,] Walls { get; set; }
-
-    //public List<Actor> Actors { get; set; } = [];
-
     public new int Width { get; set; }
     
     public new int Height { get; set; }
@@ -26,6 +21,11 @@ public class Map : MapComponent
     /// Name given to the map for the game (e.g. "The Castle")
     /// </summary>
     public string Name { get; set; }
+
+    public Wall? FindWall(int tileX, int tileY)
+    {
+        return Children.GetComponents().OfType<Wall>().FirstOrDefault(x => x.X == tileX && x.Y == tileY);
+    }
 
     public override void OnUpdate()
     {

@@ -60,13 +60,14 @@ public class MapManager : IMapManager
         
         // TODO: Should I make a "MapRenderComponent" that takes MapComponent and RenderComponent, and translates between the two?
         // Currently the video manager runs AFTER the map manager (so i can manipulate the data at first
-        var wallPlane = mapAsset.PlaneData[0];
-       // map.Walls = new Wall[mapAsset.Width, mapAsset.Height];
+        //var wallPlane = mapAsset.PlaneData[0];
+        map.Plane[0] = mapAsset.PlaneData[0].To2DArray(mapAsset.Width, mapAsset.Height);
+        map.Plane[1] = mapAsset.PlaneData[1].To2DArray(mapAsset.Width, mapAsset.Height);
         
         for (var y = 0; y < mapAsset.Height; y++)
         for (var x = 0; x < mapAsset.Width; x++)
         {
-            var wallNum = wallPlane[y*mapAsset.Width + x];
+            var wallNum = map.Plane[0][x, y];
             if (wallNum > 0 && wallNum < 90) // TODO: These will be in the mapdefs.json
             {
                 var wallLight = $"WALL{((wallNum - 1) * 2):D5}";
@@ -88,7 +89,7 @@ public class MapManager : IMapManager
             }
         }
         
-        var uniqueWalls = wallPlane.GroupBy(x => x); // TODO: This may not be necessary as the previous step will gather all of the required asset names
+        //var uniqueWalls = map.Plane[0].GroupBy(x => x); // TODO: This may not be necessary as the previous step will gather all of the required asset names
         // TODO: Map the wallPlane numbers to MapDefinitions
         // First can be a fake mapper (1 == WALL000001) (WallDefinition { N = {assetName}, E, S, W }
         // TODO: _assetManager.FindAssets(AssetType, List<string> assetNames)
