@@ -76,16 +76,18 @@ public class MapManager : IMapManager
                 var wallLightTexture = _assetManager.FindAsset(AssetType.Texture, wallLight);
                 var wallDarkTexture = _assetManager.FindAsset(AssetType.Texture, wallDark);
                 // TODO: Add these to a HashSet for assets to load
-                map.Children.Add(new Wall
-                {
-                    X = x, // TileX
-                    Y = y, // TileY
-                    Data = wallLightTexture.RawData.To2DArray(64,64),
-                    North = wallLightTexture.RawData,
-                    South = wallLightTexture.RawData,
-                    East = wallDarkTexture.RawData,
-                    West = wallDarkTexture.RawData,
-                });
+                map.Walls.TryAdd(
+                    wallNum, 
+                    new Wall
+                    {
+                        X = x, // TileX
+                        Y = y, // TileY
+                        Data = wallLightTexture.RawData.To2DArray(64, 64),
+                        North = wallLightTexture.RawData,
+                        South = wallLightTexture.RawData,
+                        East = wallDarkTexture.RawData,
+                        West = wallDarkTexture.RawData,
+                    });
             }
         }
         

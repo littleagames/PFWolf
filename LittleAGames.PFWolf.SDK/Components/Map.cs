@@ -4,6 +4,8 @@ public class Map : MapComponent
 {
     public string AssetName { get; }
     public ushort[][,] Plane { get; set; } = new ushort[3][,];
+    
+    public Dictionary<int, Wall> Walls { get; set; } = new Dictionary<int, Wall>();
 
     private Map(string assetName)
     {
@@ -22,6 +24,7 @@ public class Map : MapComponent
     /// </summary>
     public string Name { get; set; }
 
+    [Obsolete("This is extremely inefficient. Find a better solution")]
     public Wall? FindWall(int tileX, int tileY)
     {
         return Children.GetComponents().OfType<Wall>().FirstOrDefault(x => x.X == tileX && x.Y == tileY);

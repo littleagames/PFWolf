@@ -71,6 +71,7 @@ public class SDLInputManager : IInputManager
             SDL.SDL_Keycode.SDLK_w => Keys.W,
             SDL.SDL_Keycode.SDLK_LSHIFT => Keys.LeftShift,
             SDL.SDL_Keycode.SDLK_RSHIFT => Keys.RightShift,
+            SDL.SDL_Keycode.SDLK_TAB => Keys.Tab,
             _ => Keys.None
         };
     }

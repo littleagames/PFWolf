@@ -2,7 +2,8 @@
 public class GameLoopScene : Scene
 {
     private Camera _camera;
-    private Renderer _renderer;
+    private Renderer _renderer;//, 
+        //_automapRenderer, _rayCastRenderer;
     private ViewPort _viewPort;
     private Map _map;
     private Player? _player;
@@ -22,11 +23,13 @@ public class GameLoopScene : Scene
         // TODO: Change assetname for map "E1M1" or something defined in the asset
         _map = Map.Create("Wolf1 Map1");
         _camera = Camera.Create();
-        _renderer = //Wolf3DRaycastRenderer
-            RaycastRenderer
-                //AutoMapRenderer
-            .Create(_camera, _map, 304*2, 144*2);
-        _viewPort = ViewPort.Create(8*2, 8*2, 304*2, 144*2, _renderer);
+        _renderer = Wolf3DRaycastRenderer//RaycastRenderer
+            .Create(_camera, _map, 640, 320);
+        //_automapRenderer =AutoMapRenderer
+        //    .Create(_camera, _map, 640, 320);
+        //_renderer = _automapRenderer;
+            
+        _viewPort = ViewPort.Create(0, 0, 640, 320, _renderer);
         Components.Add(_viewPort);
         Components.Add(_map);
         Components.Add(_camera);
@@ -69,6 +72,18 @@ public class GameLoopScene : Scene
         const int baseMove = 150*70;
         var controlX = 0;
         var controlY = 0;
+        
+        // if (Input.IsKeyDown(Keys.Tab))
+        // {
+        //     Console.WriteLine("Toggle Renderer");
+        //     // if (_renderer is RaycastRenderer)
+        //     //     _renderer = _automapRenderer;
+        //     // else
+        //     // if (_renderer is AutoMapRenderer)
+        //     //     _renderer = _rayCastRenderer;
+        //     // _viewPort.UpdateRenderer(_renderer);
+        //      //= ViewPort.Create(0, 0, 640, 152*2, _renderer);
+        // }
         
         var delta = (Input.IsKeyDown(Keys.RightShift) ? runMove : baseMove);
         

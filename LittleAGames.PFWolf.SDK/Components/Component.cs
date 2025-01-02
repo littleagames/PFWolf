@@ -104,5 +104,6 @@ public enum Keys
     Equals,
     Minus,
     LeftShift,
-    RightShift
+    RightShift,
+    Tab
 }

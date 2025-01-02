@@ -6,7 +6,7 @@ public class ViewPort : RenderComponent
     public int Y { get; }
     public int Width { get; }
     public int Height { get; }
-    public Renderer Renderer { get; }
+    public Renderer Renderer { get; private set; }
 
     private ViewPort(int x, int y, int width, int height, Renderer renderer)
     {
@@ -24,5 +24,10 @@ public class ViewPort : RenderComponent
     {
         // Crop the render
         return Renderer.Render();
+    }
+
+    public void UpdateRenderer(Renderer renderer)
+    {
+        Renderer = renderer;
     }
 }

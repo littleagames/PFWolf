@@ -15,6 +15,8 @@ public class Wolf3DRaycastRenderer : Renderer
 
     }
 
+    public int CenterY => Height / 2;
+
     private const int ANGLES = 360;             // must be divisable by 4
     private const int ANGLEQUAD = (ANGLES / 4);
     private const int FINEANGLES = 3600;
@@ -39,6 +41,13 @@ public class Wolf3DRaycastRenderer : Renderer
     private long VIEWGLOBAL = 0x10000;
     private const long GLOBAL1 = (1L << 16);
     private readonly long TILEGLOBAL = GLOBAL1;
+    
+    
+private const int WALLSHIFT =      6;
+private const int BIT_WALL   =     (1 << WALLSHIFT);
+private const int BIT_DOOR    =    (1 << (WALLSHIFT + 1));
+private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
+    
     private int focalLength;
     private int scale;
     private int heightNumerator;
@@ -57,8 +66,8 @@ public class Wolf3DRaycastRenderer : Renderer
     private int   xintercept,yintercept;
     private int   xinttile,yinttile;
     private ushort    texdelta;
-    private ushort[]    horizwall = new ushort[90];
-    private ushort[] vertwall = new ushort[90];
+    //private ushort[]    horizwall = new ushort[90];
+    //private ushort[] vertwall = new ushort[90];
     
     private int viewSin;
     private int viewCos;
@@ -67,6 +76,7 @@ public class Wolf3DRaycastRenderer : Renderer
 
     
     private int     postx;
+    private byte[] postsource;
 
     private byte[,] _result;
     
@@ -127,7 +137,7 @@ public class Wolf3DRaycastRenderer : Renderer
 
     public static Wolf3DRaycastRenderer Create(Camera camera, Map map, int width, int height)
         => new(camera, map, width, height);
-    
+
     public override byte[,] Render()
     {
         _result.Fill((byte)0x19);
@@ -144,33 +154,33 @@ public class Wolf3DRaycastRenderer : Renderer
         viewX = Camera.X - FixedMul(focalLength, viewCos);
         viewY = Camera.Y + FixedMul(focalLength, viewSin);
 
-        var focaltx = (short)(viewX>> (int)TILESHIFT);
-        var focalty = (short)(viewY>> (int)TILESHIFT);
-        
+        var focaltx = (short)(viewX >> (int)TILESHIFT);
+        var focalty = (short)(viewY >> (int)TILESHIFT);
+
         // These are where the player is in a partial tile
-        var xpartialdown = viewX&(TILEGLOBAL-1);
+        var xpartialdown = viewX & (TILEGLOBAL - 1);
         var xpartialup = xpartialdown ^ (TILEGLOBAL - 1);
-        var ypartialdown = viewY&(TILEGLOBAL-1);
+        var ypartialdown = viewY & (TILEGLOBAL - 1);
         var ypartialup = ypartialdown ^ (TILEGLOBAL - 1);
 
-        short   angle;
-        int   xstep = 0,ystep=0;
-        int     xinttemp,yinttemp;                            // holds temporary intercept position
-        uint  xpartial = 0,ypartial = 0;
-        
+        short angle;
+        int xstep = 0, ystep = 0;
+        int xinttemp, yinttemp; // holds temporary intercept position
+        uint xpartial = 0, ypartial = 0;
+
         for (pixx = 0; pixx < Width; pixx++)
         {
             angle = (short)(midAngle + pixelAngle[pixx]);
-            
-            if (angle < 0)                                      // -90 - -1 degree arc
-                angle += ANG360;                                // -90 is the same as 270
-            if (angle >= ANG360)                                // 360-449 degree arc
-                angle -= ANG360;                                // -449 is the same as 89
+
+            if (angle < 0) // -90 - -1 degree arc
+                angle += ANG360; // -90 is the same as 270
+            if (angle >= ANG360) // 360-449 degree arc
+                angle -= ANG360; // -449 is the same as 89
 
             //
             // setup xstep/ystep based on angle
             //
-            if (angle < ANG90)                                  // 0-89 degree arc
+            if (angle < ANG90) // 0-89 degree arc
             {
                 xtilestep = 1;
                 ytilestep = -1;
@@ -179,7 +189,7 @@ public class Wolf3DRaycastRenderer : Renderer
                 xpartial = (uint)xpartialup;
                 ypartial = (uint)ypartialdown;
             }
-            else if (angle < ANG180)                            // 90-179 degree arc
+            else if (angle < ANG180) // 90-179 degree arc
             {
                 xtilestep = -1;
                 ytilestep = -1;
@@ -188,7 +198,7 @@ public class Wolf3DRaycastRenderer : Renderer
                 xpartial = (uint)xpartialdown;
                 ypartial = (uint)ypartialdown;
             }
-            else if (angle < ANG270)                            // 180-269 degree arc
+            else if (angle < ANG270) // 180-269 degree arc
             {
                 xtilestep = -1;
                 ytilestep = 1;
@@ -197,7 +207,7 @@ public class Wolf3DRaycastRenderer : Renderer
                 xpartial = (uint)xpartialdown;
                 ypartial = (uint)ypartialup;
             }
-            else if (angle < ANG360)                            // 270-359 degree arc
+            else if (angle < ANG360) // 270-359 degree arc
             {
                 xtilestep = 1;
                 ytilestep = 1;
@@ -206,26 +216,27 @@ public class Wolf3DRaycastRenderer : Renderer
                 xpartial = (uint)xpartialup;
                 ypartial = (uint)ypartialup;
             }
-            
+
             //
             // initialise variables for intersection testing
             //
-            yintercept = FixedMul(ystep,(int)xpartial) + viewY;
+            yintercept = FixedMul(ystep, (int)xpartial) + viewY;
             yinttile = yintercept >> (int)TILESHIFT;
             xtile = (short)(focaltx + xtilestep);
 
-            xintercept = FixedMul(xstep,(int)ypartial) + viewX;
+            xintercept = FixedMul(xstep, (int)ypartial) + viewX;
             xinttile = xintercept >> (int)TILESHIFT;
             ytile = (short)(focalty + ytilestep);
 
             texdelta = 0;
-            
-//
-// trace along this angle until we hit a wall
-//
-// CORE LOOP!
-//
-            while (true)
+
+            //
+            // trace along this angle until we hit a wall
+            //
+            // CORE LOOP!
+            //
+            var tileFound = false;
+            while (!tileFound)
             {
                 //
                 // check intersections with vertical walls
@@ -234,39 +245,404 @@ public class Wolf3DRaycastRenderer : Renderer
                     yinttile = ytile;
 
                 if ((ytilestep == -1 && yinttile <= ytile) || (ytilestep == 1 && yinttile >= ytile))
-                {
-                    var wall = _map.FindWall(xinttile, ytile);// tilemap[xinttile][ytile]; // TODO: Get wall?
-                    if (wall != null)
-                    {
-                        yintercept = ytile << (int)TILESHIFT;
+                    tileFound = horizentry(xstep);
 
-                        HitHorizWall();
-                    }
-                }
+                if (tileFound) break;
                 
-                //
-                // mark the tile as visible and setup for next step
-                //
-                //spotvis[xtile][yinttile] = true;
-                xtile += xtilestep;
-                yintercept += ystep;
-                yinttile = yintercept >> (int)TILESHIFT;
-            }
+                //tileFound = vertentry(ystep);
 
-            continue;
-            while (true)
-            {
                 //
                 // check intersections with horizontal walls
                 //
                 if ((xtile - xtilestep) == xinttile && (ytile - ytilestep) == yinttile)
                     xinttile = xtile;
+
+                if ((xtilestep == -1 && xinttile <= xtile) || (xtilestep == 1 && xinttile >= xtile))
+                    tileFound = vertentry(ystep);
             }
         }
-        
+
         return _result;
     }
 
+    private bool vertentry(int ystep)
+    {
+// #ifdef REVEALMAP
+//             mapseen[xtile][yinttile] = true;
+// #endif
+        tilehit = _map.Plane[0][yinttile, xtile]; // tilemap[xtile][yinttile];
+
+        if (tilehit > BIT_WALL)
+        {
+            tilehit = 0;
+        }
+
+        if (tilehit > 0)
+        {
+            if ((tilehit & BIT_DOOR) != 0)
+            {
+                // //
+                // // hit a vertical door, so find which coordinate the door would be
+                // // intersected at, and check to see if the door is open past that point
+                // //
+                // door = &doorobjlist[tilehit & ~BIT_DOOR];
+                //
+                // if (door->action == dr_open)
+                //     goto passvert;                       // door is open, continue tracing
+                //
+                // yinttemp = yintercept + (ystep >> 1);    // add halfstep to current intercept position
+                //
+                // //
+                // // midpoint is outside tile, so it hit the side of the wall before a door
+                // //
+                // if (yinttemp >> TILESHIFT != yinttile)
+                //     goto passvert;
+                //
+                // if (door->action != dr_closed)
+                // {
+                //     //
+                //     // the trace hit the door plane at pixel position yintercept, see if the door is
+                //     // closed that much
+                //     //
+                //     if ((word)yinttemp < door->position)
+                //         goto passvert;
+                // }
+                //
+                // yintercept = yinttemp;
+                // xintercept = ((fixed)xtile << TILESHIFT) + (TILEGLOBAL/2);
+                //
+                // HitVertDoor();
+            }
+            else if (tilehit == BIT_WALL)
+            {
+                // //
+                // // hit a sliding vertical wall
+                // //
+                // if (pwalldir == di_west || pwalldir == di_east)
+                // {
+                //     if (pwalldir == di_west)
+                //     {
+                //         pwallposnorm = 64 - pwallpos;
+                //         pwallposinv = pwallpos;
+                //     }
+                //     else
+                //     {
+                //         pwallposnorm = pwallpos;
+                //         pwallposinv = 64 - pwallpos;
+                //     }
+                //
+                //     if ((pwalldir == di_east && xtile == pwallx && yinttile == pwally)
+                //      || (pwalldir == di_west && !(xtile == pwallx && yinttile == pwally)))
+                //     {
+                //         yinttemp = yintercept + ((ystep * pwallposnorm) >> 6);
+                //
+                //         if (yinttemp >> TILESHIFT != yinttile)
+                //             goto passvert;
+                //
+                //         yintercept = yinttemp;
+                //         xintercept = (((fixed)xtile << TILESHIFT) + TILEGLOBAL) - (pwallposinv << 10);
+                //         yinttile = yintercept >> TILESHIFT;
+                //         tilehit = pwalltile;
+                //
+                //         HitVertWall();
+                //     }
+                //     else
+                //     {
+                //         yinttemp = yintercept + ((ystep * pwallposinv) >> 6);
+                //
+                //         if (yinttemp >> TILESHIFT != yinttile)
+                //             goto passvert;
+                //
+                //         yintercept = yinttemp;
+                //         xintercept = ((fixed)xtile << TILESHIFT) - (pwallposinv << 10);
+                //         yinttile = yintercept >> TILESHIFT;
+                //         tilehit = pwalltile;
+                //
+                //         HitVertWall();
+                //     }
+                // }
+                // else
+                // {
+                //     if (pwalldir == di_north)
+                //         pwallposi = 64 - pwallpos;
+                //     else
+                //         pwallposi = pwallpos;
+                //
+                //     if ((pwalldir == di_south && (word)yintercept < (pwallposi << 10))
+                //      || (pwalldir == di_north && (word)yintercept > (pwallposi << 10)))
+                //     {
+                //         if (xtile == pwallx && yinttile == pwally)
+                //         {
+                //             if ((pwalldir == di_south && (int32_t)((word)yintercept) + ystep < (pwallposi << 10))
+                //              || (pwalldir == di_north && (int32_t)((word)yintercept) + ystep > (pwallposi << 10)))
+                //                 goto passvert;
+                //
+                //             //
+                //             // set up a horizontal intercept position
+                //             //
+                //             if (pwalldir == di_south)
+                //                 yintercept = (yinttile << TILESHIFT) + (pwallposi << 10);
+                //             else
+                //                 yintercept = ((yinttile << TILESHIFT) - TILEGLOBAL) + (pwallposi << 10);
+                //
+                //             xintercept -= (xstep * (64 - pwallpos)) >> 6;
+                //             xinttile = xintercept >> TILESHIFT;
+                //             tilehit = pwalltile;
+                //
+                //             HitHorizWall();
+                //         }
+                //         else
+                //         {
+                //             texdelta = pwallposi << 10;
+                //             xintercept = (fixed)xtile << TILESHIFT;
+                //             tilehit = pwalltile;
+                //
+                //             HitVertWall();
+                //         }
+                //     }
+                //     else
+                //     {
+                //         if (xtile == pwallx && yinttile == pwally)
+                //         {
+                //             texdelta = pwallposi << 10;
+                //             xintercept = (fixed)xtile << TILESHIFT;
+                //             tilehit = pwalltile;
+                //
+                //             HitVertWall();
+                //         }
+                //         else
+                //         {
+                //             if ((pwalldir == di_south && (int32_t)((word)yintercept) + ystep > (pwallposi << 10))
+                //              || (pwalldir == di_north && (int32_t)((word)yintercept) + ystep < (pwallposi << 10)))
+                //                 goto passvert;
+                //
+                //             //
+                //             // set up a horizontal intercept position
+                //             //
+                //             if (pwalldir == di_south)
+                //                 yintercept = (yinttile << TILESHIFT) - ((64 - pwallpos) << 10);
+                //             else
+                //                 yintercept = (yinttile << TILESHIFT) + ((64 - pwallpos) << 10);
+                //
+                //             xintercept -= (xstep * pwallpos) >> 6;
+                //             xinttile = xintercept >> TILESHIFT;
+                //             tilehit = pwalltile;
+                //
+                //             HitHorizWall();
+                //         }
+                //     }
+                // }
+            }
+            else
+            {
+                xintercept = xtile << (int)TILESHIFT;
+
+                HitVertWall();
+            }
+
+            return true;
+        }
+
+        //
+        // mark the tile as visible and setup for next step
+        //
+        //spotvis[xtile][yinttile] = true;
+        xtile += xtilestep;
+        yintercept += ystep;
+        yinttile = yintercept >> (int)TILESHIFT;
+        return false;
+    }
+
+    private bool horizentry(int xstep)
+    {
+// #ifdef REVEALMAP
+//             mapseen[xinttile][ytile] = true;
+// #endif
+        tilehit = _map.Plane[0][ytile, xinttile];//tilemap[xinttile][ytile];
+        if (tilehit > BIT_WALL)
+        {
+            tilehit = 0;
+        }
+        
+        
+        if (tilehit > 0)
+        {
+            if ((tilehit & BIT_DOOR) != 0)
+            {
+                // //
+                // // hit a horizontal door, so find which coordinate the door would be
+                // // intersected at, and check to see if the door is open past that point
+                // //
+                // door = &doorobjlist[tilehit & ~BIT_DOOR];
+                //
+                // if (door->action == dr_open)
+                //     goto passhoriz;                      // door is open, continue tracing
+                //
+                // xinttemp = xintercept + (xstep >> 1);    // add half step to current intercept position
+                //
+                // //
+                // // midpoint is outside tile, so it hit the side of the wall before a door
+                // //
+                // if (xinttemp >> TILESHIFT != xinttile)
+                //     goto passhoriz;
+                //
+                // if (door->action != dr_closed)
+                // {
+                //     //
+                //     // the trace hit the door plane at pixel position xintercept, see if the door is
+                //     // closed that much
+                //     //
+                //     if ((word)xinttemp < door->position)
+                //         goto passhoriz;
+                // }
+                //
+                // xintercept = xinttemp;
+                // yintercept = ((fixed)ytile << TILESHIFT) + (TILEGLOBAL/2);
+                //
+                // HitHorizDoor();
+            }
+            else if (tilehit == BIT_WALL)
+            {
+                // //
+                // // hit a sliding horizontal wall
+                // //
+                // if (pwalldir == di_north || pwalldir == di_south)
+                // {
+                //     if (pwalldir == di_north)
+                //     {
+                //         pwallposnorm = 64 - pwallpos;
+                //         pwallposinv = pwallpos;
+                //     }
+                //     else
+                //     {
+                //         pwallposnorm = pwallpos;
+                //         pwallposinv = 64 - pwallpos;
+                //     }
+                //
+                //     if ((pwalldir == di_south && xinttile == pwallx && ytile == pwally)
+                //      || (pwalldir == di_north && !(xinttile == pwallx && ytile == pwally)))
+                //     {
+                //         xinttemp = xintercept + ((xstep * pwallposnorm) >> 6);
+                //
+                //         if (xinttemp >> TILESHIFT != xinttile)
+                //             goto passhoriz;
+                //
+                //         xintercept = xinttemp;
+                //         yintercept = (((fixed)ytile << TILESHIFT) + TILEGLOBAL) - (pwallposinv << 10);
+                //         xinttile = xintercept >> TILESHIFT;
+                //         tilehit = pwalltile;
+                //
+                //         HitHorizWall();
+                //     }
+                //     else
+                //     {
+                //         xinttemp = xintercept + ((xstep * pwallposinv) >> 6);
+                //
+                //         if (xinttemp >> TILESHIFT != xinttile)
+                //             goto passhoriz;
+                //
+                //         xintercept = xinttemp;
+                //         yintercept = ((fixed)ytile << TILESHIFT) - (pwallposinv << 10);
+                //         xinttile = xintercept >> TILESHIFT;
+                //         tilehit = pwalltile;
+                //
+                //         HitHorizWall();
+                //     }
+                // }
+                // else
+                // {
+                //     if (pwalldir == di_west)
+                //         pwallposi = 64 - pwallpos;
+                //     else
+                //         pwallposi = pwallpos;
+                //
+                //     if ((pwalldir == di_east && (word)xintercept < (pwallposi << 10))
+                //      || (pwalldir == di_west && (word)xintercept > (pwallposi << 10)))
+                //     {
+                //         if (xinttile == pwallx && ytile == pwally)
+                //         {
+                //             if ((pwalldir == di_east && (int32_t)((word)xintercept) + xstep < (pwallposi << 10))
+                //              || (pwalldir == di_west && (int32_t)((word)xintercept) + xstep > (pwallposi << 10)))
+                //                 goto passhoriz;
+                //
+                //             //
+                //             // set up a vertical intercept position
+                //             //
+                //             yintercept -= (ystep * (64 - pwallpos)) >> 6;
+                //             yinttile = yintercept >> TILESHIFT;
+                //
+                //             if (pwalldir == di_east)
+                //                 xintercept = (xinttile << TILESHIFT) + (pwallposi << 10);
+                //             else
+                //                 xintercept = ((xinttile << TILESHIFT) - TILEGLOBAL) + (pwallposi << 10);
+                //
+                //             tilehit = pwalltile;
+                //
+                //             HitVertWall();
+                //         }
+                //         else
+                //         {
+                //             texdelta = pwallposi << 10;
+                //             yintercept = ytile << TILESHIFT;
+                //             tilehit = pwalltile;
+                //
+                //             HitHorizWall();
+                //         }
+                //     }
+                //     else
+                //     {
+                //         if (xinttile == pwallx && ytile == pwally)
+                //         {
+                //             texdelta = pwallposi << 10;
+                //             yintercept = ytile << TILESHIFT;
+                //             tilehit = pwalltile;
+                //
+                //             HitHorizWall();
+                //         }
+                //         else
+                //         {
+                //             if ((pwalldir == di_east && (int32_t)((word)xintercept) + xstep > (pwallposi << 10))
+                //              || (pwalldir == di_west && (int32_t)((word)xintercept) + xstep < (pwallposi << 10)))
+                //                 goto passhoriz;
+                //
+                //             //
+                //             // set up a vertical intercept position
+                //             //
+                //             yintercept -= (ystep * pwallpos) >> 6;
+                //             yinttile = yintercept >> TILESHIFT;
+                //
+                //             if (pwalldir == di_east)
+                //                 xintercept = (xinttile << TILESHIFT) - ((64 - pwallpos) << 10);
+                //             else
+                //                 xintercept = (xinttile << TILESHIFT) + ((64 - pwallpos) << 10);
+                //
+                //             tilehit = pwalltile;
+                //
+                //             HitVertWall();
+                //         }
+                //     }
+                // }
+            }
+            else
+            {
+                yintercept = ytile << (int)TILESHIFT;
+
+                HitHorizWall();
+            }
+
+            return true;
+        }
+
+        //
+        // mark the tile as visible and setup for next step
+        //
+        //spotvis[xinttile][ytile] = true;
+        ytile += ytilestep;
+        xintercept += xstep;
+        xinttile = xintercept >> (int)TILESHIFT;
+            return false;
+    }
+    
     private void HitHorizWall()
     {
         int wallpic;
@@ -293,32 +669,79 @@ public class Wolf3DRaycastRenderer : Renderer
         //         wallpic = horizwall[tilehit & ~BIT_WALL];
         // }
         // else
-            wallpic = horizwall[tilehit];
+            //wallpic = horizwall[tilehit];
 
-            // texture is the offset in the byte array
-            //var postsource = 0 + texture;//PM_GetPage(wallpic) + texture;
-            var wall = new byte[64];
-        ScalePost (wall);
+            postsource = _map.Walls[tilehit].North.Skip(texture).ToArray();// PM_GetPage(wallpic) + texture;
+// #ifdef USE_SKYWALLPARALLAX
+//         postsourcesky = postsource - texture;
+// #endif
+        ScalePost();
     }
 
-    private void ScalePost(byte[] wall)
+    private void HitVertWall()
     {
-        var centerY = Height / 2;
-        var bufferPitch = 640;
+        int wallpic;
+        int texture;
+
+        texture = ((yintercept - texdelta) >> FIXED2TEXSHIFT) & TEXTUREMASK;
+
+        if (xtilestep == -1)
+        {
+            texture = TEXTUREMASK - texture;
+            xintercept += (int)TILEGLOBAL;
+        }
+
+        wallHeight[pixx] = CalcHeight();
+        postx = pixx;
+        
+        // if ((tilehit & BIT_WALL) != 0)
+        // {
+        //     //
+        //     // check for adjacent doors
+        //     //
+        //     if (tilemap[xtile - xtilestep][yinttile] & BIT_DOOR)
+        //         wallpic = DOORWALL+3;
+        //     else
+        //         wallpic = vertwall[tilehit & ~BIT_WALL];
+        // }
+        // else
+             //wallpic = vertwall[tilehit];
+
+        postsource = _map.Walls[tilehit].West.Skip(texture).ToArray();
+// #ifdef USE_SKYWALLPARALLAX
+//         postsourcesky = postsource - texture;
+// #endif
+        ScalePost();
+    }
+
+    private void ScalePost()
+    {
         int ywcount, yoffs, yw, yd, yendoffs;
         byte col;
+
+// #ifdef USE_SKYWALLPARALLAX
+//         if (tilehit == 16)
+//         {
+//             ScaleSkyPost();
+//             return;
+//         }
+// #endif
+
+// #ifdef USE_SHADING
+//         byte *curshades = shadetable[GetShade(wallheight[postx])];
+// #endif
 
         ywcount = yd = wallHeight[postx] >> 3;
         if(yd <= 0) yd = 100;
 
-        yoffs = (centerY - ywcount) * bufferPitch;
+        yoffs = (CenterY - ywcount) /* * bufferPitch*/;
         if(yoffs < 0) yoffs = 0;
-        yoffs += postx;
+        //yoffs += postx;
 
-        yendoffs = centerY + ywcount - 1;
+        yendoffs = CenterY + ywcount - 1;
         yw=TEXTURESIZE-1;
 
-        while(yendoffs >= 400)
+        while(yendoffs >= Height)
         {
             ywcount -= TEXTURESIZE/2;
             while(ywcount <= 0)
@@ -330,11 +753,16 @@ public class Wolf3DRaycastRenderer : Renderer
         }
         if(yw < 0) return;
 
-        col = wall[yw];
-        yendoffs = yendoffs * bufferPitch + postx;
+// #ifdef USE_SHADING
+//         col = curshades[postsource[yw]];
+// #else
+        col = postsource[yw];
+//#endif
+        //yendoffs = yendoffs * bufferPitch + postx;
         while(yoffs <= yendoffs)
         {
-            _result[yendoffs/640, yendoffs*640] = col;
+            _result[postx, yendoffs] = col;
+            //vbuf[yendoffs] = col;
             ywcount -= TEXTURESIZE/2;
             if(ywcount <= 0)
             {
@@ -345,9 +773,13 @@ public class Wolf3DRaycastRenderer : Renderer
                 }
                 while(ywcount <= 0);
                 if(yw < 0) break;
-                col = wall[yw];
+// #ifdef USE_SHADING
+//                 col = curshades[postsource[yw]];
+// #else
+                col = postsource[yw];
+//#endif
             }
-            yendoffs -= bufferPitch;
+            yendoffs --;
         }
     }
 
