@@ -53,6 +53,8 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
     private int heightNumerator;
 
     private int[] finetangent = new int[FINEANGLES / 4];
+    private int[]   sintable = new int[ANGLES+(ANGLES/4)];
+    private int[]   costable = new int[ANGLES];
 
     private short[] pixelAngle = new short[640]; // screenWidth
     private short[] wallHeight = new short[640]; // screenWidth
@@ -93,6 +95,24 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
             finetangent[i]=(int)(tang*GLOBAL1);
             finetangent[FINEANGLES/4-1-i]=(int)((1/tang)*GLOBAL1);
         }
+        
+        //
+        // costable overlays sintable with a quarter phase shift
+        // ANGLES is assumed to be divisable by four
+        //
+
+        float angle=0;
+        float anglestep=(float)(Math.PI/2/ANGLEQUAD);
+        for(i=0; i<ANGLEQUAD; i++)
+        {
+            int value=(int)(GLOBAL1*Math.Sin(angle));
+            sintable[i]=sintable[i+ANGLES]=sintable[ANGLES/2-i]=value;
+            sintable[ANGLES-i]=sintable[ANGLES/2+i]=-value;
+            angle+=anglestep;
+        }
+        sintable[ANGLEQUAD] = 65536;
+        sintable[3*ANGLEQUAD] = -65536;
+        costable = sintable.Skip(ANGLES / 4).ToArray();
     }
     
     private void CalcProjection(long focal)
@@ -148,8 +168,10 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
         var midAngle = viewAngle * (FINEANGLES / ANGLES);
 
-        viewSin = (int)Math.Sin(viewAngle) << (int)TILESHIFT;
-        viewCos = (int)Math.Cos(viewAngle) << (int)TILESHIFT;
+        //viewSin = (int)Math.Sin(viewAngle) << (int)TILESHIFT;
+        //viewCos = (int)Math.Cos(viewAngle) << (int)TILESHIFT;
+        viewSin = sintable[(int)viewAngle];// << (int)TILESHIFT;
+        viewCos = costable[(int)viewAngle];// << (int)TILESHIFT;
 
         viewX = Camera.X - FixedMul(focalLength, viewCos);
         viewY = Camera.Y + FixedMul(focalLength, viewSin);
