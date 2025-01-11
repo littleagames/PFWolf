@@ -27,23 +27,28 @@ public class MapManager : IMapManager
             {
                 return;
             }
+
+            var mapDefinitions = (MapDefinitions?)_assetManager.FindAsset(AssetType.MapDefinitions, "map-definitions");
             
             map.Width = mapAsset.Width;
             map.Height = mapAsset.Height;
             map.Name = mapAsset.Name;
-
+            
+            // TODO: Does this belong here?
+            map.PlaneIds[0] = mapAsset.PlaneData[0].To2DArray(mapAsset.Width, mapAsset.Height);
+            map.PlaneIds[1] = mapAsset.PlaneData[1].To2DArray(mapAsset.Width, mapAsset.Height);
+            
             // TODO: These might be better in an SDK thing
             // I want the modder to be able to add their things to this
             // I'll need to just have a "plane loader component" that takes in data, and the SDK piece translates it
             // This takes that component, and just loads them in
             // That component will also update them as well
             
-            BuildWalls(map, mapAsset);
-            BuildDoors(mapAsset);
+            BuildWalls(map, mapAsset, mapDefinitions);
+            BuildDoors(map, mapAsset, mapDefinitions);
             BuildActors(map, mapAsset);
             BuildStatics(mapAsset);
             BuildFlats(mapAsset);
-            
         }
     }
 
@@ -54,56 +59,123 @@ public class MapManager : IMapManager
         // How does the map component translate to the map?
     }
 
-    private void BuildWalls(Map map, MapAsset mapAsset)
+    private void BuildWalls(Map map, MapAsset mapAsset, MapDefinitions mapDefinitions)
     {
         Dictionary<string, byte[]> wallAssets = new();
         
         // TODO: Should I make a "MapRenderComponent" that takes MapComponent and RenderComponent, and translates between the two?
         // Currently the video manager runs AFTER the map manager (so i can manipulate the data at first
         //var wallPlane = mapAsset.PlaneData[0];
-        map.Plane[0] = mapAsset.PlaneData[0].To2DArray(mapAsset.Width, mapAsset.Height);
-        map.Plane[1] = mapAsset.PlaneData[1].To2DArray(mapAsset.Width, mapAsset.Height);
         
         for (var y = 0; y < mapAsset.Height; y++)
         for (var x = 0; x < mapAsset.Width; x++)
         {
-            var wallNum = map.Plane[0][x, y];
-            if (wallNum > 0 && wallNum < 90) // TODO: These will be in the mapdefs.json
+            var tileId = map.PlaneIds[0][x, y];
+
+            if (map.WallCache.ContainsKey(tileId))
+                continue; // already loaded
+            
+            var definition = mapDefinitions.FindWall(tileId);
+            
+            // do same work but split to door asset cache
+            if (definition == null)
             {
-                var wallLight = $"WALL{((wallNum - 1) * 2):D5}";
-                var wallDark = $"WALL{(((wallNum - 1) * 2) + 1):D5}";
-                // TODO: Add to dictionary?
-                var wallLightTexture = _assetManager.FindAsset(AssetType.Texture, wallLight);
-                var wallDarkTexture = _assetManager.FindAsset(AssetType.Texture, wallDark);
-                // TODO: Add these to a HashSet for assets to load
-                map.Walls.TryAdd(
-                    wallNum, 
-                    new Wall
+                // error?
+            }
+            else
+            {
+                var assetNames = new HashSet<string>();
+                assetNames.Add(definition.North);
+                assetNames.Add(definition.South);
+                assetNames.Add(definition.East);
+                assetNames.Add(definition.West);
+
+                foreach (var asset in assetNames)
+                {
+                    if (wallAssets.ContainsKey(asset))
+                        continue; // already loaded
+                    
+                    var textureAsset = (WallAsset?)_assetManager.FindAsset(AssetType.Texture, asset);
+                    if (textureAsset == null)
                     {
-                        X = x, // TileX
-                        Y = y, // TileY
-                        Data = wallLightTexture.RawData.To2DArray(64, 64),
-                        North = wallLightTexture.RawData,
-                        South = wallLightTexture.RawData,
-                        East = wallDarkTexture.RawData,
-                        West = wallDarkTexture.RawData,
-                    });
+                        // texture not found
+                    }
+                    else
+                    {
+                        wallAssets.Add(asset, textureAsset.RawData);
+                    }
+                }
+                
+                map.WallCache.Add(tileId, new Wall
+                {
+                    North = wallAssets[definition.North],
+                    South = wallAssets[definition.South],
+                    East = wallAssets[definition.East],
+                    West = wallAssets[definition.West],
+                });
             }
         }
-        
-        //var uniqueWalls = map.Plane[0].GroupBy(x => x); // TODO: This may not be necessary as the previous step will gather all of the required asset names
-        // TODO: Map the wallPlane numbers to MapDefinitions
-        // First can be a fake mapper (1 == WALL000001) (WallDefinition { N = {assetName}, E, S, W }
-        // TODO: _assetManager.FindAssets(AssetType, List<string> assetNames)
-        // TODO: add to ActiveMap? (object name for a fully built out map)
-        // ActiveMap contains 2D array of "tilemap"
-        //           contains 2D array of "statics"
-        //           contains 2D array of "actors"
-        // TODO: This is what will be put into a save game???
     }
 
-    private void BuildDoors(MapAsset mapAsset)
+    private void BuildDoors(Map map, MapAsset mapAsset, MapDefinitions mapDefinitions)
     {
+        Dictionary<string, byte[]> doorAssets = new();
+        
+        // TODO: Should I make a "MapRenderComponent" that takes MapComponent and RenderComponent, and translates between the two?
+        // Currently the video manager runs AFTER the map manager (so i can manipulate the data at first
+        //var wallPlane = mapAsset.PlaneData[0];
+        
+        //map.PlaneIds[0] = mapAsset.PlaneData[0].To2DArray(mapAsset.Width, mapAsset.Height);
+        //map.PlaneIds[1] = mapAsset.PlaneData[1].To2DArray(mapAsset.Width, mapAsset.Height);
+        
+        for (var y = 0; y < mapAsset.Height; y++)
+        for (var x = 0; x < mapAsset.Width; x++)
+        {
+            var tileId = map.PlaneIds[0][x, y];
+
+            if (map.DoorCache.ContainsKey(tileId))
+                continue; // already loaded
+            
+            var definition = mapDefinitions.FindDoor(tileId);
+            
+            // do same work but split to door asset cache
+            if (definition == null)
+            {
+                // error?
+            }
+            else
+            {
+                var assetNames = new HashSet<string>();
+                assetNames.Add(definition.North);
+                assetNames.Add(definition.South);
+                assetNames.Add(definition.East);
+                assetNames.Add(definition.West);
+
+                foreach (var asset in assetNames)
+                {
+                    if (doorAssets.ContainsKey(asset))
+                        continue; // already loaded
+                    
+                    var textureAsset = (WallAsset?)_assetManager.FindAsset(AssetType.Texture, asset);
+                    if (textureAsset == null)
+                    {
+                        // texture not found
+                    }
+                    else
+                    {
+                        doorAssets.Add(asset, textureAsset.RawData);
+                    }
+                }
+                
+                map.DoorCache.Add(tileId, new Wall
+                {
+                    North = doorAssets[definition.North],
+                    South = doorAssets[definition.South],
+                    East = doorAssets[definition.East],
+                    West = doorAssets[definition.West],
+                });
+            }
+        }
     }
 
     private void BuildActors(Map map, MapAsset mapAsset)

@@ -39,6 +39,11 @@ public class Pk3FileLoader : BaseFileLoader
         using ZipArchive archive = ZipFile.OpenRead(_pk3Directory);
         var assets = new List<Asset>();
         var scriptAssets = new List<UnpackedScript>();
+        
+        // All map definitions will be merged into a single asset
+        const string MapDefinitionsName = "map-definitions";
+        
+        MapDefinitions? mapDefinitions = null;
         foreach (ZipArchiveEntry entry in archive.Entries)
         {
             if (entry.Length == 0)
@@ -134,10 +139,36 @@ public class Pk3FileLoader : BaseFileLoader
                     });
                 }
             }
+
+            if (entry.FullName.StartsWith("mapdefs/"))
+            {
+                if (entry.Name.EndsWith(".json"))
+                {
+                    if (mapDefinitions == null)
+                        mapDefinitions = new MapDefinitions(
+                            MapDefinitionsName,
+                            rawData
+                            // formatloaderjson
+                        );
+                    else
+                    {
+                        mapDefinitions.Merge(rawData /*formatloaderjson*/);
+                    }
+                }
+                else if (entry.Name.EndsWith(".yml") || entry.Name.EndsWith(".yaml"))
+                {
+                    throw new NotSupportedException("YAML files currently not supported.");
+                }
+            }
         }
 
+        // TODO: Validate mapDefinitions
+        if (mapDefinitions != null)
+        {
+            assets.Add(mapDefinitions);
+        }
+        
         // Bundle and validate scripts per pack
-
         assets.AddRange(CompileScripts(scriptAssets));
         
         return assets;

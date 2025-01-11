@@ -1,0 +1,47 @@
+﻿{
+  "Statics": [
+    {
+      "Id": "23",
+      "Name": "Puddle",
+      "Sprite": "SPR_STAT_0",
+      "Flags": "FL_BLOCKING"
+    },
+    {
+      "Id": "24",
+      "Name": "Green Barrel",
+      "Sprite": "SPR_STAT_1",
+      "Flags": "FL_BLOCKING"
+    },
+    {
+      "Id": "25",
+      "Name": "Table w/ Chairs",
+      "Sprite": "SPR_STAT_2",
+      "Flags": "FL_BLOCKING"
+    },
+    {
+      "Id": "26",
+      "Name": "Floor Lamp",
+      "Sprite": "SPR_STAT_3",
+      "Flags": "FL_BLOCKING | FL_FULLBRIGHT"
+    },
+    {
+      "Id": "27",
+      "Name": "Chandelier",
+      "Sprite": "SPR_STAT_4",
+      "Flags": "FL_FULLBRIGHT"
+    },
+    {
+      "Id": "28",
+      "Name": "Hanged Man",
+      "Sprite": "SPR_STAT_5",
+      "Flags": "FL_BLOCKING"
+    },
+    {
+      "Id": "29",
+      "Name": "Dog Food",
+      "Sprite": "SPR_STAT_6",
+      "Flags": "",
+      "Action": "BonusItemActions.DogFood()"
+    }
+  ]
+}

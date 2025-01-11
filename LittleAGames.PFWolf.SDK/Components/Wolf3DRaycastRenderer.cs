@@ -168,8 +168,6 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
         var midAngle = viewAngle * (FINEANGLES / ANGLES);
 
-        //viewSin = (int)Math.Sin(viewAngle) << (int)TILESHIFT;
-        //viewCos = (int)Math.Cos(viewAngle) << (int)TILESHIFT;
         viewSin = sintable[(int)viewAngle];// << (int)TILESHIFT;
         viewCos = costable[(int)viewAngle];// << (int)TILESHIFT;
 
@@ -187,7 +185,6 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
         short angle;
         int xstep = 0, ystep = 0;
-        int xinttemp, yinttemp; // holds temporary intercept position
         uint xpartial = 0, ypartial = 0;
 
         for (pixx = 0; pixx < Width; pixx++)
@@ -289,171 +286,59 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
     private bool vertentry(int ystep)
     {
+        int yinttemp;
 // #ifdef REVEALMAP
 //             mapseen[xtile][yinttile] = true;
 // #endif
-        tilehit = _map.Plane[0][yinttile, xtile]; // tilemap[xtile][yinttile];
+        tilehit = _map.PlaneIds[0][yinttile, xtile]; // tilemap[xtile][yinttile];
 
-        if (tilehit > BIT_WALL)
+        if (tilehit > 64)
         {
             tilehit = 0;
         }
 
         if (tilehit > 0)
         {
-            if ((tilehit & BIT_DOOR) != 0)
+            if (tilehit >= 90)
             {
+                xintercept = xtile << (int)TILESHIFT;
+
+                HitVertWall();
                 // //
                 // // hit a vertical door, so find which coordinate the door would be
                 // // intersected at, and check to see if the door is open past that point
                 // //
-                // door = &doorobjlist[tilehit & ~BIT_DOOR];
+                // var door = _map.Doors[tilehit & ~BIT_DOOR];
                 //
-                // if (door->action == dr_open)
-                //     goto passvert;                       // door is open, continue tracing
+                // if (door.Action == DoorAction.Open)
+                //     passvert(ystep);                       // door is open, continue tracing
                 //
                 // yinttemp = yintercept + (ystep >> 1);    // add halfstep to current intercept position
                 //
                 // //
                 // // midpoint is outside tile, so it hit the side of the wall before a door
                 // //
-                // if (yinttemp >> TILESHIFT != yinttile)
-                //     goto passvert;
+                // if (yinttemp >> (int)TILESHIFT != yinttile)
+                //     passvert(ystep);
                 //
-                // if (door->action != dr_closed)
+                // if (door.Action != DoorAction.Closed)
                 // {
                 //     //
                 //     // the trace hit the door plane at pixel position yintercept, see if the door is
                 //     // closed that much
                 //     //
-                //     if ((word)yinttemp < door->position)
-                //         goto passvert;
+                //     if (yinttemp < door.Position)
+                //         passvert(ystep);
                 // }
                 //
                 // yintercept = yinttemp;
-                // xintercept = ((fixed)xtile << TILESHIFT) + (TILEGLOBAL/2);
+                // xintercept = (int)((xtile << (int)TILESHIFT) + (TILEGLOBAL/2));
                 //
                 // HitVertDoor();
             }
             else if (tilehit == BIT_WALL)
             {
-                // //
-                // // hit a sliding vertical wall
-                // //
-                // if (pwalldir == di_west || pwalldir == di_east)
-                // {
-                //     if (pwalldir == di_west)
-                //     {
-                //         pwallposnorm = 64 - pwallpos;
-                //         pwallposinv = pwallpos;
-                //     }
-                //     else
-                //     {
-                //         pwallposnorm = pwallpos;
-                //         pwallposinv = 64 - pwallpos;
-                //     }
-                //
-                //     if ((pwalldir == di_east && xtile == pwallx && yinttile == pwally)
-                //      || (pwalldir == di_west && !(xtile == pwallx && yinttile == pwally)))
-                //     {
-                //         yinttemp = yintercept + ((ystep * pwallposnorm) >> 6);
-                //
-                //         if (yinttemp >> TILESHIFT != yinttile)
-                //             goto passvert;
-                //
-                //         yintercept = yinttemp;
-                //         xintercept = (((fixed)xtile << TILESHIFT) + TILEGLOBAL) - (pwallposinv << 10);
-                //         yinttile = yintercept >> TILESHIFT;
-                //         tilehit = pwalltile;
-                //
-                //         HitVertWall();
-                //     }
-                //     else
-                //     {
-                //         yinttemp = yintercept + ((ystep * pwallposinv) >> 6);
-                //
-                //         if (yinttemp >> TILESHIFT != yinttile)
-                //             goto passvert;
-                //
-                //         yintercept = yinttemp;
-                //         xintercept = ((fixed)xtile << TILESHIFT) - (pwallposinv << 10);
-                //         yinttile = yintercept >> TILESHIFT;
-                //         tilehit = pwalltile;
-                //
-                //         HitVertWall();
-                //     }
-                // }
-                // else
-                // {
-                //     if (pwalldir == di_north)
-                //         pwallposi = 64 - pwallpos;
-                //     else
-                //         pwallposi = pwallpos;
-                //
-                //     if ((pwalldir == di_south && (word)yintercept < (pwallposi << 10))
-                //      || (pwalldir == di_north && (word)yintercept > (pwallposi << 10)))
-                //     {
-                //         if (xtile == pwallx && yinttile == pwally)
-                //         {
-                //             if ((pwalldir == di_south && (int32_t)((word)yintercept) + ystep < (pwallposi << 10))
-                //              || (pwalldir == di_north && (int32_t)((word)yintercept) + ystep > (pwallposi << 10)))
-                //                 goto passvert;
-                //
-                //             //
-                //             // set up a horizontal intercept position
-                //             //
-                //             if (pwalldir == di_south)
-                //                 yintercept = (yinttile << TILESHIFT) + (pwallposi << 10);
-                //             else
-                //                 yintercept = ((yinttile << TILESHIFT) - TILEGLOBAL) + (pwallposi << 10);
-                //
-                //             xintercept -= (xstep * (64 - pwallpos)) >> 6;
-                //             xinttile = xintercept >> TILESHIFT;
-                //             tilehit = pwalltile;
-                //
-                //             HitHorizWall();
-                //         }
-                //         else
-                //         {
-                //             texdelta = pwallposi << 10;
-                //             xintercept = (fixed)xtile << TILESHIFT;
-                //             tilehit = pwalltile;
-                //
-                //             HitVertWall();
-                //         }
-                //     }
-                //     else
-                //     {
-                //         if (xtile == pwallx && yinttile == pwally)
-                //         {
-                //             texdelta = pwallposi << 10;
-                //             xintercept = (fixed)xtile << TILESHIFT;
-                //             tilehit = pwalltile;
-                //
-                //             HitVertWall();
-                //         }
-                //         else
-                //         {
-                //             if ((pwalldir == di_south && (int32_t)((word)yintercept) + ystep > (pwallposi << 10))
-                //              || (pwalldir == di_north && (int32_t)((word)yintercept) + ystep < (pwallposi << 10)))
-                //                 goto passvert;
-                //
-                //             //
-                //             // set up a horizontal intercept position
-                //             //
-                //             if (pwalldir == di_south)
-                //                 yintercept = (yinttile << TILESHIFT) - ((64 - pwallpos) << 10);
-                //             else
-                //                 yintercept = (yinttile << TILESHIFT) + ((64 - pwallpos) << 10);
-                //
-                //             xintercept -= (xstep * pwallpos) >> 6;
-                //             xinttile = xintercept >> TILESHIFT;
-                //             tilehit = pwalltile;
-                //
-                //             HitHorizWall();
-                //         }
-                //     }
-                // }
+                // TODO:
             }
             else
             {
@@ -469,10 +354,15 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         // mark the tile as visible and setup for next step
         //
         //spotvis[xtile][yinttile] = true;
+        passvert(ystep);
+        return false;
+    }
+
+    private void passvert(int ystep)
+    {
         xtile += xtilestep;
         yintercept += ystep;
         yinttile = yintercept >> (int)TILESHIFT;
-        return false;
     }
 
     private bool horizentry(int xstep)
@@ -480,16 +370,17 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 // #ifdef REVEALMAP
 //             mapseen[xinttile][ytile] = true;
 // #endif
-        tilehit = _map.Plane[0][ytile, xinttile];//tilemap[xinttile][ytile];
-        if (tilehit > BIT_WALL)
+        // TODO: Turn tilehit into a Wall vs Door MapComponent check
+        tilehit = _map.PlaneIds[0][ytile, xinttile];//tilemap[xinttile][ytile];
+        
+        if (tilehit > 64)
         {
             tilehit = 0;
         }
         
-        
         if (tilehit > 0)
         {
-            if ((tilehit & BIT_DOOR) != 0)
+            if (tilehit >= 90)
             {
                 // //
                 // // hit a horizontal door, so find which coordinate the door would be
@@ -693,7 +584,8 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         // else
             //wallpic = horizwall[tilehit];
 
-            postsource = _map.Walls[tilehit].North.Skip(texture).ToArray();// PM_GetPage(wallpic) + texture;
+            var tex = ytilestep > 0 ? _map.WallCache[tilehit].North : _map.WallCache[tilehit].South;
+            postsource = tex.Skip(texture).ToArray();
 // #ifdef USE_SKYWALLPARALLAX
 //         postsourcesky = postsource - texture;
 // #endif
@@ -715,25 +607,63 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
         wallHeight[pixx] = CalcHeight();
         postx = pixx;
-        
-        // if ((tilehit & BIT_WALL) != 0)
+
+        // if (_map.PlaneIds[0][yinttile, xtile] >= 90)
+        //     // if ((tilehit & BIT_WALL) != 0)
         // {
         //     //
         //     // check for adjacent doors
         //     //
-        //     if (tilemap[xtile - xtilestep][yinttile] & BIT_DOOR)
-        //         wallpic = DOORWALL+3;
+        //     const int DOORWALL = 101;
+        //     if (_map.PlaneIds[0][yinttile, xtile - xtilestep] is >= 90 and <= 106)
+        //         wallpic = DOORWALL;
         //     else
-        //         wallpic = vertwall[tilehit & ~BIT_WALL];
+        //         wallpic = 91;// & ~BIT_WALL;
         // }
         // else
-             //wallpic = vertwall[tilehit];
+            //wallpic = tilehit;
 
-        postsource = _map.Walls[tilehit].West.Skip(texture).ToArray();
+        var tex = xtilestep > 0 ? _map.WallCache[tilehit].East : _map.WallCache[tilehit].West;
+        postsource = tex.Skip(texture).ToArray();
 // #ifdef USE_SKYWALLPARALLAX
 //         postsourcesky = postsource - texture;
 // #endif
         ScalePost();
+    }
+
+    private void HitVertDoor()
+    {
+        // int doorpage;
+        // int doornum;
+        // int texture;
+        //
+        // doornum = tilehit & ~BIT_DOOR;
+        // texture = ((yintercept - doorobjlist[doornum].position) >> FIXED2TEXSHIFT) & TEXTUREMASK;
+        //
+        // wallHeight[pixx] = CalcHeight();
+        // postx = pixx;
+        //
+        // switch (doorobjlist[doornum].lock)
+        // {
+        //     case dr_normal:
+        //     doorpage = DOORWALL + 1;
+        //     break;
+        //
+        //     case dr_lock1:
+        //     case dr_lock2:
+        //     case dr_lock3:
+        //     case dr_lock4:
+        //     doorpage = DOORWALL + 7;
+        //     break;
+        //
+        //     case dr_elevator:
+        //     doorpage = DOORWALL + 5;
+        //     break;
+        // }
+        //
+        // postsource = PM_GetPage(doorpage) + texture;
+        //
+        // ScalePost ();
     }
 
     private void ScalePost()

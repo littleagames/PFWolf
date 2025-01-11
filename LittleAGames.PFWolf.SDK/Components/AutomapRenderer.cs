@@ -30,11 +30,11 @@ public class AutoMapRenderer : Renderer
         {
             for (var x = 0; x < _map.Width; x++)
             {
-                var wallId = _map.Plane[0][y, x];
+                var wallId = _map.PlaneIds[0][y, x];
                 if (wallId <= 0 || wallId >= 90)
                     continue;
                 
-                var wall = _map.Walls[wallId];
+                var wall = _map.WallCache[wallId];
                 for (var scx = 0; scx < ScaleX; scx++)
                 for (var scy = 0; scy < ScaleY; scy++)
                 {

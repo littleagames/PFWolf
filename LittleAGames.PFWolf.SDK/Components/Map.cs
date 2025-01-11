@@ -3,9 +3,31 @@
 public class Map : MapComponent
 {
     public string AssetName { get; }
-    public ushort[][,] Plane { get; set; } = new ushort[3][,];
     
-    public Dictionary<int, Wall> Walls { get; set; } = new Dictionary<int, Wall>();
+    /// <summary>
+    /// The raw IDs found in the game maps file
+    /// </summary>
+    public ushort[][,] PlaneIds { get; set; } = new ushort[3][,];
+
+    /// <summary>
+    /// Contains all complex tile data such as walls, doors, floor codes
+    /// </summary>
+    public MapComponent[,] TilePlane { get; set; }
+    
+    /// <summary>
+    /// Contains all complex tile data, such as statics, actors
+    /// </summary>
+    public MapComponent[,] ObjectPlane { get; set; }
+    
+    /// <summary>
+    /// All loaded wall textures in the map
+    /// </summary>
+    public Dictionary<int, Wall> WallCache { get; set; } = new();
+    
+    /// <summary>
+    /// All doors in the map
+    /// </summary>
+    public Dictionary<int, Wall> DoorCache { get; set; } = new();
 
     private Map(string assetName)
     {
@@ -23,12 +45,6 @@ public class Map : MapComponent
     /// Name given to the map for the game (e.g. "The Castle")
     /// </summary>
     public string Name { get; set; }
-
-    [Obsolete("This is extremely inefficient. Find a better solution")]
-    public Wall? FindWall(int tileX, int tileY)
-    {
-        return Children.GetComponents().OfType<Wall>().FirstOrDefault(x => x.X == tileX && x.Y == tileY);
-    }
 
     public override void OnUpdate()
     {

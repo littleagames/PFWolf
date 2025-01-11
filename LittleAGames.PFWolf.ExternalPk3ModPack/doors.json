@@ -1,0 +1,52 @@
+﻿{
+  "Doors": {
+    "90": {
+      "East": "WALL00098",
+      "West": "WALL00098",
+      "North": "WALL00100",
+      "South": "WALL00100"
+    },
+    "91": {
+      "North": "WALL00099",
+      "South": "WALL00099",
+      "East": "WALL00101",
+      "West": "WALL00101"
+    },
+    "92": {
+      "East": "WALL00104",
+      "West": "WALL00104",
+      "North": "WALL00100",
+      "South": "WALL00100"
+    },
+    "93": {
+      "North": "WALL00105",
+      "South": "WALL00105",
+      "East": "WALL00101",
+      "West": "WALL00101"
+    },
+    "94": {
+      "East": "WALL00104",
+      "West": "WALL00104",
+      "North": "WALL00100",
+      "South": "WALL00100"
+    },
+    "95": {
+      "North": "WALL00105",
+      "South": "WALL00105",
+      "East": "WALL00101",
+      "West": "WALL00101"
+    },
+    "100": {
+      "East": "WALL00102",
+      "West": "WALL00102",
+      "North": "WALL00100",
+      "South": "WALL00100"
+    },
+    "101": {
+      "North": "WALL00103",
+      "South": "WALL00103",
+      "East": "WALL00101",
+      "West": "WALL00101"
+    }
+  }
+}

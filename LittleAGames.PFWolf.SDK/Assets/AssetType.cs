@@ -9,6 +9,7 @@ public enum AssetType
     ImfMusic,
     Marker,
     Map,
+    MapDefinitions,
     VgaPicData,
     Font,
     Graphic,

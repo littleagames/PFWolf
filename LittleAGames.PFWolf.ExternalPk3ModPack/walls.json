@@ -1,0 +1,299 @@
+﻿{
+  "Walls": {
+    "1": {
+      "North": "WALL0000",
+      "South": "WALL0000",
+      "East": "WALL00001",
+      "West": "WALL00001"
+    },
+    "2": {
+      "North": "WALL00002",
+      "South": "WALL00002",
+      "East": "WALL00003",
+      "West": "WALL00003"
+    },
+    "3": {
+      "North": "WALL00004",
+      "South": "WALL00004",
+      "East": "WALL00005",
+      "West": "WALL00005"
+    },
+    "4": {
+      "North": "WALL00006",
+      "South": "WALL00006",
+      "East": "WALL00007",
+      "West": "WALL00007"
+    },
+    "5": {
+      "North": "WALL00008",
+      "South": "WALL00008",
+      "East": "WALL00009",
+      "West": "WALL00009"
+    },
+    "6": {
+      "North": "WALL00010",
+      "South": "WALL00010",
+      "East": "WALL00011",
+      "West": "WALL00011"
+    },
+    "7": {
+      "North": "WALL00012",
+      "South": "WALL00012",
+      "East": "WALL00013",
+      "West": "WALL00013"
+    },
+    "8": {
+      "North": "WALL00014",
+      "South": "WALL00014",
+      "East": "WALL00015",
+      "West": "WALL00015"
+    },
+    "9": {
+      "North": "WALL00016",
+      "South": "WALL00016",
+      "East": "WALL00017",
+      "West": "WALL00017"
+    },
+    "10": {
+      "North": "WALL00018",
+      "South": "WALL00018",
+      "East": "WALL00019",
+      "West": "WALL00019"
+    },
+    "11": {
+      "North": "WALL00020",
+      "South": "WALL00020",
+      "East": "WALL00021",
+      "West": "WALL00021"
+    },
+    "12": {
+      "North": "WALL00022",
+      "South": "WALL00022",
+      "East": "WALL00023",
+      "West": "WALL00023"
+    },
+    "13": {
+      "North": "WALL00024",
+      "South": "WALL00024",
+      "East": "WALL00025",
+      "West": "WALL00025"
+    },
+    "14": {
+      "North": "WALL00026",
+      "South": "WALL00026",
+      "East": "WALL00027",
+      "West": "WALL00027"
+    },
+    "15": {
+      "North": "WALL00028",
+      "South": "WALL00028",
+      "East": "WALL00029",
+      "West": "WALL00029"
+    },
+    "16": {
+      "North": "WALL00030",
+      "South": "WALL00030",
+      "East": "WALL00031",
+      "West": "WALL00031"
+    },
+    "17": {
+      "North": "WALL00032",
+      "South": "WALL00032",
+      "East": "WALL00033",
+      "West": "WALL00033"
+    },
+    "18": {
+      "North": "WALL00034",
+      "South": "WALL00034",
+      "East": "WALL00035",
+      "West": "WALL00035"
+    },
+    "19": {
+      "North": "WALL00036",
+      "South": "WALL00036",
+      "East": "WALL00037",
+      "West": "WALL00037"
+    },
+    "20": {
+      "North": "WALL00038",
+      "South": "WALL00038",
+      "East": "WALL00039",
+      "West": "WALL00039"
+    },
+    "21": {
+      "North": "WALL00040",
+      "South": "WALL00040",
+      "East": "WALL00041",
+      "West": "WALL00041"
+    },
+    "22": {
+      "North": "WALL00042",
+      "South": "WALL00042",
+      "East": "WALL00043",
+      "West": "WALL00043"
+    },
+    "23": {
+      "North": "WALL00044",
+      "South": "WALL00044",
+      "East": "WALL00045",
+      "West": "WALL00045"
+    },
+    "24": {
+      "North": "WALL00046",
+      "South": "WALL00046",
+      "East": "WALL00047",
+      "West": "WALL00047"
+    },
+    "25": {
+      "North": "WALL00048",
+      "South": "WALL00048",
+      "East": "WALL00049",
+      "West": "WALL00049"
+    },
+    "26": {
+      "North": "WALL00050",
+      "South": "WALL00050",
+      "East": "WALL00051",
+      "West": "WALL00051"
+    },
+    "27": {
+      "North": "WALL00052",
+      "South": "WALL00052",
+      "East": "WALL00053",
+      "West": "WALL00053"
+    },
+    "28": {
+      "North": "WALL00054",
+      "South": "WALL00054",
+      "East": "WALL00055",
+      "West": "WALL00055"
+    },
+    "29": {
+      "Id": 29,
+      "North": "WALL00056",
+      "South": "WALL00056",
+      "East": "WALL00057",
+      "West": "WALL00057"
+    },
+    "30": {
+      "North": "WALL00058",
+      "South": "WALL00058",
+      "East": "WALL00059",
+      "West": "WALL00059"
+    },
+    "31": {
+      "North": "WALL00060",
+      "South": "WALL00060",
+      "East": "WALL00061",
+      "West": "WALL00061"
+    },
+    "32": {
+      "North": "WALL00062",
+      "South": "WALL00062",
+      "East": "WALL00063",
+      "West": "WALL00063"
+    },
+    "33": {
+      "North": "WALL00064",
+      "South": "WALL00064",
+      "East": "WALL00065",
+      "West": "WALL00065"
+    },
+    "34": {
+      "North": "WALL00066",
+      "South": "WALL00066",
+      "East": "WALL00067",
+      "West": "WALL00067"
+    },
+    "35": {
+      "North": "WALL00068",
+      "South": "WALL00068",
+      "East": "WALL00069",
+      "West": "WALL00069"
+    },
+    "36": {
+      "North": "WALL00070",
+      "South": "WALL00070",
+      "East": "WALL00071",
+      "West": "WALL00071"
+    },
+    "37": {
+      "North": "WALL00072",
+      "South": "WALL00072",
+      "East": "WALL00073",
+      "West": "WALL00073"
+    },
+    "38": {
+      "North": "WALL00074",
+      "South": "WALL00074",
+      "East": "WALL00075",
+      "West": "WALL00075"
+    },
+    "39": {
+      "North": "WALL00076",
+      "South": "WALL00076",
+      "East": "WALL00077",
+      "West": "WALL00077"
+    },
+    "40": {
+      "North": "WALL00078",
+      "South": "WALL00078",
+      "East": "WALL00079",
+      "West": "WALL00079"
+    },
+    "41": {
+      "North": "WALL00080",
+      "South": "WALL00080",
+      "East": "WALL00081",
+      "West": "WALL00081"
+    },
+    "42": {
+      "North": "WALL00082",
+      "South": "WALL00082",
+      "East": "WALL00083",
+      "West": "WALL00083"
+    },
+    "43": {
+      "North": "WALL00084",
+      "South": "WALL00084",
+      "East": "WALL00085",
+      "West": "WALL00085"
+    },
+    "44": {
+      "North": "WALL00086",
+      "South": "WALL00086",
+      "East": "WALL00087",
+      "West": "WALL00087"
+    },
+    "45": {
+      "North": "WALL00088",
+      "South": "WALL00088",
+      "East": "WALL00089",
+      "West": "WALL00089"
+    },
+    "46": {
+      "North": "WALL00090",
+      "South": "WALL00090",
+      "East": "WALL00091",
+      "West": "WALL00091"
+    },
+    "47": {
+      "North": "WALL00092",
+      "South": "WALL00092",
+      "East": "WALL00093",
+      "West": "WALL00093"
+    },
+    "48": {
+      "North": "WALL00094",
+      "South": "WALL00094",
+      "East": "WALL00095",
+      "West": "WALL00095"
+    },
+    "49": {
+      "North": "WALL00096",
+      "South": "WALL00096",
+      "East": "WALL00097",
+      "West": "WALL00097"
+    }
+  }
+}
