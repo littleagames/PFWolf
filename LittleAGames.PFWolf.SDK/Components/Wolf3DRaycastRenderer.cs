@@ -608,6 +608,13 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         wallHeight[pixx] = CalcHeight();
         postx = pixx;
 
+        var tex = xtilestep > 0 ? _map.WallCache[tilehit].East : _map.WallCache[tilehit].West;
+        
+        if (_map.TilePlane[yinttile,xtile-xtilestep] is Door) // todo: why not setting values? tileplane is empty, mostly
+        {
+            Door doorTex = _map.TilePlane[yinttile,xtile-xtilestep] as Door;
+            tex = xtilestep > 0 ? _map.DoorCache[doorTex.TileId].East : _map.DoorCache[doorTex.TileId].West;
+        }
         // if (_map.PlaneIds[0][yinttile, xtile] >= 90)
         //     // if ((tilehit & BIT_WALL) != 0)
         // {
@@ -623,7 +630,6 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         // else
             //wallpic = tilehit;
 
-        var tex = xtilestep > 0 ? _map.WallCache[tilehit].East : _map.WallCache[tilehit].West;
         postsource = tex.Skip(texture).ToArray();
 // #ifdef USE_SKYWALLPARALLAX
 //         postsourcesky = postsource - texture;

@@ -22,12 +22,12 @@ public class Map : MapComponent
     /// <summary>
     /// All loaded wall textures in the map
     /// </summary>
-    public Dictionary<int, Wall> WallCache { get; set; } = new();
+    public Dictionary<int, WallData> WallCache { get; set; } = new();
     
     /// <summary>
     /// All doors in the map
     /// </summary>
-    public Dictionary<int, Wall> DoorCache { get; set; } = new();
+    public Dictionary<int, WallData> DoorCache { get; set; } = new();
 
     private Map(string assetName)
     {
@@ -57,6 +57,23 @@ public class Map : MapComponent
 }
 
 public class Wall : MapComponent
+{
+    public int TileId { get; set; }
+    public string North { get; init; }
+    public string South { get; init; }
+    public string East { get; init; }
+    public string West { get; init; }
+}
+// public class Door : MapComponent
+// {
+//     public int TileId { get; set; }
+//     public string North { get; init; }
+//     public string South { get; init; }
+//     public string East { get; init; }
+//     public string West { get; init; }
+// }
+
+public class WallData
 {
     public byte[] North { get; init; }
     public byte[] South { get; init; }

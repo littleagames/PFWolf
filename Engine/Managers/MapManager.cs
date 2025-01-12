@@ -32,10 +32,12 @@ public class MapManager : IMapManager
             
             map.Width = mapAsset.Width;
             map.Height = mapAsset.Height;
+            map.TilePlane = new MapComponent[map.Height, map.Width];
             map.Name = mapAsset.Name;
             
             // TODO: Does this belong here?
             map.PlaneIds[0] = mapAsset.PlaneData[0].To2DArray(mapAsset.Width, mapAsset.Height);
+            
             map.PlaneIds[1] = mapAsset.PlaneData[1].To2DArray(mapAsset.Width, mapAsset.Height);
             
             // TODO: These might be better in an SDK thing
@@ -70,10 +72,8 @@ public class MapManager : IMapManager
         for (var y = 0; y < mapAsset.Height; y++)
         for (var x = 0; x < mapAsset.Width; x++)
         {
-            var tileId = map.PlaneIds[0][x, y];
+            var tileId = map.PlaneIds[0][y, x];
 
-            if (map.WallCache.ContainsKey(tileId))
-                continue; // already loaded
             
             var definition = mapDefinitions.FindWall(tileId);
             
@@ -81,6 +81,7 @@ public class MapManager : IMapManager
             if (definition == null)
             {
                 // error?
+                Console.WriteLine($"Wall not found: {tileId} at tile {x},{y}");
             }
             else
             {
@@ -90,6 +91,18 @@ public class MapManager : IMapManager
                 assetNames.Add(definition.East);
                 assetNames.Add(definition.West);
 
+                map.TilePlane[y, x] = new Wall
+                {
+                    TileId = tileId,
+                    North = definition.North,
+                    South = definition.South,
+                    East = definition.East,
+                    West = definition.West
+                };
+                
+                if (map.WallCache.ContainsKey(tileId))
+                    continue; // already loaded
+                
                 foreach (var asset in assetNames)
                 {
                     if (wallAssets.ContainsKey(asset))
@@ -106,7 +119,7 @@ public class MapManager : IMapManager
                     }
                 }
                 
-                map.WallCache.Add(tileId, new Wall
+                map.WallCache.Add(tileId, new WallData
                 {
                     North = wallAssets[definition.North],
                     South = wallAssets[definition.South],
@@ -131,20 +144,30 @@ public class MapManager : IMapManager
         for (var y = 0; y < mapAsset.Height; y++)
         for (var x = 0; x < mapAsset.Width; x++)
         {
-            var tileId = map.PlaneIds[0][x, y];
+            var tileId = map.PlaneIds[0][y, x];
 
-            if (map.DoorCache.ContainsKey(tileId))
-                continue; // already loaded
-            
             var definition = mapDefinitions.FindDoor(tileId);
             
             // do same work but split to door asset cache
             if (definition == null)
             {
+                Console.WriteLine($"Door not found: {tileId} at tile {x},{y}");
                 // error?
             }
             else
             {
+                map.TilePlane[y, x] = new Door
+                {
+                    TileId = tileId,
+                    North = definition.North,
+                    South = definition.South,
+                    East = definition.East,
+                    West = definition.West
+                };
+                
+                if (map.DoorCache.ContainsKey(tileId))
+                    continue; // already loaded
+
                 var assetNames = new HashSet<string>();
                 assetNames.Add(definition.North);
                 assetNames.Add(definition.South);
@@ -167,7 +190,7 @@ public class MapManager : IMapManager
                     }
                 }
                 
-                map.DoorCache.Add(tileId, new Wall
+                map.DoorCache.Add(tileId, new WallData
                 {
                     North = doorAssets[definition.North],
                     South = doorAssets[definition.South],
