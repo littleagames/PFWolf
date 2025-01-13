@@ -571,24 +571,14 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         wallHeight[pixx] = CalcHeight();
         postx = pixx;
 
-        // if (tilehit & BIT_WALL)
-        // {
-        //     //
-        //     // check for adjacent doors
-        //     //
-        //     if (tilemap[xinttile][ytile - ytilestep] & BIT_DOOR)
-        //         wallpic = DOORWALL + 2;
-        //     else
-        //         wallpic = horizwall[tilehit & ~BIT_WALL];
-        // }
-        // else
-            //wallpic = horizwall[tilehit];
+        var tex = ytilestep > 0 ? _map.WallCache[tilehit].North : _map.WallCache[tilehit].South;
+        if (_map.TilePlane[ytile - ytilestep, xinttile] is Door) // todo: why not setting values? tileplane is empty, mostly
+        {
+            Door doorTex = _map.TilePlane[ytile - ytilestep, xinttile] as Door;
+            tex = ytilestep > 0 ? _map.DoorCache[doorTex.TileId].North : _map.DoorCache[doorTex.TileId].South;
+        }
 
-            var tex = ytilestep > 0 ? _map.WallCache[tilehit].North : _map.WallCache[tilehit].South;
-            postsource = tex.Skip(texture).ToArray();
-// #ifdef USE_SKYWALLPARALLAX
-//         postsourcesky = postsource - texture;
-// #endif
+        postsource = tex.Skip(texture).ToArray();
         ScalePost();
     }
 
