@@ -12,7 +12,7 @@ public class Door : MapComponent// Thinker// Wall //: Thinker (to take tilex,y, 
     
     public bool IsVertical { get; set; }
     public byte Lock { get; set; }
-    public DoorAction Action { get; set; }
+    public DoorAction Action { get; set; } = DoorAction.Closed;
     public short TicCount { get; set; }
     public short Position { get; set; }
 }

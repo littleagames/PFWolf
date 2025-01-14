@@ -29,7 +29,7 @@ public class Wolf3DRaycastRenderer : Renderer
     private const int VANG270 = (VANG90 * 3);
     private const int VANG360 = (VANG90 * 4);
 
-    private const long TILESHIFT = 16L;
+    private const int TILESHIFT = 16;
 
     private const int TEXTURESHIFT = 6;
 
@@ -61,6 +61,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
     
     
     private ushort    tilehit;
+    private MapComponent tilehit2;
     private int     pixx;
 
     private short   xtile,ytile;
@@ -290,51 +291,53 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 // #ifdef REVEALMAP
 //             mapseen[xtile][yinttile] = true;
 // #endif
+        tilehit2 = _map.TilePlane[yinttile, xtile];
         tilehit = _map.PlaneIds[0][yinttile, xtile]; // tilemap[xtile][yinttile];
 
-        if (tilehit > 64)
+        if (tilehit2 != null)
         {
-            tilehit = 0;
-        }
-
-        if (tilehit > 0)
-        {
-            if (tilehit >= 90)
+            if (tilehit2 is Door)
             {
-                xintercept = xtile << (int)TILESHIFT;
+                //
+                // hit a vertical door, so find which coordinate the door would be
+                // intersected at, and check to see if the door is open past that point
+                //
+                var door = tilehit2 as Door;
 
-                HitVertWall();
-                // //
-                // // hit a vertical door, so find which coordinate the door would be
-                // // intersected at, and check to see if the door is open past that point
-                // //
-                // var door = _map.Doors[tilehit & ~BIT_DOOR];
+                if (door.Action == DoorAction.Open)
+                {
+                    passvert(ystep); // door is open, continue tracing
+                    return false;
+                }
+
+                yinttemp = yintercept + (ystep >> 1);    // add halfstep to current intercept position
+                
                 //
-                // if (door.Action == DoorAction.Open)
-                //     passvert(ystep);                       // door is open, continue tracing
+                // midpoint is outside tile, so it hit the side of the wall before a door
                 //
-                // yinttemp = yintercept + (ystep >> 1);    // add halfstep to current intercept position
-                //
-                // //
-                // // midpoint is outside tile, so it hit the side of the wall before a door
-                // //
-                // if (yinttemp >> (int)TILESHIFT != yinttile)
-                //     passvert(ystep);
-                //
-                // if (door.Action != DoorAction.Closed)
-                // {
-                //     //
-                //     // the trace hit the door plane at pixel position yintercept, see if the door is
-                //     // closed that much
-                //     //
-                //     if (yinttemp < door.Position)
-                //         passvert(ystep);
-                // }
-                //
-                // yintercept = yinttemp;
-                // xintercept = (int)((xtile << (int)TILESHIFT) + (TILEGLOBAL/2));
-                //
-                // HitVertDoor();
+                if (yinttemp >> TILESHIFT != yinttile)
+                {
+                    passvert(ystep);
+                    return false;
+                }
+
+                if (door.Action != DoorAction.Closed)
+                {
+                    //
+                    // the trace hit the door plane at pixel position yintercept, see if the door is
+                    // closed that much
+                    //
+                    if (yinttemp < door.Position)
+                    {
+                        passvert(ystep);
+                        return false;
+                    }
+                }
+                
+                yintercept = yinttemp;
+                xintercept = (int)((xtile << (int)TILESHIFT) + (TILEGLOBAL/2));
+                
+                HitVertDoor();
             }
             else if (tilehit == BIT_WALL)
             {
@@ -367,174 +370,62 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
     private bool horizentry(int xstep)
     {
+        int xinttemp;
 // #ifdef REVEALMAP
 //             mapseen[xinttile][ytile] = true;
 // #endif
         // TODO: Turn tilehit into a Wall vs Door MapComponent check
+        tilehit2 = _map.TilePlane[ytile, xinttile];
         tilehit = _map.PlaneIds[0][ytile, xinttile];//tilemap[xinttile][ytile];
         
-        if (tilehit > 64)
+        if (tilehit2 != null)
         {
-            tilehit = 0;
-        }
-        
-        if (tilehit > 0)
-        {
-            if (tilehit >= 90)
+            if (tilehit2 is Door)
             {
-                // //
-                // // hit a horizontal door, so find which coordinate the door would be
-                // // intersected at, and check to see if the door is open past that point
-                // //
-                // door = &doorobjlist[tilehit & ~BIT_DOOR];
                 //
-                // if (door->action == dr_open)
-                //     goto passhoriz;                      // door is open, continue tracing
+                // hit a horizontal door, so find which coordinate the door would be
+                // intersected at, and check to see if the door is open past that point
                 //
-                // xinttemp = xintercept + (xstep >> 1);    // add half step to current intercept position
+                var door = tilehit2 as Door;
+
+                if (door.Action == DoorAction.Open) 
+                {
+                    passhoriz(xstep); // door is open, continue tracing
+                    return false;
+                }
+
+                xinttemp = xintercept + (xstep >> 1);    // add half step to current intercept position
+
                 //
-                // //
-                // // midpoint is outside tile, so it hit the side of the wall before a door
-                // //
-                // if (xinttemp >> TILESHIFT != xinttile)
-                //     goto passhoriz;
+                // midpoint is outside tile, so it hit the side of the wall before a door
                 //
-                // if (door->action != dr_closed)
-                // {
-                //     //
-                //     // the trace hit the door plane at pixel position xintercept, see if the door is
-                //     // closed that much
-                //     //
-                //     if ((word)xinttemp < door->position)
-                //         goto passhoriz;
-                // }
-                //
-                // xintercept = xinttemp;
-                // yintercept = ((fixed)ytile << TILESHIFT) + (TILEGLOBAL/2);
-                //
-                // HitHorizDoor();
+                if ((xinttemp >> TILESHIFT) != xinttile)
+                {
+                    passhoriz(xstep);
+                    return false;
+                }
+
+                if (door.Action != DoorAction.Closed)
+                {
+                    //
+                    // the trace hit the door plane at pixel position xintercept, see if the door is
+                    // closed that much
+                    //
+                    if (xinttemp < door.Position)
+                    {
+                        passhoriz(xstep);
+                        return false;
+                    }
+                }
+
+                xintercept = xinttemp;
+                yintercept = (int)((ytile << (int)TILESHIFT) + (TILEGLOBAL/2));
+
+                HitHorizDoor();
             }
             else if (tilehit == BIT_WALL)
             {
-                // //
-                // // hit a sliding horizontal wall
-                // //
-                // if (pwalldir == di_north || pwalldir == di_south)
-                // {
-                //     if (pwalldir == di_north)
-                //     {
-                //         pwallposnorm = 64 - pwallpos;
-                //         pwallposinv = pwallpos;
-                //     }
-                //     else
-                //     {
-                //         pwallposnorm = pwallpos;
-                //         pwallposinv = 64 - pwallpos;
-                //     }
-                //
-                //     if ((pwalldir == di_south && xinttile == pwallx && ytile == pwally)
-                //      || (pwalldir == di_north && !(xinttile == pwallx && ytile == pwally)))
-                //     {
-                //         xinttemp = xintercept + ((xstep * pwallposnorm) >> 6);
-                //
-                //         if (xinttemp >> TILESHIFT != xinttile)
-                //             goto passhoriz;
-                //
-                //         xintercept = xinttemp;
-                //         yintercept = (((fixed)ytile << TILESHIFT) + TILEGLOBAL) - (pwallposinv << 10);
-                //         xinttile = xintercept >> TILESHIFT;
-                //         tilehit = pwalltile;
-                //
-                //         HitHorizWall();
-                //     }
-                //     else
-                //     {
-                //         xinttemp = xintercept + ((xstep * pwallposinv) >> 6);
-                //
-                //         if (xinttemp >> TILESHIFT != xinttile)
-                //             goto passhoriz;
-                //
-                //         xintercept = xinttemp;
-                //         yintercept = ((fixed)ytile << TILESHIFT) - (pwallposinv << 10);
-                //         xinttile = xintercept >> TILESHIFT;
-                //         tilehit = pwalltile;
-                //
-                //         HitHorizWall();
-                //     }
-                // }
-                // else
-                // {
-                //     if (pwalldir == di_west)
-                //         pwallposi = 64 - pwallpos;
-                //     else
-                //         pwallposi = pwallpos;
-                //
-                //     if ((pwalldir == di_east && (word)xintercept < (pwallposi << 10))
-                //      || (pwalldir == di_west && (word)xintercept > (pwallposi << 10)))
-                //     {
-                //         if (xinttile == pwallx && ytile == pwally)
-                //         {
-                //             if ((pwalldir == di_east && (int32_t)((word)xintercept) + xstep < (pwallposi << 10))
-                //              || (pwalldir == di_west && (int32_t)((word)xintercept) + xstep > (pwallposi << 10)))
-                //                 goto passhoriz;
-                //
-                //             //
-                //             // set up a vertical intercept position
-                //             //
-                //             yintercept -= (ystep * (64 - pwallpos)) >> 6;
-                //             yinttile = yintercept >> TILESHIFT;
-                //
-                //             if (pwalldir == di_east)
-                //                 xintercept = (xinttile << TILESHIFT) + (pwallposi << 10);
-                //             else
-                //                 xintercept = ((xinttile << TILESHIFT) - TILEGLOBAL) + (pwallposi << 10);
-                //
-                //             tilehit = pwalltile;
-                //
-                //             HitVertWall();
-                //         }
-                //         else
-                //         {
-                //             texdelta = pwallposi << 10;
-                //             yintercept = ytile << TILESHIFT;
-                //             tilehit = pwalltile;
-                //
-                //             HitHorizWall();
-                //         }
-                //     }
-                //     else
-                //     {
-                //         if (xinttile == pwallx && ytile == pwally)
-                //         {
-                //             texdelta = pwallposi << 10;
-                //             yintercept = ytile << TILESHIFT;
-                //             tilehit = pwalltile;
-                //
-                //             HitHorizWall();
-                //         }
-                //         else
-                //         {
-                //             if ((pwalldir == di_east && (int32_t)((word)xintercept) + xstep > (pwallposi << 10))
-                //              || (pwalldir == di_west && (int32_t)((word)xintercept) + xstep < (pwallposi << 10)))
-                //                 goto passhoriz;
-                //
-                //             //
-                //             // set up a vertical intercept position
-                //             //
-                //             yintercept -= (ystep * pwallpos) >> 6;
-                //             yinttile = yintercept >> TILESHIFT;
-                //
-                //             if (pwalldir == di_east)
-                //                 xintercept = (xinttile << TILESHIFT) - ((64 - pwallpos) << 10);
-                //             else
-                //                 xintercept = (xinttile << TILESHIFT) + ((64 - pwallpos) << 10);
-                //
-                //             tilehit = pwalltile;
-                //
-                //             HitVertWall();
-                //         }
-                //     }
-                // }
+                // TODO: Moving pushwalls
             }
             else
             {
@@ -550,18 +441,20 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         // mark the tile as visible and setup for next step
         //
         //spotvis[xinttile][ytile] = true;
+        passhoriz(xstep);
+        return false;
+    }
+
+    private void passhoriz(int xstep)
+    {
         ytile += ytilestep;
         xintercept += xstep;
         xinttile = xintercept >> (int)TILESHIFT;
-            return false;
     }
     
     private void HitHorizWall()
     {
-        int wallpic;
-        int texture;
-
-        texture = ((xintercept - texdelta) >> FIXED2TEXSHIFT) & TEXTUREMASK;
+        var texture = ((xintercept - texdelta) >> FIXED2TEXSHIFT) & TEXTUREMASK;
 
         if (ytilestep == -1)
             yintercept += (int)TILEGLOBAL;
@@ -572,9 +465,9 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         postx = pixx;
 
         var tex = ytilestep > 0 ? _map.WallCache[tilehit].North : _map.WallCache[tilehit].South;
-        if (_map.TilePlane[ytile - ytilestep, xinttile] is Door) // todo: why not setting values? tileplane is empty, mostly
+        if (tilehit2 is Door) // todo: why not setting values? tileplane is empty, mostly
         {
-            Door doorTex = _map.TilePlane[ytile - ytilestep, xinttile] as Door;
+            Door doorTex = tilehit2 as Door;
             tex = ytilestep > 0 ? _map.DoorCache[doorTex.TileId].North : _map.DoorCache[doorTex.TileId].South;
         }
 
@@ -582,12 +475,23 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         ScalePost();
     }
 
+    private void HitHorizDoor()
+    {
+        var door = tilehit2 as Door;
+        var texture = ((xintercept - (door?.Position??0)) >> FIXED2TEXSHIFT) & TEXTUREMASK;
+
+        wallHeight[pixx] = CalcHeight();
+        postx = pixx;
+        var tex = ytilestep > 0 ? _map.DoorCache[tilehit].North : _map.DoorCache[tilehit].South;
+
+        postsource = tex.Skip(texture).ToArray();
+
+        ScalePost ();
+    }
+    
     private void HitVertWall()
     {
-        int wallpic;
-        int texture;
-
-        texture = ((yintercept - texdelta) >> FIXED2TEXSHIFT) & TEXTUREMASK;
+        int texture = ((yintercept - texdelta) >> FIXED2TEXSHIFT) & TEXTUREMASK;
 
         if (xtilestep == -1)
         {
@@ -600,66 +504,30 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
         var tex = xtilestep > 0 ? _map.WallCache[tilehit].East : _map.WallCache[tilehit].West;
         
-        if (_map.TilePlane[yinttile,xtile-xtilestep] is Door) // todo: why not setting values? tileplane is empty, mostly
+        if (tilehit2 is Door) // todo: why not setting values? tileplane is empty, mostly
         {
-            Door doorTex = _map.TilePlane[yinttile,xtile-xtilestep] as Door;
+            Door doorTex = tilehit2 as Door;
             tex = xtilestep > 0 ? _map.DoorCache[doorTex.TileId].East : _map.DoorCache[doorTex.TileId].West;
         }
-        // if (_map.PlaneIds[0][yinttile, xtile] >= 90)
-        //     // if ((tilehit & BIT_WALL) != 0)
-        // {
-        //     //
-        //     // check for adjacent doors
-        //     //
-        //     const int DOORWALL = 101;
-        //     if (_map.PlaneIds[0][yinttile, xtile - xtilestep] is >= 90 and <= 106)
-        //         wallpic = DOORWALL;
-        //     else
-        //         wallpic = 91;// & ~BIT_WALL;
-        // }
-        // else
-            //wallpic = tilehit;
 
         postsource = tex.Skip(texture).ToArray();
-// #ifdef USE_SKYWALLPARALLAX
-//         postsourcesky = postsource - texture;
-// #endif
         ScalePost();
     }
 
     private void HitVertDoor()
     {
-        // int doorpage;
-        // int doornum;
-        // int texture;
-        //
-        // doornum = tilehit & ~BIT_DOOR;
-        // texture = ((yintercept - doorobjlist[doornum].position) >> FIXED2TEXSHIFT) & TEXTUREMASK;
-        //
-        // wallHeight[pixx] = CalcHeight();
-        // postx = pixx;
-        //
-        // switch (doorobjlist[doornum].lock)
-        // {
-        //     case dr_normal:
-        //     doorpage = DOORWALL + 1;
-        //     break;
-        //
-        //     case dr_lock1:
-        //     case dr_lock2:
-        //     case dr_lock3:
-        //     case dr_lock4:
-        //     doorpage = DOORWALL + 7;
-        //     break;
-        //
-        //     case dr_elevator:
-        //     doorpage = DOORWALL + 5;
-        //     break;
-        // }
-        //
-        // postsource = PM_GetPage(doorpage) + texture;
-        //
-        // ScalePost ();
+        int texture;
+        
+        var doorPosition = (tilehit2 as Door)?.Position ?? 0;
+        // TODO: Look up door and get its object data
+        texture = ((yintercept - doorPosition) >> FIXED2TEXSHIFT) & TEXTUREMASK;
+        
+        wallHeight[pixx] = CalcHeight();
+        postx = pixx;
+        
+        var tex = xtilestep > 0 ? _map.DoorCache[tilehit].East : _map.DoorCache[tilehit].West;
+        postsource = tex.Skip(texture).ToArray();
+        ScalePost ();
     }
 
     private void ScalePost()
