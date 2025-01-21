@@ -11,7 +11,9 @@ public class Wolfenstein3DActivision : GamePack
     public const string VgaHead = "vgahead.wl6";
     public const string Vswap = "vswap.wl6";
     
-    public override string PackName => "Wolfenstein 3D v1.4 Activision";
+    public override string PackName => "wolf3d-activision";
+    public override string PackDescription => "Wolfenstein 3D v1.4 Activision";
+    
     protected override List<GamePackFile> Files => [
          new(AudioHed, "a41af25a2f193e7d4afbcc4301b3d1ce"),
          new(AudioT, "2385b488b18f8721633e5b2bdf054853"),

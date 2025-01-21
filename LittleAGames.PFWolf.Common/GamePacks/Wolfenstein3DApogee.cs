@@ -13,7 +13,8 @@ public class Wolfenstein3DApogee : GamePack
     public const string VgaHead = "vgahead.wl6";
     public const string Vswap = "vswap.wl6";
     
-    public override string PackName => "Wolfenstein 3D v1.4 Apogee";
+    public override string PackName => "wolf3d-apogee";
+    public override string PackDescription => "Wolfenstein 3D v1.4 Apogee";
     
     protected override List<GamePackFile> Files => [
         new(AudioHed, "a41af25a2f193e7d4afbcc4301b3d1ce"),
@@ -34,6 +35,7 @@ public class Wolfenstein3DApogee : GamePack
         new(typeof(Wolf3DVswapFileLoader), SwapAssetReferences, Vswap),
     ];
 
+    // TODO: Move to pfwolf.pk3
     public readonly List<string> AudioAssetReferences = [
         // PC Sounds
         "HitWall",

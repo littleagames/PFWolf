@@ -12,7 +12,8 @@ public class OperationBodyCountFloppy : GamePack
     public const string VgaGraph = "vgagraph.bc";
     public const string VgaHead = "vgahead.bc";
     
-    public override string PackName => "Operation Body Count (Floppy Disk)";
+    public override string PackName => "operation-bc-floppy";
+    public override string PackDescription => "Operation Body Count (Floppy Disk)";
     
     protected override List<GamePackFile> Files => [
         new(AudioHed, "ccde3d43a536426426c4621d5fe0f370"),

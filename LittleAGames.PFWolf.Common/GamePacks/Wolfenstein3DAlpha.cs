@@ -13,7 +13,8 @@ public class Wolfenstein3DAlpha : GamePack
     public const string VgaHead = "vgahead.wl1";
     public const string Vswap = "vswap.wl1";
 
-    public override string PackName => "Wolfenstein 3D v1.0 Shareware";
+    public override string PackName => "wolf3d-v1_0-shareware";
+    public override string PackDescription => "Wolfenstein 3D v1.0 Shareware";
 
     protected override List<GamePackFile> Files => [
         new (AudioHed, "178e747da0d6ad92a1551eca8e15d42c"),

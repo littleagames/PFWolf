@@ -15,7 +15,8 @@ public class Corridor7Demo : GamePack
     public const string VgaGraph = "vgagraph.dmo";
     public const string VgaHead = "vgahead.dmo";
     
-    public override string PackName => "Corridor 7 Demo";
+    public override string PackName => "corridor7-demo";
+    public override string PackDescription => "Corridor 7 Demo";
     
     protected override List<GamePackFile> Files => [
         new(AudioDct, "7af30a3a43dcffb32e8349952415c2e0"),

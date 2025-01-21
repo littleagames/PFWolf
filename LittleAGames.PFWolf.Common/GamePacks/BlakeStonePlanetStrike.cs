@@ -13,7 +13,8 @@ public class BlakeStonePlanetStrike : GamePack
     public const string VgaHead = "vgahead.vsi";
     public const string Vswap = "vswap.vsi";
     
-    public override string PackName => "Blake Stone 2: Planet Strike";
+    public override string PackName => "blake-planet-strike";
+    public override string PackDescription => "Blake Stone 2: Planet Strike";
     
     protected override List<GamePackFile> Files => [
         new(AudioHed, "47c42494b67c14e93c7f3e90aed41a9a"),

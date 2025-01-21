@@ -14,7 +14,8 @@ public class BlakeStoneAliensOfGoldDemo : GamePack
     public const string VgaHead = "vgahead.bs1";
     public const string Vswap = "vswap.bs1";
     
-    public override string PackName => "Blake Stone: Aliens of Gold Demo";
+    public override string PackName => "blake-aog-demo";
+    public override string PackDescription => "Blake Stone: Aliens of Gold Demo";
     
     protected override List<GamePackFile> Files => [
         new(AudioHed, "52a203285041846c9fd73e8947a64522"),

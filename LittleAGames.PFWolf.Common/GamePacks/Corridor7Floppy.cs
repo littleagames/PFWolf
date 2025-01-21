@@ -14,7 +14,8 @@ public class Corridor7Floppy : GamePack
     public const string VgaGraph = "vgagraph.co7";
     public const string VgaHead = "vgahead.co7";
     
-    public override string PackName => "Corridor 7 (Floppy Disk)";
+    public override string PackName => "corridor7-floppy";
+    public override string PackDescription => "Corridor 7 (Floppy Disk)";
     
     protected override List<GamePackFile> Files => [
         new(AudioHed, "793e3ae8bc64d623082db6bb1eca3f20"),

@@ -11,7 +11,8 @@ public class SpearOfDestiny : GamePack
     public const string VgaHead = "vgahead.sod";
     public const string Vswap = "vswap.sod";
 
-    public override string PackName => "Spear of Destiny v1.0";
+    public override string PackName => "spear";
+    public override string PackDescription => "Spear of Destiny v1.0";
 
     protected override List<GamePackFile> Files => [
         new (AudioHed, "6e914d15335125872737718470061ad8"),

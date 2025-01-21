@@ -28,7 +28,7 @@ public class MapManager : IMapManager
                 return;
             }
 
-            var mapDefinitions = (MapDefinitions?)_assetManager.FindAsset(AssetType.MapDefinitions, "map-definitions");
+            var mapDefinitions = (MapDefinitionAsset?)_assetManager.FindAsset(AssetType.MapDefinitions, "map-definitions");
             
             map.Width = mapAsset.Width;
             map.Height = mapAsset.Height;
@@ -49,7 +49,7 @@ public class MapManager : IMapManager
             BuildWalls(map, mapAsset, mapDefinitions);
             BuildDoors(map, mapAsset, mapDefinitions);
             BuildActors(map, mapAsset);
-            BuildStatics(mapAsset);
+            BuildStatics(map, mapAsset);
             BuildFlats(mapAsset);
         }
     }
@@ -61,7 +61,7 @@ public class MapManager : IMapManager
         // How does the map component translate to the map?
     }
 
-    private void BuildWalls(Map map, MapAsset mapAsset, MapDefinitions mapDefinitions)
+    private void BuildWalls(Map map, MapAsset mapAsset, MapDefinitionAsset mapDefinitionAsset)
     {
         Dictionary<string, byte[]> wallAssets = new();
         
@@ -73,9 +73,7 @@ public class MapManager : IMapManager
         for (var x = 0; x < mapAsset.Width; x++)
         {
             var tileId = map.PlaneIds[0][y, x];
-
-            
-            var definition = mapDefinitions.FindWall(tileId);
+            var definition = mapDefinitionAsset.FindWall(tileId);
             
             // do same work but split to door asset cache
             if (definition == null)
@@ -130,7 +128,7 @@ public class MapManager : IMapManager
         }
     }
 
-    private void BuildDoors(Map map, MapAsset mapAsset, MapDefinitions mapDefinitions)
+    private void BuildDoors(Map map, MapAsset mapAsset, MapDefinitionAsset mapDefinitionAsset)
     {
         Dictionary<string, byte[]> doorAssets = new();
         
@@ -146,7 +144,7 @@ public class MapManager : IMapManager
         {
             var tileId = map.PlaneIds[0][y, x];
 
-            var definition = mapDefinitions.FindDoor(tileId);
+            var definition = mapDefinitionAsset.FindDoor(tileId);
             
             // do same work but split to door asset cache
             if (definition == null)
@@ -236,7 +234,7 @@ public class MapManager : IMapManager
         // MapDefinitions in objects (actor, static, etc) eventually modders can add more things "Trigger"
     }
     
-    private void BuildStatics(MapAsset mapAsset)
+    private void BuildStatics(Map map, MapAsset mapAsset)
     {
     }
     

@@ -14,7 +14,8 @@ public class OperationBodyCountDemo : GamePack
     public const string VgaGraph = "vgagraph.co7";
     public const string VgaHead = "vgahead.co7";
     
-    public override string PackName => "Operation Body Count Demo";
+    public override string PackName => "operation-bc-demo";
+    public override string PackDescription => "Operation Body Count Demo";
     
     protected override List<GamePackFile> Files => [
         new(AudioHed, "e023f57689119d8677b84a905996ef0b"),

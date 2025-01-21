@@ -14,8 +14,9 @@ public class Corridor7CD : GamePack
     public const string VgaDict = "vgadict.co7";
     public const string VgaGraph = "vgagraph.co7";
     public const string VgaHead = "vgahead.co7";
-    
-    public override string PackName => "Corridor 7 CD";
+
+    public override string PackName => "corridor7-cd";
+    public override string PackDescription => "Corridor 7 CD";
     
     protected override List<GamePackFile> Files => [
         new(AudioHed, "6f41f714f882ea133dd5d1678448dffb"),

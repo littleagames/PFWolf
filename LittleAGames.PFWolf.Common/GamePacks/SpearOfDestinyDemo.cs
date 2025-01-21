@@ -11,7 +11,8 @@ public class SpearOfDestinyDemo : GamePack
     public const string VgaHead = "vgahead.sdm";
     public const string Vswap = "vswap.sdm";
 
-    public override string PackName => "Spear of Destiny Demo";
+    public override string PackName => "spear-demo";
+    public override string PackDescription => "Spear of Destiny Demo";
 
     protected override List<GamePackFile> Files => [
         new (AudioHed, "f0022742f86c214872bd72f03aaf1529"),

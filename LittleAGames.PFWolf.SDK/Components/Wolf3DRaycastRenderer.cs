@@ -169,8 +169,8 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
         var midAngle = viewAngle * (FINEANGLES / ANGLES);
 
-        viewSin = sintable[(int)viewAngle];// << (int)TILESHIFT;
-        viewCos = costable[(int)viewAngle];// << (int)TILESHIFT;
+        viewSin = sintable[(int)viewAngle];
+        viewCos = costable[(int)viewAngle];
 
         viewX = Camera.X - FixedMul(focalLength, viewCos);
         viewY = Camera.Y + FixedMul(focalLength, viewSin);
@@ -178,6 +178,16 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         var focaltx = (short)(viewX >> (int)TILESHIFT);
         var focalty = (short)(viewY >> (int)TILESHIFT);
 
+        WallRefresh(midAngle, focaltx, focalty);
+
+        DrawScaleds();
+
+        return _result;
+    }
+
+    private void WallRefresh(double midAngle, short focaltx, short focalty)
+    {
+        
         // These are where the player is in a partial tile
         var xpartialdown = viewX & (TILEGLOBAL - 1);
         var xpartialup = xpartialdown ^ (TILEGLOBAL - 1);
@@ -281,10 +291,13 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
                     tileFound = vertentry(ystep);
             }
         }
-
-        return _result;
     }
 
+    private void DrawScaleds()
+    {
+        
+    }
+    
     private bool vertentry(int ystep)
     {
         int yinttemp;
@@ -327,7 +340,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
                     // the trace hit the door plane at pixel position yintercept, see if the door is
                     // closed that much
                     //
-                    if (yinttemp < door.Position)
+                    if ((ushort)yinttemp < door.Position)
                     {
                         passvert(ystep);
                         return false;
@@ -411,7 +424,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
                     // the trace hit the door plane at pixel position xintercept, see if the door is
                     // closed that much
                     //
-                    if (xinttemp < door.Position)
+                    if ((ushort)xinttemp < door.Position)
                     {
                         passhoriz(xstep);
                         return false;
@@ -465,10 +478,9 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         postx = pixx;
 
         var tex = ytilestep > 0 ? _map.WallCache[tilehit].North : _map.WallCache[tilehit].South;
-        if (tilehit2 is Door) // todo: why not setting values? tileplane is empty, mostly
+        if (_map.TilePlane[ytile-ytilestep, xinttile] is Door door)
         {
-            Door doorTex = tilehit2 as Door;
-            tex = ytilestep > 0 ? _map.DoorCache[doorTex.TileId].North : _map.DoorCache[doorTex.TileId].South;
+            tex = ytilestep > 0 ? _map.DoorCache[door.TileId].North : _map.DoorCache[door.TileId].South;
         }
 
         postsource = tex.Skip(texture).ToArray();
@@ -504,10 +516,9 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
         var tex = xtilestep > 0 ? _map.WallCache[tilehit].East : _map.WallCache[tilehit].West;
         
-        if (tilehit2 is Door) // todo: why not setting values? tileplane is empty, mostly
+        if (_map.TilePlane[yinttile, xtile - xtilestep] is Door door)
         {
-            Door doorTex = tilehit2 as Door;
-            tex = xtilestep > 0 ? _map.DoorCache[doorTex.TileId].East : _map.DoorCache[doorTex.TileId].West;
+            tex = ytilestep > 0 ? _map.DoorCache[door.TileId].East : _map.DoorCache[door.TileId].West;
         }
 
         postsource = tex.Skip(texture).ToArray();
@@ -516,11 +527,9 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
     private void HitVertDoor()
     {
-        int texture;
-        
         var doorPosition = (tilehit2 as Door)?.Position ?? 0;
         // TODO: Look up door and get its object data
-        texture = ((yintercept - doorPosition) >> FIXED2TEXSHIFT) & TEXTUREMASK;
+        var texture = ((yintercept - doorPosition) >> FIXED2TEXSHIFT) & TEXTUREMASK;
         
         wallHeight[pixx] = CalcHeight();
         postx = pixx;

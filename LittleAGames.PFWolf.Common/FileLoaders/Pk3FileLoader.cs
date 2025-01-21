@@ -42,8 +42,8 @@ public class Pk3FileLoader : BaseFileLoader
         
         // All map definitions will be merged into a single asset
         const string MapDefinitionsName = "map-definitions";
-        
-        MapDefinitions? mapDefinitions = null;
+
+        List<MapDefinitionAsset> allMapDefinitions = [];
         foreach (ZipArchiveEntry entry in archive.Entries)
         {
             if (entry.Length == 0)
@@ -137,23 +137,44 @@ public class Pk3FileLoader : BaseFileLoader
                         RawData = rawData,
                         Location = entry.FullName
                     });
+                    continue;
                 }
             }
 
+            if (entry.FullName.StartsWith("gamepacks/"))
+            {
+                assets.Add(new GamePackDefinitionAsset(
+                    name: CleanName(entry.Name),
+                    rawData: rawData
+                    // formatloaderjson
+                ));
+                continue;
+                // TODO: Load all gamepacks, and match it with the selected game pack, and filter out the assets not needed
+            }
+            
             if (entry.FullName.StartsWith("mapdefs/"))
             {
                 if (entry.Name.EndsWith(".json"))
                 {
-                    if (mapDefinitions == null)
-                        mapDefinitions = new MapDefinitions(
-                            MapDefinitionsName,
-                            rawData
-                            // formatloaderjson
-                        );
-                    else
-                    {
-                        mapDefinitions.Merge(rawData /*formatloaderjson*/);
-                    }
+                    var mapDefinition = new MapDefinitionAsset (
+                        MapDefinitionsName,
+                        rawData
+                        // formatloaderjson
+                    );
+                    allMapDefinitions.Add(mapDefinition);
+                    // TODO: Load all map definitions, find the MapDefs property, and only load what those are, discard the rest
+                    // todo: use the gamepack to determine whick map def pack to load
+                    // if (mapDefinitions == null)
+                    //     mapDefinitions = new MapDefinitions(
+                    //         MapDefinitionsName,
+                    //         rawData
+                    //         // formatloaderjson
+                    //     );
+                    // else
+                    // {
+                    //     mapDefinitions.Merge(rawData /*formatloaderjson*/);
+                    // }
+                    continue;
                 }
                 else if (entry.Name.EndsWith(".yml") || entry.Name.EndsWith(".yaml"))
                 {
@@ -162,11 +183,13 @@ public class Pk3FileLoader : BaseFileLoader
             }
         }
 
+        // TODO: Compile list of map definitions
+        
         // TODO: Validate mapDefinitions
-        if (mapDefinitions != null)
-        {
-            assets.Add(mapDefinitions);
-        }
+        // if (mapDefinitions != null)
+        // {
+        //     assets.Add(mapDefinitions);
+        // }
         
         // Bundle and validate scripts per pack
         assets.AddRange(CompileScripts(scriptAssets));
