@@ -10,7 +10,7 @@ var directory = "D:\\projects\\Wolf3D\\Wolf3D_Games\\wolf3d-v1.4-apogee";
 var isValidPack = fileLoader.Validate(gamePack, directory);
 if (!isValidPack)
 {
-    Console.WriteLine($"Pack: {gamePack.PackName} not found in directory: {directory}");
+    Console.WriteLine($"Pack: {gamePack.PackDescription} not found in directory: {directory}");
     return;
 }
 
@@ -26,7 +26,14 @@ assetManager.AddModPack("D:\\projects\\Wolf3D\\PFWolf\\PFWolf-Assets", "pfwolf.p
 assetManager.AddAssembly(typeof(LittleAGames.PFWolf.ExternalPk3ModPack.NoOp).Assembly);
 Console.WriteLine($"Assets loaded: {assetManager.AssetCount}");
 
-var mapManager = new MapManager(assetManager); // TODO: Choose map handler from game pack?
+var packDefinition = assetManager.FindAsset<GamePackDefinitionAsset>(AssetType.GamePackDefinition, gamePack.PackName);
+if (packDefinition == null)
+{
+    Console.WriteLine($"Pack definition not found: {gamePack.PackDescription}");
+    return;
+}
+
+var mapManager = new MapManager(assetManager, packDefinition.MapDefinitionsAssetName);
 
 var inputManager = new SDLInputManager();
 

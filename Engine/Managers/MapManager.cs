@@ -11,10 +11,12 @@ public interface IMapManager
 public class MapManager : IMapManager
 {
     private readonly IAssetManager _assetManager;
+    private readonly string _mapDefinitionAssetName;
 
-    public MapManager(IAssetManager assetManager)
+    public MapManager(IAssetManager assetManager, string mapDefinitionAssetName)
     {
         _assetManager = assetManager;
+        _mapDefinitionAssetName = mapDefinitionAssetName;
     }
 
     public void Initialize(MapComponent component)
@@ -28,7 +30,10 @@ public class MapManager : IMapManager
                 return;
             }
 
-            var mapDefinitions = (MapDefinitionAsset?)_assetManager.FindAsset(AssetType.MapDefinitions, "map-definitions");
+            var mapDefinitionList = _assetManager.FindAsset<MapDefinitionAsset>(AssetType.MapDefinitions, _mapDefinitionAssetName);
+            var partialMapDefinitions = _assetManager.GetAssets<MapDefinitionAsset>(AssetType.MapDefinitions)
+                .Where(x => mapDefinitionList.MapDefinitions.Select(x => x).Contains(x.Name.Replace("\\", "/")));
+            var fullMapDefinition = MapDefinitionAsset.Merge(partialMapDefinitions);
             
             map.Width = mapAsset.Width;
             map.Height = mapAsset.Height;
@@ -46,8 +51,8 @@ public class MapManager : IMapManager
             // This takes that component, and just loads them in
             // That component will also update them as well
             
-            BuildWalls(map, mapAsset, mapDefinitions);
-            BuildDoors(map, mapAsset, mapDefinitions);
+            BuildWalls(map, mapAsset, fullMapDefinition);
+            BuildDoors(map, mapAsset, fullMapDefinition);
             BuildActors(map, mapAsset);
             BuildStatics(map, mapAsset);
             BuildFlats(mapAsset);

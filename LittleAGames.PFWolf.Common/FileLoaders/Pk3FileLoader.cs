@@ -40,9 +40,6 @@ public class Pk3FileLoader : BaseFileLoader
         var assets = new List<Asset>();
         var scriptAssets = new List<UnpackedScript>();
         
-        // All map definitions will be merged into a single asset
-        const string MapDefinitionsName = "map-definitions";
-
         List<MapDefinitionAsset> allMapDefinitions = [];
         foreach (ZipArchiveEntry entry in archive.Entries)
         {
@@ -157,11 +154,12 @@ public class Pk3FileLoader : BaseFileLoader
                 if (entry.Name.EndsWith(".json"))
                 {
                     var mapDefinition = new MapDefinitionAsset (
-                        MapDefinitionsName,
+                        CleanName(entry.FullName, includeDirectory: true),
                         rawData
                         // formatloaderjson
                     );
-                    allMapDefinitions.Add(mapDefinition);
+                    assets.Add(mapDefinition);
+                    //allMapDefinitions.Add(mapDefinition);
                     // TODO: Load all map definitions, find the MapDefs property, and only load what those are, discard the rest
                     // todo: use the gamepack to determine whick map def pack to load
                     // if (mapDefinitions == null)
@@ -261,8 +259,16 @@ public class Pk3FileLoader : BaseFileLoader
         return scriptAssets;
     }
 
-    private string CleanName(string pk3Name)
+    private static string CleanName(string pk3Name, bool includeDirectory = false)
     {
-        return Path.GetFileNameWithoutExtension(pk3Name);
+        var fileName = Path.GetFileNameWithoutExtension(pk3Name);
+        
+        if (includeDirectory)
+        {
+            var directory = Path.GetDirectoryName(pk3Name);
+            return $"{directory}/{fileName}";
+        }
+
+        return fileName;
     }
 }

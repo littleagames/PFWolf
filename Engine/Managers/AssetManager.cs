@@ -47,10 +47,18 @@ public class AssetManager : IAssetManager
     
     public List<Asset> GetAssets(AssetType assetType)
         => _assets.Where(a => a.AssetType == assetType).ToList();
+    
+    public List<T> GetAssets<T>(AssetType assetType) where T : Asset
+        => _assets.Where(a => a.AssetType == assetType).Select(x => (T)x).ToList();
 
     public Asset? FindAsset(AssetType assetType, string assetName)
     {
-        return _assets.FirstOrDefault(a =>
+        return FindAsset<Asset>(assetType, assetName);
+    }
+    
+    public T? FindAsset<T>(AssetType assetType, string assetName) where T : Asset
+    {
+        return (T?)_assets.FirstOrDefault(a =>
             a.AssetType == assetType && a.Name.Equals(assetName, StringComparison.InvariantCultureIgnoreCase));
     }
 }

@@ -1,13 +1,11 @@
-﻿using System.ComponentModel;
-
-namespace LittleAGames.PFWolf.SDK.Assets;
+﻿namespace LittleAGames.PFWolf.SDK.Assets;
 
 public class MapDefinitionAsset : Asset
 {
-    public Dictionary<int, WallDefinition> Walls { get; set; }
-    public Dictionary<int, DoorDefinition> Doors { get; set; }
-    public Dictionary<int, ActorDefinition> Actors { get; set; }
-    public Dictionary<int, PlayerDefinition> Player { get; set; }
+    public Dictionary<int, WallDefinition> Walls { get; init; }
+    public Dictionary<int, DoorDefinition> Doors { get; init; }
+    public Dictionary<int, ActorDefinition> Actors { get; init; }
+    public Dictionary<int, PlayerDefinition> Player { get; init; }
 
     public TileDefinition? FindWall(int tileId)
     {
@@ -20,7 +18,14 @@ public class MapDefinitionAsset : Asset
 
     public sealed override string Name { get; set; }
     public sealed override byte[] RawData { get; set; }
+    public List<string> MapDefinitions { get; init; }
 
+    private MapDefinitionAsset(string name)
+    {
+        AssetType = AssetType.MapDefinitions;
+        Name = name;
+        RawData = [];
+    }
     public MapDefinitionAsset(string name, byte[] rawData)
     {
         AssetType = AssetType.MapDefinitions;
@@ -37,29 +42,44 @@ public class MapDefinitionAsset : Asset
         Doors = defs.Doors.ToDictionary(x => Convert.ToInt32(x.Key), x => x.Value);
         Actors = defs.Actors.ToDictionary(x => Convert.ToInt32(x.Key), x => x.Value);
         Player = defs.Player.ToDictionary(x => Convert.ToInt32(x.Key), x => x.Value);
+        MapDefinitions = defs.MapDefinitions;
         // TODO: This isn't quite what I had in mind. Can I check for properties on the top-level of the object first?
     }
 
-    public void Merge(byte[] rawData /*,formatloader*/)
+    public static MapDefinitionAsset Merge(IEnumerable<MapDefinitionAsset> assets)
     {
-        var encoded = System.Text.Encoding.UTF8.GetString(rawData);
-        var defs = System.Text.Json.JsonSerializer.Deserialize<MapDefinitionDataModel>(encoded);
-        var walls = defs.Walls.ToDictionary(x => Convert.ToInt32(x.Key), x => x.Value);
-        var doors = defs.Doors.ToDictionary(x => Convert.ToInt32(x.Key), x => x.Value);
-        var actors = defs.Actors.ToDictionary(x => Convert.ToInt32(x.Key), x => x.Value);
-        
-        Walls = Walls.Concat(walls)
-            .GroupBy(kv => kv.Key)
-            .ToDictionary(g => g.Key, g => g.Last().Value);
-        
-        Doors = Doors.Concat(doors)
-            .GroupBy(kv => kv.Key)
-            .ToDictionary(g => g.Key, g => g.Last().Value);
-        // TODO: Add new, overwrite existing? (with warning?) It came from the same pk3 file
-        
-        Actors = Actors.Concat(actors)
-            .GroupBy(kv => kv.Key)
-            .ToDictionary(g => g.Key, g => g.Last().Value);
+        var walls = new Dictionary<int, WallDefinition>();
+        var doors = new Dictionary<int, DoorDefinition>();
+        var actors = new Dictionary<int, ActorDefinition>();
+        var player = new Dictionary<int, PlayerDefinition>();
+
+        foreach (var asset in assets)
+        {
+            walls = walls.Concat(asset.Walls)
+                .GroupBy(kv => kv.Key)
+                .ToDictionary(g => g.Key, g => g.Last().Value);
+
+            doors = doors.Concat(asset.Doors)
+                .GroupBy(kv => kv.Key)
+                .ToDictionary(g => g.Key, g => g.Last().Value);
+            // TODO: Add new, overwrite existing? (with warning?) It came from the same pk3 file
+
+            actors = actors.Concat(asset.Actors)
+                .GroupBy(kv => kv.Key)
+                .ToDictionary(g => g.Key, g => g.Last().Value);
+
+            player = player.Concat(asset.Player)
+                .GroupBy(kv => kv.Key)
+                .ToDictionary(g => g.Key, g => g.Last().Value);
+        }
+
+        return new MapDefinitionAsset("map-definitions")
+        {
+            Walls = walls,
+            Doors = doors,
+            Actors = actors,
+            Player = player
+        };
     }
 }
 
