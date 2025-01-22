@@ -2,14 +2,20 @@
 
 public class SceneManager
 {
+    private readonly IAssetManager _assetManager;
     private readonly IVideoManager _videoManager;
     private readonly IInputManager _inputManager;
     private readonly IMapManager _mapManager;
 
     private dynamic? _contextData = null;
 
-    public SceneManager(IVideoManager videoManager, IInputManager inputManager, IMapManager mapManager)
+    public SceneManager(
+        IAssetManager assetManager,
+        IVideoManager videoManager,
+        IInputManager inputManager,
+        IMapManager mapManager)
     {
+        _assetManager = assetManager;
         _videoManager = videoManager;
         _inputManager = inputManager;
         _mapManager = mapManager;
@@ -18,10 +24,10 @@ public class SceneManager
     private Scene? _currentScene = null;
     public void LoadScene(string sceneName, dynamic? contextData = null)
     {
-#if DEBUG
-            _currentScene = new GameLoopScene();
-#else
-        var scriptAsset = (ScriptAsset?)_assetManager.FindAsset(AssetType.ScriptScene, sceneName);
+// #if DEBUG
+//             _currentScene = new GameLoopScene();
+// #else
+        var scriptAsset = _assetManager.FindAsset<ScriptAsset>(AssetType.ScriptScene, sceneName);
         if (scriptAsset == null)
         {
             throw new InvalidDataException($"The specified scene \"{sceneName}\" does not exist.");
@@ -31,7 +37,7 @@ public class SceneManager
         {
             throw new InvalidDataException($"Could not properly build the script for scene \"{sceneName}\"");
         }
-#endif
+//#endif
 
         if (_currentScene == null)
             return;

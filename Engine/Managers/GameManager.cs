@@ -23,7 +23,7 @@ public class GameManager
     {
         _videoManager.Initialize();
         
-        var sceneManager = new SceneManager(_videoManager, _inputManager, _mapManager);
+        var sceneManager = new SceneManager(_assetManager, _videoManager, _inputManager, _mapManager);
         sceneManager.LoadScene(_packDefinitions.StartingScene);
         
         // GameLoop
