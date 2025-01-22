@@ -7,7 +7,7 @@ namespace Engine.Managers;
 
 public class SDLVideoManager : IVideoManager
 {
-    private readonly AssetManager _assetManager;
+    private readonly IAssetManager _assetManager;
     private readonly GameConfiguration _config;
     private bool _isInitialized = false;
     private readonly SDL_Color[] _gamePalette, _currentPalette;
@@ -24,12 +24,12 @@ public class SDLVideoManager : IVideoManager
     // SDL pointers
     private IntPtr _screen, _screenBuffer, _texture, _renderer, _window;
 
-    public SDLVideoManager(AssetManager assetManager, GameConfiguration config)
+    public SDLVideoManager(IAssetManager assetManager, GameConfiguration config, GamePackDefinitionAsset packDefinition)
     {
         _assetManager = assetManager;
         _config = config;
         
-        _gamePalette = LoadPaletteFromAssets(_config.GamePalette);
+        _gamePalette = LoadPaletteFromAssets(packDefinition.GamePalette);
         _currentPalette = new SDL_Color[_gamePalette.Length];
         Array.Copy(_gamePalette, _currentPalette, 256);
         

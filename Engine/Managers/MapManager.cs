@@ -81,12 +81,7 @@ public class MapManager : IMapManager
             var definition = mapDefinitionAsset.FindWall(tileId);
             
             // do same work but split to door asset cache
-            if (definition == null)
-            {
-                // error?
-                Console.WriteLine($"Wall not found: {tileId} at tile {x},{y}");
-            }
-            else
+            if (definition != null)
             {
                 var assetNames = new HashSet<string>();
                 assetNames.Add(definition.North);
@@ -149,33 +144,28 @@ public class MapManager : IMapManager
         {
             var tileId = map.PlaneIds[0][y, x];
 
-            var definition = mapDefinitionAsset.FindDoor(tileId);
+            var doorDefinition = mapDefinitionAsset.FindDoor(tileId);
             
             // do same work but split to door asset cache
-            if (definition == null)
-            {
-                Console.WriteLine($"Door not found: {tileId} at tile {x},{y}");
-                // error?
-            }
-            else
+            if (doorDefinition != null)
             {
                 map.TilePlane[y, x] = new Door
                 {
                     TileId = tileId,
-                    North = definition.North,
-                    South = definition.South,
-                    East = definition.East,
-                    West = definition.West
+                    North = doorDefinition.North,
+                    South = doorDefinition.South,
+                    East = doorDefinition.East,
+                    West = doorDefinition.West
                 };
                 
                 if (map.DoorCache.ContainsKey(tileId))
                     continue; // already loaded
 
                 var assetNames = new HashSet<string>();
-                assetNames.Add(definition.North);
-                assetNames.Add(definition.South);
-                assetNames.Add(definition.East);
-                assetNames.Add(definition.West);
+                assetNames.Add(doorDefinition.North);
+                assetNames.Add(doorDefinition.South);
+                assetNames.Add(doorDefinition.East);
+                assetNames.Add(doorDefinition.West);
 
                 foreach (var asset in assetNames)
                 {
@@ -195,10 +185,10 @@ public class MapManager : IMapManager
                 
                 map.DoorCache.Add(tileId, new WallData
                 {
-                    North = doorAssets[definition.North],
-                    South = doorAssets[definition.South],
-                    East = doorAssets[definition.East],
-                    West = doorAssets[definition.West],
+                    North = doorAssets[doorDefinition.North],
+                    South = doorAssets[doorDefinition.South],
+                    East = doorAssets[doorDefinition.East],
+                    West = doorAssets[doorDefinition.West],
                 });
             }
         }

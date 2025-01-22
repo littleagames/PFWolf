@@ -12,4 +12,6 @@ public interface IAssetManager
     List<Asset> GetAssets(AssetType assetType);
     
     List<T> GetAssets<T>(AssetType assetType) where T : Asset;
+    
+    public int AssetCount { get; }
 }

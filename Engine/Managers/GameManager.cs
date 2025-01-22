@@ -8,15 +8,15 @@ public class GameManager
     private readonly IVideoManager _videoManager;
     private readonly IInputManager _inputManager;
     private readonly IMapManager _mapManager;
-    private readonly GameConfiguration _gameConfig;
+    private readonly GamePackDefinitionAsset _packDefinitions;
 
-    public GameManager(IAssetManager assetManager, IVideoManager videoManager, IInputManager inputManager, IMapManager mapManager, GameConfiguration gameConfig)
+    public GameManager(IAssetManager assetManager, IVideoManager videoManager, IInputManager inputManager, IMapManager mapManager, GamePackDefinitionAsset packDefinitions)
     {
         _assetManager = assetManager;
         _videoManager = videoManager;
         _inputManager = inputManager;
         _mapManager = mapManager;
-        _gameConfig = gameConfig;
+        _packDefinitions = packDefinitions;
     }
     
     public void Start()
@@ -24,7 +24,7 @@ public class GameManager
         _videoManager.Initialize();
         
         var sceneManager = new SceneManager(_videoManager, _inputManager, _mapManager);
-        sceneManager.LoadScene(_gameConfig.StartingScene);
+        sceneManager.LoadScene(_packDefinitions.StartingScene);
         
         // GameLoop
         // Main loop flag

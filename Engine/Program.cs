@@ -17,9 +17,9 @@ if (!isValidPack)
 GameConfiguration gameConfig = new()
 {
     BaseDirectory = directory,
-    GamePalette = "wolfpal" // TODO: Move this into the pk3 file as other games will want to use custom palettes
+    //GamePalette = "wolfpal" // TODO: Move this into the pk3 file as other games will want to use custom palettes
 };
-var assetManager = new AssetManager(fileLoader);
+IAssetManager assetManager = new AssetManager(fileLoader);
 
 assetManager.AddGamePack(gamePack, directory);
 assetManager.AddModPack("D:\\projects\\Wolf3D\\PFWolf\\PFWolf-Assets", "pfwolf.pk3");
@@ -37,11 +37,11 @@ var mapManager = new MapManager(assetManager, packDefinition.MapDefinitionsAsset
 
 var inputManager = new SDLInputManager();
 
-var videoManager = new SDLVideoManager(assetManager, gameConfig);
+var videoManager = new SDLVideoManager(assetManager, gameConfig, packDefinition);
 
 new GameManager(
     assetManager,
     videoManager,
     inputManager,
     mapManager,
-    gameConfig).Start();
+    packDefinition).Start();
