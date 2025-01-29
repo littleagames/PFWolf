@@ -78,7 +78,7 @@ public class SkillSelectScene : MenuScene
     public void SelectSkill()
     {
         var episode = ContextData?.GetProperty<int>("SelectedEpisode") ?? -1;
-        LoadScene("wolf3d:InitializeGameScene", new SceneContext
+        LoadScene("wolf3d:GameLoopScene", new SceneContext
         {
             { "SelectedSkill", Menu.CurrentIndex },
             { "SelectedEpisode", episode }

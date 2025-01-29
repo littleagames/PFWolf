@@ -2,7 +2,7 @@
 
 public class Text : RenderComponent
 {
-    public string String { get; }
+    public string String { get; set; }
     public int X { get; }
     public int Y { get; }
     public string FontAssetName { get; }

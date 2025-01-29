@@ -7,11 +7,13 @@ public class GameLoopScene : Scene
     private ViewPort _viewPort;
     private Map _map;
     private Player? _player;
+    private IngameConsole _ingameConsole;
     
     public GameLoopScene()
     {
         Components.Add(Background.Create(0x7f));
         Components.Add(Graphic.Create("statusbar", new Position(0, 160))); // TODO: Component (Statusbar), it'll be made of many components to draw things
+        _ingameConsole = IngameConsole.Create(0, 0, 320, 100, 0x00);
     }
 
     public override void OnStart()
@@ -33,6 +35,7 @@ public class GameLoopScene : Scene
         Components.Add(_viewPort);
         Components.Add(_map);
         Components.Add(_camera);
+        Components.Add(_ingameConsole);
     }
 
     public override void OnPreUpdate(float deltaTime)
@@ -139,6 +142,18 @@ public class GameLoopScene : Scene
     
     public override void OnUpdate(float deltaTime)
     {
+        if (Input.IsKeyDown(Keys.Tilde))
+        {
+            _ingameConsole.ToggleState();
+            Input.ClearKeysDown();
+        }
+        
+        if (_ingameConsole.IsActive)
+        {
+            _ingameConsole.Listen(Input);
+            return;
+        }
+        
         // TODO: "Normalize" controls
         MovePlayer(deltaTime);
         //MoveAutomap();

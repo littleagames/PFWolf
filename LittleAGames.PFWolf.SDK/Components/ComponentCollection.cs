@@ -4,14 +4,14 @@ public class ComponentCollection
 {
     private readonly HashSet<Component> _components = [];
 
-    public void Add(Component component)
+    public void Add<T>(T component) where T : Component
     {
         if (component == null)
             throw new Exception("Cannot add null component");
         _components.Add(component);
     }
     
-    public void Add(HashSet<Component> components)
+    public void Add<T>(HashSet<T> components) where T : Component
     {
         foreach(var component in components)
             _components.Add(component);

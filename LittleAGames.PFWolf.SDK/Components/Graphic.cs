@@ -17,7 +17,7 @@ public class Graphic : RenderComponent
         => new Graphic(assetName, x, y);
 
     public static Graphic Create(string assetName, Position position)
-        =>  new Graphic(assetName, position.X, position.Y);
+        =>  new (assetName, position.X, position.Y);
     
     public void SetPosition(Position position)
     {

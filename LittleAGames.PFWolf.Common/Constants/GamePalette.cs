@@ -3,6 +3,7 @@
 namespace LittleAGames.PFWolf.Common.Constants;
 
 // TODO: Convert this to a PLAYPAL file
+[Obsolete("This needs to be replaced with the gamepack's palette")]
 public static class GamePalette
 {
     private static Color RGB(byte red, byte green, byte blue)
@@ -13,6 +14,7 @@ public static class GamePalette
             blue: (byte)(blue * 255 / 63));
     }
 
+    [Obsolete("This needs to be replaced with the gamepack's palette")]
     public static Color[] BasePalette = new Color[256]
     {
 RGB(  0,  0,  0),RGB(  0,  0, 42),RGB(  0, 42,  0),RGB(  0, 42, 42),RGB( 42,  0,  0),

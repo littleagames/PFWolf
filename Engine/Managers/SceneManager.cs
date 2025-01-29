@@ -149,10 +149,12 @@ public class SceneManager
                 _mapManager.Update(map);
                 break;
             case RenderComponent render:
+                if (render.Hidden)
+                    return;
+                
                 _videoManager.Update(render);
                 break;
         }
-
 
         foreach (var innerComponent in component.Children.GetComponents())
         {

@@ -58,6 +58,7 @@ public class Pk3FileLoader : BaseFileLoader
             {
                 if (entry.Name.EndsWith(".png"))
                 {
+                    // TODO: Move this to a PNGDataLoader that might require a palette asset
                     using Image<Rgba32> bmpImage = Image.Load<Rgba32>(rawData);
                     var graphicData = new byte[bmpImage.Width * bmpImage.Height];
                     
