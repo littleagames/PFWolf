@@ -11,11 +11,17 @@ public class ComponentCollection
         _components.Add(component);
     }
     
-    public void Add<T>(HashSet<T> components) where T : Component
+    public void Add<T>(IEnumerable<T> components) where T : Component
     {
         foreach(var component in components)
             _components.Add(component);
     }
+    
+    // public void Add<T>(HashSet<T> components) where T : Component
+    // {
+    //     foreach(var component in components)
+    //         _components.Add(component);
+    // }
     
     public void Add(ComponentCollection components)
     {

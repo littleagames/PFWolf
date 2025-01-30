@@ -12,7 +12,7 @@ public class GameLoopScene : Scene
     public GameLoopScene()
     {
         Components.Add(Background.Create(0x7f));
-        Components.Add(Graphic.Create("statusbar", new Position(0, 160))); // TODO: Component (Statusbar), it'll be made of many components to draw things
+        Components.Add(Wolf3DStatusBar.Create(new Position(0, 160)));
         _ingameConsole = IngameConsole.Create(0, 0, 320, 100, 0x00);
     }
 
@@ -51,19 +51,7 @@ public class GameLoopScene : Scene
         // Do events
         return;
     }
-
-    // private void MoveAutomap()
-    // {
-    //     if (Input.IsKeyDown(Keys.Equals))
-    //     {
-    //         _renderer.UpdateScale(_renderer.Scale + 1);
-    //     }
-    //     else if (Input.IsKeyDown(Keys.Minus))
-    //     {
-    //         _renderer.UpdateScale(_renderer.Scale - 1);
-    //     }
-    // }
-
+    
     private void MovePlayer(float deltaTime)
     {
         if (_player == null)
@@ -75,18 +63,6 @@ public class GameLoopScene : Scene
         const int baseMove = 150*70;
         var controlX = 0;
         var controlY = 0;
-        
-        // if (Input.IsKeyDown(Keys.Tab))
-        // {
-        //     Console.WriteLine("Toggle Renderer");
-        //     // if (_renderer is RaycastRenderer)
-        //     //     _renderer = _automapRenderer;
-        //     // else
-        //     // if (_renderer is AutoMapRenderer)
-        //     //     _renderer = _rayCastRenderer;
-        //     // _viewPort.UpdateRenderer(_renderer);
-        //      //= ViewPort.Create(0, 0, 640, 152*2, _renderer);
-        // }
         
         var delta = (Input.IsKeyDown(Keys.RightShift) ? runMove : baseMove);
         
