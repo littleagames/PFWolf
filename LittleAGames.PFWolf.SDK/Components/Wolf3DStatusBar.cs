@@ -19,6 +19,7 @@ public class Wolf3DStatusBar : RenderComponent
 
     public override void OnStart()
     {
+        Player.OnHealthUpdated += UpdateHealth;
         Children.Add(Graphic.Create("statusbar", Position));
         
         // Draw Face
@@ -48,5 +49,15 @@ public class Wolf3DStatusBar : RenderComponent
         // Draw Weapon
         // TODO: From weapon definition data
         Children.Add(Graphic.Create("gun", new Position(32*8, 160+8)));
+    }
+
+    private void UpdateHealth(int value)
+    {
+        _health.Value = value;
+    }
+    
+    public override void OnPreUpdate()
+    {
+        // TODO: Events?
     }
 }

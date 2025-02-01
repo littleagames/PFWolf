@@ -127,6 +127,7 @@ public class SceneManager
 
     private void ComponentPreUpdate(Component component)
     {
+        component.OnPreUpdate();
         if (component is InputComponent input)
             _inputManager.Update(input);
         

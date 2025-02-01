@@ -3,12 +3,17 @@
 public abstract class Component
 {
     public ComponentCollection Children { get; } = new();
-    
+
     public virtual void OnStart()
     {
         
     }
 
+    public virtual void OnPreUpdate()
+    {
+        
+    }
+    
     public virtual void OnUpdate()
     {
         
