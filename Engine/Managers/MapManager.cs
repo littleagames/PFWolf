@@ -1,4 +1,5 @@
-﻿using LittleAGames.PFWolf.SDK.Utilities;
+﻿using System.Text.Json;
+using LittleAGames.PFWolf.SDK.Utilities;
 
 namespace Engine.Managers;
 
@@ -53,7 +54,7 @@ public class MapManager : IMapManager
             
             BuildWalls(map, mapAsset, fullMapDefinition);
             BuildDoors(map, mapAsset, fullMapDefinition);
-            BuildActors(map, mapAsset);
+            BuildActors(map, mapAsset, fullMapDefinition);
             BuildStatics(map, mapAsset);
             BuildFlats(mapAsset);
         }
@@ -194,7 +195,7 @@ public class MapManager : IMapManager
         }
     }
 
-    private void BuildActors(Map map, MapAsset mapAsset)
+    private void BuildActors(Map map, MapAsset mapAsset, MapDefinitionAsset mapDefinitionAsset)
     {
         var objectsPlane = mapAsset.PlaneData[1];
         
@@ -202,24 +203,46 @@ public class MapManager : IMapManager
         for (var x = 0; x < mapAsset.Width; x++)
         {
             var objectNum = objectsPlane[y * mapAsset.Width + x];
-            SpriteAsset? automapPlayerArrow = _assetManager.FindAsset(AssetType.Sprite, "player-arrow") as SpriteAsset;
-            switch (objectNum)
+            var player = mapDefinitionAsset.Player;
+
+            if (player.TryGetValue(objectNum, out var playerData))
             {
-                case 19: // North
-                    map.Children.Add(new Player(x, y, 90.0f));
-                    break;
-                case 20: // East
-                    map.Children.Add(new Player(x, y, 0.0f));
-                    break;
-                case 21: // South
-                    map.Children.Add(new Player(x, y, 270.0f));
-                    break;
-                case 22: // West
-                    map.Children.Add(new Player(x, y, 180.0f));
-                    break;
+                map.Children.Add(new Player(x, y, GetAngleFromParams(playerData.Params),
+                    playerData.Params.Health));
+
+                float GetAngleFromParams(ActorDataDefinition? actorParams)
+                {
+                    if (actorParams == null)
+                        return 0;
+
+                    if (actorParams.Angle != null)
+                    {
+                        return (float)Convert.ToDouble(actorParams.Angle);
+                    }
+
+                    if (actorParams.Direction != null)
+                    {
+                        var dirString = actorParams.Direction.ToString()?.ToUpperInvariant();
+                        switch (dirString)
+                        {
+                            case "N":
+                            case "NORTH":
+                                return 90;
+                            case "E":
+                            case "EAST":
+                                return 0;
+                            case "S":
+                            case "SOUTH":
+                                return 270;
+                            case "W":
+                            case "WEST":
+                                return 180;
+                        }
+                    }
+
+                    throw new InvalidDataException("No valid direction parameters.");
+                }
             }
-            if (automapPlayerArrow != null)
-                map.Children.Add(new Sprite { Data = automapPlayerArrow.RawData });
         }
         //var uniqueObjects = objectsPlane.GroupBy(x => x);
         // Group

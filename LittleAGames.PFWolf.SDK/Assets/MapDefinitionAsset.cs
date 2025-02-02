@@ -1,4 +1,6 @@
-﻿namespace LittleAGames.PFWolf.SDK.Assets;
+﻿using System.Text.Json.Serialization;
+
+namespace LittleAGames.PFWolf.SDK.Assets;
 
 public class MapDefinitionAsset : Asset
 {
@@ -124,9 +126,11 @@ public record PlayerDefinition
 
 public record ActorDataDefinition
 {
-    public object Direction { get; set; }
-    public object Angle { get; set; }
-    public object Health { get; set; }
+    public string? Direction { get; set; }
+    [JsonConverter(typeof(FloatOrStringConverter))]
+    public float? Angle { get; set; }
+    [JsonConverter(typeof(IntOrStringConverter))]
+    public int Health { get; set; }
     public List<object> Ammo { get; set; }
     public List<object> Weapons { get; set; }
 }
