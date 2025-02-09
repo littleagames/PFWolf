@@ -11,6 +11,7 @@ public enum AssetType
     Map,
     GamePackDefinition,
     MapDefinitions,
+    ActorDefinitions,
     VgaPicData,
     Font,
     Graphic,

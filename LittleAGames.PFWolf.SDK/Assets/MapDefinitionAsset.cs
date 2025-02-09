@@ -4,10 +4,10 @@ namespace LittleAGames.PFWolf.SDK.Assets;
 
 public class MapDefinitionAsset : Asset
 {
-    public Dictionary<int, WallDefinition> Walls { get; init; }
-    public Dictionary<int, DoorDefinition> Doors { get; init; }
-    public Dictionary<int, ActorDefinition> Actors { get; init; }
-    public Dictionary<int, PlayerDefinition> Player { get; init; }
+    public Dictionary<int, WallMapDefinition> Walls { get; init; }
+    public Dictionary<int, DoorMapDefinition> Doors { get; init; }
+    public Dictionary<int, ActorMapDefinition> Actors { get; init; }
+    public Dictionary<int, PlayerMapDefinition> Player { get; init; }
 
     public TileDefinition? FindWall(int tileId)
     {
@@ -50,10 +50,10 @@ public class MapDefinitionAsset : Asset
 
     public static MapDefinitionAsset Merge(IEnumerable<MapDefinitionAsset> assets)
     {
-        var walls = new Dictionary<int, WallDefinition>();
-        var doors = new Dictionary<int, DoorDefinition>();
-        var actors = new Dictionary<int, ActorDefinition>();
-        var player = new Dictionary<int, PlayerDefinition>();
+        var walls = new Dictionary<int, WallMapDefinition>();
+        var doors = new Dictionary<int, DoorMapDefinition>();
+        var actors = new Dictionary<int, ActorMapDefinition>();
+        var player = new Dictionary<int, PlayerMapDefinition>();
 
         foreach (var asset in assets)
         {
@@ -87,10 +87,10 @@ public class MapDefinitionAsset : Asset
 
 public record MapDefinitionDataModel
 {
-    public Dictionary<string, WallDefinition> Walls { get; set; } = new();
-    public Dictionary<string, DoorDefinition> Doors { get; set; } = new(); 
-    public Dictionary<string, ActorDefinition> Actors { get; set; } = new();
-    public Dictionary<string, PlayerDefinition> Player { get; set; } = new();
+    public Dictionary<string, WallMapDefinition> Walls { get; set; } = new();
+    public Dictionary<string, DoorMapDefinition> Doors { get; set; } = new(); 
+    public Dictionary<string, ActorMapDefinition> Actors { get; set; } = new();
+    public Dictionary<string, PlayerMapDefinition> Player { get; set; } = new();
     public List<string> MapDefinitions { get; set; } = [];
 }
 
@@ -102,30 +102,50 @@ public record TileDefinition
     public string East { get; set; } = null!;
 }
 
-public record WallDefinition : TileDefinition
+public record WallMapDefinition : TileDefinition
 {
     
 }
 
-public record DoorDefinition : TileDefinition
+public record DoorMapDefinition : TileDefinition
 {
 
 }
 
-public record ActorDefinition
+public record ActorMapDefinition
 {
-    public List<ActorStateDefinition> Spawn { get; set; } = [];
-    public List<ActorStateDefinition> Walk { get; set; } = [];
+    /// <summary>
+    /// The type of actor definition found in the actordefs/
+    /// </summary>
+    public string Actor { get; set; } = null!;
+
+    /// <summary>
+    /// The state the actor begins in
+    /// <default>Spawn</default>
+    /// </summary>
+    public string State { get; set; } = "Spawn";
+
+    /// <summary>
+    /// Facing direction of the actor
+    /// <default>None</default>
+    /// </summary>
+    public string Direction { get; set; } = "None";
+
+    /// <summary>
+    /// Skills that this actor is spawned
+    /// <default>Empty list means all skills</default>
+    /// </summary>
+    public List<int> Skills { get; set; } = [];
+
+    /// <summary>
+    /// Flags used to determine certain states of the actor
+    /// </summary>
+    public List<string> Flags { get; set; } = [];
 }
 
-public record PlayerDefinition
+public record PlayerMapDefinition
 {
     public string Actor { get; set; }
-    public ActorDataDefinition Params { get; set; }
-}
-
-public record ActorDataDefinition
-{
     public string? Direction { get; set; }
     [JsonConverter(typeof(FloatOrStringConverter))]
     public float? Angle { get; set; }
@@ -135,27 +155,26 @@ public record ActorDataDefinition
     public List<object> Weapons { get; set; }
 }
 
-
-public class ActorStateDefinition
-{
-    /// <summary>
-    /// Graphic assigned to the frame
-    /// </summary>
-    public string Frame { get; set; }
-
-    /// <summary>
-    /// Number of tics to display frame, -1 means it runs indefinitely
-    /// </summary>
-    public float Tics { get; set; } = -1;
-
-    /// <summary>
-    /// String pipe delimited list of default flags on the actor
-    /// </summary>
-    public string Flags { get; set; } = null!;
-}
-
-public enum ActorFlags
-{
-    None = 0,
-    Block = 1,
-}
+// public class ActorStateDefinition
+// {
+//     /// <summary>
+//     /// Graphic assigned to the frame
+//     /// </summary>
+//     public string Frame { get; set; }
+//
+//     /// <summary>
+//     /// Number of tics to display frame, -1 means it runs indefinitely
+//     /// </summary>
+//     public float Tics { get; set; } = -1;
+//
+//     /// <summary>
+//     /// String pipe delimited list of default flags on the actor
+//     /// </summary>
+//     public string Flags { get; set; } = null!;
+// }
+//
+// public enum ActorFlags
+// {
+//     None = 0,
+//     Block = 1,
+// }

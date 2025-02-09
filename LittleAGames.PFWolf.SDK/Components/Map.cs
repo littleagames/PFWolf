@@ -18,6 +18,8 @@ public class Map : MapComponent
     /// Contains all complex tile data, such as statics, actors
     /// </summary>
     public MapComponent[,] ObjectPlane { get; set; }
+
+    public IList<Actor> Actors { get; set; } = new List<Actor>();
     
     /// <summary>
     /// All loaded wall textures in the map
@@ -48,6 +50,11 @@ public class Map : MapComponent
 
     public override void OnUpdate()
     {
+        foreach (var actor in Actors)
+        {
+            actor.Think();
+            // TODO: Handle map things here, like actor behaviors   
+        }
         // TODO: Map handling stuff?
         
         // Actors?

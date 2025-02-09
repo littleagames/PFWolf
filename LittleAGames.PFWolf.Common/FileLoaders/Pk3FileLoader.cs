@@ -160,19 +160,24 @@ public class Pk3FileLoader : BaseFileLoader
                         // formatloaderjson
                     );
                     assets.Add(mapDefinition);
-                    //allMapDefinitions.Add(mapDefinition);
-                    // TODO: Load all map definitions, find the MapDefs property, and only load what those are, discard the rest
-                    // todo: use the gamepack to determine whick map def pack to load
-                    // if (mapDefinitions == null)
-                    //     mapDefinitions = new MapDefinitions(
-                    //         MapDefinitionsName,
-                    //         rawData
-                    //         // formatloaderjson
-                    //     );
-                    // else
-                    // {
-                    //     mapDefinitions.Merge(rawData /*formatloaderjson*/);
-                    // }
+                    continue;
+                }
+                else if (entry.Name.EndsWith(".yml") || entry.Name.EndsWith(".yaml"))
+                {
+                    throw new NotSupportedException("YAML files currently not supported.");
+                }
+            }
+            
+            if (entry.FullName.StartsWith("actordefs/"))
+            {
+                if (entry.Name.EndsWith(".json"))
+                {
+                    var actorDefinition = new ActorDefinitionAsset (
+                        CleanName(entry.FullName, includeDirectory: true),
+                        rawData
+                        // formatloaderjson
+                    );
+                    assets.Add(actorDefinition);
                     continue;
                 }
                 else if (entry.Name.EndsWith(".yml") || entry.Name.EndsWith(".yaml"))
@@ -267,7 +272,7 @@ public class Pk3FileLoader : BaseFileLoader
         if (includeDirectory)
         {
             var directory = Path.GetDirectoryName(pk3Name);
-            return $"{directory}/{fileName}";
+            return $"{directory}\\{fileName}";
         }
 
         return fileName;

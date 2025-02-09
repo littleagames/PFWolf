@@ -1,0 +1,17 @@
+﻿{
+  "MAP01": {
+    //"MapDefinitions":["map01-walls", "map01-doors"],
+    "MapName": "Wolf1 Map1",
+    "Next": "MAP02",
+    "NextSecret": "MAP10",
+    "Par": 90
+    //IntroText": "INTART01A",
+    //OutroText": "INTART01B"
+  },
+  "MAP02": {
+    "MapName": "Wolf1 Map1",
+    "Next": "MAP02",
+    "NextSecret": "MAP10",
+    "Par": 90
+  },
+}

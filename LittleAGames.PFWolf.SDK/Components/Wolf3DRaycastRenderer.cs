@@ -295,7 +295,10 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
     private void DrawScaleds()
     {
-        
+        foreach (var actor in _map.Actors)
+        {
+            
+        }
     }
     
     private bool vertentry(int ystep)

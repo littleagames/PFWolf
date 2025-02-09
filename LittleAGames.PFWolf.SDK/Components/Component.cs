@@ -60,8 +60,8 @@ public abstract class RenderComponent : Component
 
 public abstract class MapComponent : Component
 {
-    public int X { get; init; }
-    public int Y { get; init; }
+    public int X { get; protected set; }
+    public int Y { get; protected set; }
     public int Width => Data.GetLength(0);
     public int Height => Data.GetLength(1);
     public byte[,] Data { get; set; } = new byte[0,0];

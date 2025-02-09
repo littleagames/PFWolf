@@ -54,15 +54,14 @@ public class MapManager : IMapManager
             
             BuildWalls(map, mapAsset, fullMapDefinition);
             BuildDoors(map, mapAsset, fullMapDefinition);
+            BuildPlayers(map, mapAsset, fullMapDefinition);
             BuildActors(map, mapAsset, fullMapDefinition);
-            BuildStatics(map, mapAsset, fullMapDefinition);
             BuildFlats(mapAsset);
         }
     }
 
     public void Update(MapComponent component)
     {
-        // TODO: Handle map things here, like actor behaviors
         // Build this like the VideoManager "Update". How does that update translate a component to the video?
         // How does the map component translate to the map?
     }
@@ -195,7 +194,7 @@ public class MapManager : IMapManager
         }
     }
 
-    private void BuildActors(Map map, MapAsset mapAsset, MapDefinitionAsset mapDefinitionAsset)
+    private void BuildPlayers(Map map, MapAsset mapAsset, MapDefinitionAsset mapDefinitionAsset)
     {
         var objectsPlane = mapAsset.PlaneData[1];
         
@@ -207,10 +206,10 @@ public class MapManager : IMapManager
 
             if (player.TryGetValue(objectNum, out var playerData))
             {
-                map.Children.Add(new Player(x, y, GetAngleFromParams(playerData.Params),
-                    playerData.Params.Health));
+                map.Children.Add(new Player(x, y, GetAngleFromParams(playerData),
+                    playerData.Health));
 
-                float GetAngleFromParams(ActorDataDefinition? actorParams)
+                float GetAngleFromParams(PlayerMapDefinition? actorParams)
                 {
                     if (actorParams == null)
                         return 0;
@@ -252,7 +251,7 @@ public class MapManager : IMapManager
         // MapDefinitions in objects (actor, static, etc) eventually modders can add more things "Trigger"
     }
     
-    private void BuildStatics(Map map, MapAsset mapAsset, MapDefinitionAsset mapDefinitionAsset)
+    private void BuildActors(Map map, MapAsset mapAsset, MapDefinitionAsset mapDefinitionAsset)
     {
         var objectsPlane = mapAsset.PlaneData[1];
         
@@ -262,7 +261,23 @@ public class MapManager : IMapManager
             var objectNum = (int)objectsPlane[y * mapAsset.Width + x];
             if (!mapDefinitionAsset.Actors.TryGetValue(objectNum, out var actor))
                 continue;
+
+          //  var actorType = Instantiate(actor.Actor);
+          //  var actorDefinition = GetActorDefinition(actor.Actor);
+            // TODO: Look for actor in scripts, if exists, instantiate as that actor type
+            // TODO : If it doesn't exist, just instantiate as Actor
             
+            
+            map.Actors.Add(new Actor(x, y, 0)
+            {
+                //ActorStates = 
+                //Hitpoints = actor.Hitpoints,
+                
+                // TODO: Set up actor, HP, type, etc
+                // TODO: Set up states of the actor
+            });
+            //map.ObjectPlane[y, x];
+            // TODO: Create actor, and add to actors list
             //actor.Spawn
         }
     }
