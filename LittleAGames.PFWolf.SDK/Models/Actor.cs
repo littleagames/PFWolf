@@ -5,6 +5,14 @@ namespace LittleAGames.PFWolf.SDK.Models;
 public class Actor : MapComponent
 {
     private float _fineAngle;
+
+    public Actor(int tileX, int tileY)
+    {
+        X = (tileX<<16)+(1<<16)/2;
+        Y = (tileY<<16)+(1<<16)/2;
+        IsActive = true;
+        ActorStates.CurrentState = "Spawn";
+    }
     
     public Actor(int tileX, int tileY, float angle)
     {
@@ -72,27 +80,27 @@ public class Actor : MapComponent
         // Transitional object
         
         ActorStates.TickCount--;
-        while (ActorStates.TickCount <= 0)
+        //while (ActorStates.TickCount <= 0)
         {
             if (state.Action != null)
             {
                 //state.Action();
             }
 
-            var nextState = ActorStates.Next();
-
-            if (nextState == null)
-            {
-                //Remove();
-                return;
-            }
+            // var nextState = ActorStates.Next();
+            //
+            // if (nextState == null)
+            // {
+            //     //Remove();
+            //     return;
+            // }
             
-            if (nextState.Ticks == 0)
-            {
-                ActorStates.TickCount = 0;
-            }
-
-            ActorStates.TickCount += nextState.Ticks;
+            // if (nextState.Ticks == 0)
+            // {
+            //     ActorStates.TickCount = 0;
+            // }
+            //
+            // ActorStates.TickCount += nextState.Ticks;
         }
     }
 }
@@ -123,7 +131,7 @@ public class ActorStates
     public ActorState? Next()
     {
         _currentStateIndex++;
-        
+        //return CurrentState;
         // Increments current state's index
         throw new NotImplementedException();
     }

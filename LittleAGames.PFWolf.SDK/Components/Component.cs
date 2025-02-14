@@ -1,6 +1,6 @@
 ﻿namespace LittleAGames.PFWolf.SDK.Components;
 
-public abstract class Component
+public abstract class Component : RunnableBase
 {
     public ComponentCollection Children { get; } = new();
 

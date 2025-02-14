@@ -78,8 +78,10 @@ public class Pk3FileLoader : BaseFileLoader
                     assets.Add(new SpriteAsset
                     {
                         Name = CleanName(entry.Name),
-                        RawData = graphicData//,
-                        //Dimensions = new Dimension((ushort)bmpImage.Width, (ushort)bmpImage.Height)
+                        RawData = graphicData,
+                        Width = bmpImage.Width,
+                        Height = bmpImage.Height,
+                        Offset = new Position(bmpImage.Bounds.Top, bmpImage.Bounds.Left)
                     });
                 }
                 continue;
@@ -272,7 +274,7 @@ public class Pk3FileLoader : BaseFileLoader
         if (includeDirectory)
         {
             var directory = Path.GetDirectoryName(pk3Name);
-            return $"{directory}\\{fileName}";
+            return $"{directory}/{fileName}";
         }
 
         return fileName;

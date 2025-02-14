@@ -261,24 +261,55 @@ public class MapManager : IMapManager
             var objectNum = (int)objectsPlane[y * mapAsset.Width + x];
             if (!mapDefinitionAsset.Actors.TryGetValue(objectNum, out var actor))
                 continue;
+            
+            var partialActorDefinitions = _assetManager.GetAssets<ActorDefinitionAsset>(AssetType.ActorDefinitions);
+            var fullActorDefinition = ActorDefinitionAsset.Merge(partialActorDefinitions);
 
-          //  var actorType = Instantiate(actor.Actor);
-          //  var actorDefinition = GetActorDefinition(actor.Actor);
+            if (!fullActorDefinition.Actors.TryGetValue(actor.Actor, out var actorDefinition))
+                continue;
+
+            Actor? actorInstance;
+            var script = _assetManager.FindAsset<ScriptAsset>(AssetType.Script, actor.Actor);
+            if (script == null)
+            {
+                actorInstance = new WolfensteinActor(x,y);
+            }
+            else
+            {
+                actorInstance = Activator.CreateInstance(script.Script, [x,y]) as Actor;
+            }
+            
             // TODO: Look for actor in scripts, if exists, instantiate as that actor type
             // TODO : If it doesn't exist, just instantiate as Actor
-            
-            
-            map.Actors.Add(new Actor(x, y, 0)
+
+            if (actorInstance != null)
             {
-                //ActorStates = 
-                //Hitpoints = actor.Hitpoints,
-                
-                // TODO: Set up actor, HP, type, etc
-                // TODO: Set up states of the actor
-            });
-            //map.ObjectPlane[y, x];
-            // TODO: Create actor, and add to actors list
-            //actor.Spawn
+                // TODO: Get definitions from actorDefinition
+                //actorDefinition.States
+                actorInstance.ActorStates.States.Add("Spawn", new List<ActorState>
+                {
+                    new ActorState
+                    {
+                        AssetFrame = "Unknown",
+                        Ticks = 0
+                    }
+                });
+                //if (actorAssets.ContainsKey("Unknown"))
+                  //  continue; // already loaded
+                    
+                var spriteAsset = (SpriteAsset?)_assetManager.FindAsset(AssetType.Sprite, "unknown");
+
+                if (spriteAsset != null)
+                {
+                    map.SpriteCache.TryAdd("Unknown", new SpriteData
+                    {
+                        Offset = new Position(0, 0),
+                        Data = spriteAsset.RawData.To2DArray(spriteAsset.Width, spriteAsset.Height),
+                    });
+                }
+
+                map.Actors.Add(actorInstance);
+            }
         }
     }
     

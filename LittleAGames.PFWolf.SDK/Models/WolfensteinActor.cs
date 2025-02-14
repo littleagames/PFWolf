@@ -2,8 +2,7 @@
 
 public class WolfensteinActor : Actor
 {
-	public WolfensteinActor(int tileX, int tileY, float angle) 
-		: base(tileX, tileY, angle)
+	public WolfensteinActor(int x, int y) : base(x,y)
 	{
 	}
 

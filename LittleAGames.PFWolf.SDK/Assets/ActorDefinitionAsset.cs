@@ -22,12 +22,29 @@ public class ActorDefinitionAsset : Asset
         {
             // throw error
         }
-        // TODO: This isn't quite what I had in mind. Can I check for properties on the top-level of the object first?
+
+        Actors = defs;
     }
+
+    // TODO: ActorDefinitionDataModel and ActorMapDefinition need to be merged or figured out
+    // I don't remember what I did here, but I think I need to have both, and build them together
+    public Dictionary<string, ActorDefinitionDataModel> Actors { get; set; } = null!;
 
     public static ActorDefinitionAsset Merge(IEnumerable<ActorDefinitionAsset> assets)
     {
-        throw new NotImplementedException();
+        var actors = new Dictionary<string, ActorDefinitionDataModel>();
+
+        foreach (var asset in assets)
+        {
+            actors = actors.Concat(asset.Actors)
+                .GroupBy(kv => kv.Key)
+                .ToDictionary(g => g.Key, g => g.Last().Value);
+        }
+        
+        return new ActorDefinitionAsset("actor-definitions")
+        {
+            Actors = actors
+        };
     }
 
     public override string Name { get; set; }

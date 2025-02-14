@@ -30,6 +30,11 @@ public class Map : MapComponent
     /// All doors in the map
     /// </summary>
     public Dictionary<int, WallData> DoorCache { get; set; } = new();
+    
+    /// <summary>
+    /// All doors in the map
+    /// </summary>
+    public Dictionary<string, SpriteData> SpriteCache { get; set; } = new();
 
     private Map(string assetName)
     {
@@ -88,7 +93,7 @@ public class WallData
     public byte[] West { get; init; }
 }
 
-public class Sprite : MapComponent
+public class SpriteData : MapComponent
 {
-    public byte[] Data { get; init; }
+    public Position Offset { get; init; } = new(0, 0);
 }
