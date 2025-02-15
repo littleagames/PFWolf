@@ -1,0 +1,13 @@
+﻿{
+  "Actors": {
+    "23": {
+      "Actor": "Puddle"
+    },
+    "24": {
+      "Actor": "OilDrum"
+    },
+    "124": {
+      "Actor": "DeadGuard"
+    }
+  }
+}

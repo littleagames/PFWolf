@@ -1,8 +1,8 @@
 ﻿{
   "Walls": {
     "1": {
-      "North": "WALL0000",
-      "South": "WALL0000",
+      "North": "WALL00000",
+      "South": "WALL00000",
       "East": "WALL00001",
       "West": "WALL00001"
     },

@@ -1,0 +1,9 @@
+﻿{
+  "MapDefinitions":[
+    "mapdefs/wolf3d/walls",
+    "mapdefs/wolf3d/doors",
+    "mapdefs/wolf3d/player",
+    "mapdefs/wolf3d/decorations",
+    "mapdefs/wolf3d/enemies"
+  ]
+}

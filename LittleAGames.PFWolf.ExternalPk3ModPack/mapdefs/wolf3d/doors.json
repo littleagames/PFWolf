@@ -1,14 +1,14 @@
 ﻿{
   "Doors": {
     "90": {
-      "East": "WALL00098",
-      "West": "WALL00098",
+      "East": "WALL00099",
+      "West": "WALL00099",
       "North": "WALL00100",
       "South": "WALL00100"
     },
     "91": {
-      "North": "WALL00099",
-      "South": "WALL00099",
+      "North": "WALL00098",
+      "South": "WALL00098",
       "East": "WALL00101",
       "West": "WALL00101"
     },

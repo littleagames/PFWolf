@@ -293,25 +293,152 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         }
     }
 
+    private record VisibleObject
+    {
+        public short TileX { get; set; }
+        public short TileY { get; set; }
+        public int ViewX { get; set; }
+        public short ViewHeight { get; set; }
+        public string AssetName { get; set; }
+        //uint32_t   flags;
+    }
+    
+    private IList<VisibleObject> VisibleObjects { get; set; } = new List<VisibleObject>();
+
+    private bool IsSpotVisible(int tileX, int tileY)
+    {
+        // TODO: spotvis array from wallrefresh render
+        return false;
+    }
+
+    private const int FRACBITS = 16;
+    private const int ActorSize = 0x4000;
+    private const int MinDistance = 0x5800;
+    private (short ViewHeight, int ViewX, int TransX) TransformActor(Actor actor)
+    {
+        throw new NotImplementedException();
+    }
+    
     private void DrawScaleds()
     {
+        VisibleObjects.Clear();
+        
         foreach (var actor in _map.Actors)
         {
-            var name = actor.ActorStates.GetCurrentState()?.AssetFrame;
-            _map.SpriteCache.TryGetValue(name, out var data);
-            // todo: calc if actor is visible
-            for (var y = 0; y < data.Height; y++)
+            // If there is no asset to draw ignore it
+            // Get the visible spot of the actor
+            var isSpotVisible =
+                IsSpotVisible(actor.TileX, actor.TileY) // 0, 0
+                || IsSpotVisible(actor.TileX + 1, actor.TileY) // 1, 0
+                || IsSpotVisible(actor.TileX + 1, actor.TileY + 1) // 1, 1
+                || IsSpotVisible(actor.TileX + 1, actor.TileY - 1) // 1,-1
+                || IsSpotVisible(actor.TileX, actor.TileY - 1) // 0,-1
+                || IsSpotVisible(actor.TileX, actor.TileY + 1) // 0, 1
+                || IsSpotVisible(actor.TileX - 1, actor.TileY) //-1, 0
+                || IsSpotVisible(actor.TileX - 1, actor.TileY + 1) //-1, 1
+                || IsSpotVisible(actor.TileX + 1, actor.TileY - 1); //-1,-1
+            if (isSpotVisible) 
             {
-                for (var x = 0; x < data.Width; x++)
+                actor.IsActive = true;
+                var transformed = TransformActor(actor);
+                if (transformed.ViewHeight == 0) continue;
+
+                var visibleObject = new VisibleObject
                 {
-                    var col = data.Data[x, y];
-                    if (col != 0xff)
-                    {
-                        _result[x, y] = data.Data[x, y];
-                    }
-                }
+                    ViewX = transformed.ViewX,
+                    ViewHeight = transformed.ViewHeight,
+                    AssetName = "Unknown", // TODO: Get rotated frame
+                    TileX = actor.TileX,
+                    TileY = actor.TileY,
+                    //Flags = actor.Flags
+                };
+                VisibleObjects.Add(visibleObject);
+                //actor.Flags |= Flags.Visible;
+            }
+            else
+            {
+                //actor.Flags &= ~Flags.Visible;
             }
         }
+        
+        //
+        // draw from back to front
+        //
+        foreach (var visibleObject in VisibleObjects.OrderBy(x => x.ViewHeight))
+        {
+            ScaleShape(visibleObject);
+        }
+    }
+
+    private void ScaleShape(VisibleObject visibleObject)
+    {
+        var scale = visibleObject.ViewHeight >> 3;
+        if (scale == 0) return;
+
+        if (!_map.SpriteCache.TryGetValue(visibleObject.AssetName, out var sprite))
+            return;
+
+        var shape = sprite.Data;
+        // Do I still have left pix/right pix?
+        // I believe offset will be leftpix, and toppix (currently 0)
+
+
+        var fracStep = FixedDiv(scale, TEXTURESIZE / 2);
+        var frac = sprite.Offset.X * fracStep;
+        var actX = visibleObject.ViewX - scale;
+        var topPix = CenterY - scale;
+
+        var x2 = (frac >> FRACBITS) + actX;
+
+        int w, i;
+        for (w = 0, i = sprite.Offset.X; w < sprite.Width; w++, i++)
+        {
+            //
+            // calculate edges of the shape
+            //
+            var x1 = x2;
+            if (x1 >= _result.GetLength(0))
+                break;
+
+            frac += fracStep;
+            x2 = (frac >> FRACBITS) + actX;
+
+            if (x2 < 0)
+                continue;   // not into the view area
+
+            if (x1 < 0)
+                x1 = 0;     // clip left boundary
+
+            if (x2 > _result.GetLength(0))
+                x2 = _result.GetLength(0); // clip right boundary
+
+            while (x1 < x2)
+            {
+                if (wallHeight[x1] < visibleObject.ViewHeight)
+                {
+                    // TODO: Finish this
+                    //var line = sprite.Data[w]; // get one row
+                    //ScaleLine(x1, topPix, fracStep, shape, line);
+                }
+
+                x1++;
+            }
+        }
+    }
+
+    private void ScaleLine(int x, int topPix, int fracStep, VisibleObject shape, byte[] line)
+    {
+        // top and start are not part of this data
+        var top = 0;
+        var start = 0;
+        var frac = start + fracStep;
+        var endPix = (frac >> FRACBITS) + topPix;
+        
+        // TODO: I made this already? In a prototype to render to console. Where is that?
+        // In datafilemanager
+        // but sprites should come with the offsets (which should be calculated already)
+        
+        //for ()
     }
     
     private bool vertentry(int ystep)
@@ -624,9 +751,14 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         }
     }
 
+    [Obsolete("This is used before the time of floating point values")]
     private int FixedMul(int a, int b)
         => (int)(((long)a*b+0x8000) >> 16);
     
+    [Obsolete("This is used before the time of floating point values")]
+    private int FixedDiv (int a, int b)
+        => (int)(((long)a << FRACBITS) / b);
+
     private short CalcHeight ()
     {
         short height;

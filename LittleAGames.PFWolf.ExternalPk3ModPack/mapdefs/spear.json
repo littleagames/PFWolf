@@ -1,0 +1,8 @@
+﻿{
+  "MapDefinitions":[
+    "mapdefs/spear/walls",
+    "mapdefs/spear/doors",
+    "mapdefs/spear/player",
+    "mapdefs/spear/decorations"
+  ]
+}

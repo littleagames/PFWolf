@@ -1,0 +1,6 @@
+﻿{
+  "MapDefinitions": "mapdefs/wolf3d-apogee",
+  "GamePalette": "wolfpal",
+  "StartingScene": "wolf3d:GameLoopScene",
+  "GamePackMappings": "gamepacks/wolf3d-apogee-map"
+}

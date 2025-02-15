@@ -1,0 +1,27 @@
+﻿{
+  "Puddle": {
+    "States": {
+      "Spawn": [{
+        "Frame": "WATRA0",
+        "Tics": 0
+      }]
+    }
+  },
+  "OilDrum": {
+    "Flags": ["FL_BLOCKING"],
+    "States": {
+      "Spawn": [{
+        "Frame": "DRUMA0",
+        "Tics": 0
+      }]
+    }
+  },
+  "DeadGuard": {
+    "States": {
+      "Spawn": [{
+        "Frame": "GUARDDEAD",
+        "Tics": 0
+      }]
+    }
+  }
+}

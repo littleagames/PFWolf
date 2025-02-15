@@ -1,0 +1,5 @@
+﻿{
+  "MapDefinitions": "mapdefs/spear",
+  "GamePalette": "spearpal",
+  "StartingScene": "spear:SignonScene"
+}

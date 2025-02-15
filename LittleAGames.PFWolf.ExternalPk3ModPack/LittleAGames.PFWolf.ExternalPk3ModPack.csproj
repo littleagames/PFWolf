@@ -10,14 +10,13 @@
       <Compile Update="Scenes\MainMenuScene.cs">
         <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
       </Compile>
+      <Compile Update="scripts\Scenes\MainMenuScene.cs">
+        <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\LittleAGames.PFWolf.SDK\LittleAGames.PFWolf.SDK.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Actors\" />
     </ItemGroup>
 
 </Project>
