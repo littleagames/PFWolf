@@ -95,7 +95,7 @@ public class Wolf3DVswapFileLoader : BaseFileLoader
             var data = _vswapData.Skip((int)headerInfo.PageOffsets[i]).Take(headerInfo.PageLengths[i]).ToArray();
             assets.Add(new WallAsset
             {
-                Name = $"WALL{i:D5}",
+                Name = _assetReferences[i],// $"WALL{i:D5}",
                 AssetType = AssetType.Texture,
                 RawData = data
             });
@@ -113,7 +113,7 @@ public class Wolf3DVswapFileLoader : BaseFileLoader
             var data = _vswapData.Skip((int)headerInfo.PageOffsets[i]).Take(headerInfo.PageLengths[i]).ToArray();
             assets.Add(new SpriteAsset
             {
-                Name = $"SPRITE{i:D5}", // TODO: Map this to an asset mapper
+                Name = _assetReferences[i],// $"SPRITE{i:D5}", // TODO: Map this to an asset mapper
                 RawData = data,
                 Width = 64,
                 Height = 64
