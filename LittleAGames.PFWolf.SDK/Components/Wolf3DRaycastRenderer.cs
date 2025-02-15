@@ -3,11 +3,13 @@
 public class Wolf3DRaycastRenderer : Renderer
 {
     private readonly Map _map;
+    private readonly bool[,] _spotVis;
     
     public Wolf3DRaycastRenderer(Camera camera, Map map, int width, int height) : base(camera, width, height)
     {
         _map = map;
         _result = new byte[Width, Height];
+        _spotVis = new bool[Width, Height];
 
         BuildTables();
 
@@ -15,6 +17,7 @@ public class Wolf3DRaycastRenderer : Renderer
 
     }
 
+    public int CenterX => (Width / 2) - 1;
     public int CenterY => Height / 2;
 
     private const int ANGLES = 360;             // must be divisable by 4
@@ -162,6 +165,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
     public override byte[,] Render()
     {
         _result.Fill((byte)0x19);
+        Array.Clear(_spotVis);
 
         var focalLength = 0x5700;
 
@@ -307,16 +311,57 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
     private bool IsSpotVisible(int tileX, int tileY)
     {
-        // TODO: spotvis array from wallrefresh render
-        return false;
+        return _spotVis[tileX, tileY];
     }
 
     private const int FRACBITS = 16;
     private const int ActorSize = 0x4000;
     private const int MinDistance = 0x5800;
+    
     private (short ViewHeight, int ViewX, int TransX) TransformActor(Actor actor)
     {
-        throw new NotImplementedException();
+        int gx,gy,gxt,gyt,nx,ny;
+//
+// translate point to view centered coordinates
+//
+        gx = actor.X-viewX;
+        gy = actor.Y-viewY;
+
+//
+// calculate newx
+//
+        gxt = FixedMul(gx,viewCos);
+        gyt = FixedMul(gy,viewSin);
+        nx = gxt-gyt-ActorSize;         // fudge the shape forward a bit, because
+        // the midpoint could put parts of the shape
+        // into an adjacent wall
+
+//
+// calculate newy
+//
+        gxt = FixedMul(gx,viewSin);
+        gyt = FixedMul(gy,viewCos);
+        ny = gyt+gxt;
+
+//
+// calculate perspective ratio
+//
+        (short ViewHeight, int ViewX, int TransX) result = new();
+        result.TransX = nx;
+
+        if (nx<MINDIST)                 // too close, don't overflow the divide
+        {
+            result.ViewHeight = 0;
+            return result;
+        }
+
+        result.ViewX = (CenterX + ny*scale/nx);
+
+//
+// calculate height (heightnumerator/(nx>>8))
+//
+        result.ViewHeight = (short)(heightNumerator/(nx>>8));
+        return result;
     }
     
     private void DrawScaleds()
@@ -417,8 +462,11 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
                 if (wallHeight[x1] < visibleObject.ViewHeight)
                 {
                     // TODO: Finish this
-                    //var line = sprite.Data[w]; // get one row
-                    //ScaleLine(x1, topPix, fracStep, shape, line);
+                    //var line = sprite.Data.Get; // get one row
+                    // linecmds = &linesrc[shape->dataofs[i - shape->leftpix]];
+                        // this is a data object storing start, top, and data
+                    var line = new byte[64];
+                    ScaleLine(x1, topPix, fracStep, visibleObject, line);
                 }
 
                 x1++;
@@ -429,16 +477,53 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
     private void ScaleLine(int x, int topPix, int fracStep, VisibleObject shape, byte[] line)
     {
         // top and start are not part of this data
-        var top = 0;
-        var start = 0;
-        var frac = start + fracStep;
-        var endPix = (frac >> FRACBITS) + topPix;
+        var end = line.Length - 1;
+        
+        byte    col;
+        int startPix;
         
         // TODO: I made this already? In a prototype to render to console. Where is that?
         // In datafilemanager
         // but sprites should come with the offsets (which should be calculated already)
-        
-        //for ()
+        for (end = 0; end < line.Length; end++)
+        {
+            var top = 0;
+            var start = 0;
+            //top = ReadShort(linecmds + 2);
+            //start = ReadShort(linecmds + 4) >> 1;
+
+            var frac = start + fracStep;
+
+            var endPix = (frac >> FRACBITS) + topPix;
+
+            for (int src = 0; start != end; start++, src++)
+            {
+                startPix = endPix;
+
+                if (startPix >= Height)
+                    break;                          // off the bottom of the view area
+
+                frac += fracStep;
+                endPix = (frac >> FRACBITS) + topPix;
+
+                if (endPix < 0)
+                    continue;                       // not into the view area
+
+                if (startPix < 0)
+                    startPix = 0;                   // clip upper boundary
+
+                if (endPix > Height)
+                    endPix = Height;            // clip lower boundary
+
+                    col = line[src];
+
+                while (startPix < endPix)
+                {
+                    _result[x, startPix] = col;
+                    startPix++;
+                }
+            }
+        }
     }
     
     private bool vertentry(int ystep)
@@ -519,6 +604,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
     private void passvert(int ystep)
     {
+        _spotVis[xtile, yinttile] = true;
         xtile += xtilestep;
         yintercept += ystep;
         yinttile = yintercept >> (int)TILESHIFT;
@@ -603,6 +689,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
     private void passhoriz(int xstep)
     {
+        _spotVis[xinttile, ytile] = true;
         ytile += ytilestep;
         xintercept += xstep;
         xinttile = xintercept >> (int)TILESHIFT;
@@ -620,7 +707,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         wallHeight[pixx] = CalcHeight();
         postx = pixx;
 
-        var tex = ytilestep > 0 ? _map.WallCache[tilehit].North : _map.WallCache[tilehit].South;
+        var tex = ytilestep > 0 ? _map.TileCache[tilehit].North : _map.TileCache[tilehit].South;
         if (_map.TilePlane[ytile-ytilestep, xinttile] is Door door)
         {
             tex = ytilestep > 0 ? _map.DoorCache[door.TileId].North : _map.DoorCache[door.TileId].South;
@@ -657,7 +744,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         wallHeight[pixx] = CalcHeight();
         postx = pixx;
 
-        var tex = xtilestep > 0 ? _map.WallCache[tilehit].East : _map.WallCache[tilehit].West;
+        var tex = xtilestep > 0 ? _map.TileCache[tilehit].East : _map.TileCache[tilehit].West;
         
         if (_map.TilePlane[yinttile, xtile - xtilestep] is Door door)
         {

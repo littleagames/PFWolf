@@ -68,7 +68,7 @@ public class MapManager : IMapManager
 
     private void BuildWalls(Map map, MapAsset mapAsset, MapDefinitionAsset mapDefinitionAsset)
     {
-        Dictionary<string, byte[]> wallAssets = new();
+        Dictionary<string, byte[]> tileAssets = new();
         
         // TODO: Should I make a "MapRenderComponent" that takes MapComponent and RenderComponent, and translates between the two?
         // Currently the video manager runs AFTER the map manager (so i can manipulate the data at first
@@ -98,12 +98,12 @@ public class MapManager : IMapManager
                     West = definition.West
                 };
                 
-                if (map.WallCache.ContainsKey(tileId))
+                if (map.TileCache.ContainsKey(tileId))
                     continue; // already loaded
                 
                 foreach (var asset in assetNames)
                 {
-                    if (wallAssets.ContainsKey(asset))
+                    if (tileAssets.ContainsKey(asset))
                         continue; // already loaded
                     
                     var textureAsset = (WallAsset?)_assetManager.FindAsset(AssetType.Texture, asset);
@@ -113,16 +113,16 @@ public class MapManager : IMapManager
                     }
                     else
                     {
-                        wallAssets.Add(asset, textureAsset.RawData);
+                        tileAssets.Add(asset, textureAsset.RawData);
                     }
                 }
                 
-                map.WallCache.Add(tileId, new WallData
+                map.TileCache.Add(tileId, new WallData
                 {
-                    North = wallAssets[definition.North],
-                    South = wallAssets[definition.South],
-                    East = wallAssets[definition.East],
-                    West = wallAssets[definition.West],
+                    North = tileAssets[definition.North],
+                    South = tileAssets[definition.South],
+                    East = tileAssets[definition.East],
+                    West = tileAssets[definition.West],
                 });
             }
         }
@@ -131,13 +131,6 @@ public class MapManager : IMapManager
     private void BuildDoors(Map map, MapAsset mapAsset, MapDefinitionAsset mapDefinitionAsset)
     {
         Dictionary<string, byte[]> doorAssets = new();
-        
-        // TODO: Should I make a "MapRenderComponent" that takes MapComponent and RenderComponent, and translates between the two?
-        // Currently the video manager runs AFTER the map manager (so i can manipulate the data at first
-        //var wallPlane = mapAsset.PlaneData[0];
-        
-        //map.PlaneIds[0] = mapAsset.PlaneData[0].To2DArray(mapAsset.Width, mapAsset.Height);
-        //map.PlaneIds[1] = mapAsset.PlaneData[1].To2DArray(mapAsset.Width, mapAsset.Height);
         
         for (var y = 0; y < mapAsset.Height; y++)
         for (var x = 0; x < mapAsset.Width; x++)

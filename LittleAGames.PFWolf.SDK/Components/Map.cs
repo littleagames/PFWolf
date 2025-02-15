@@ -24,7 +24,7 @@ public class Map : MapComponent
     /// <summary>
     /// All loaded wall textures in the map
     /// </summary>
-    public Dictionary<int, WallData> WallCache { get; set; } = new();
+    public Dictionary<int, WallData> TileCache { get; set; } = new();
     
     /// <summary>
     /// All doors in the map
