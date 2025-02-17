@@ -392,7 +392,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
                 {
                     ViewX = transformed.ViewX,
                     ViewHeight = transformed.ViewHeight,
-                    AssetName = "Unknown", // TODO: Get rotated frame
+                    AssetName = actor.ActorStates.GetCurrentState()?.AssetFrame ?? "Unknown", // TODO: Get rotated frame
                     TileX = actor.TileX,
                     TileY = actor.TileY,
                     //Flags = actor.Flags
@@ -461,12 +461,13 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
             {
                 if (wallHeight[x1] < visibleObject.ViewHeight)
                 {
-                    // TODO: Finish this
-                    //var line = sprite.Data.Get; // get one row
-                    // linecmds = &linesrc[shape->dataofs[i - shape->leftpix]];
-                        // this is a data object storing start, top, and data
-                    var line = new byte[64];
-                    ScaleLine(x1, topPix, fracStep, visibleObject, line);
+                    var line = new byte[sprite.Data.GetLength(1)];
+                    for (int j = 0; j < sprite.Data.GetLength(1); j++)
+                    {
+                        line[j] = sprite.Data[w, j];
+                    }
+                    
+                    ScaleLine(x1, topPix+sprite.Offset.Y, fracStep, line);
                 }
 
                 x1++;
@@ -474,29 +475,21 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         }
     }
 
-    private void ScaleLine(int x, int topPix, int fracStep, VisibleObject shape, byte[] line)
+    private void ScaleLine(int x, int topPix, int fracStep, byte[] line)
     {
-        // top and start are not part of this data
-        var end = line.Length - 1;
-        
         byte    col;
         int startPix;
         
-        // TODO: I made this already? In a prototype to render to console. Where is that?
-        // In datafilemanager
-        // but sprites should come with the offsets (which should be calculated already)
-        for (end = 0; end < line.Length; end++)
+        for (var end = 0; end < line.Length; end++)
         {
             var top = 0;
             var start = 0;
-            //top = ReadShort(linecmds + 2);
-            //start = ReadShort(linecmds + 4) >> 1;
 
             var frac = start + fracStep;
 
             var endPix = (frac >> FRACBITS) + topPix;
 
-            for (int src = 0; start != end; start++, src++)
+            for (int src = 0; start <= end; start++, src++)
             {
                 startPix = endPix;
 
@@ -515,7 +508,10 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
                 if (endPix > Height)
                     endPix = Height;            // clip lower boundary
 
-                    col = line[src];
+                col = line[src];
+                
+                if (col == 0xff)
+                    continue;
 
                 while (startPix < endPix)
                 {

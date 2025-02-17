@@ -111,12 +111,73 @@ public class Wolf3DVswapFileLoader : BaseFileLoader
             }
 
             var data = _vswapData.Skip((int)headerInfo.PageOffsets[i]).Take(headerInfo.PageLengths[i]).ToArray();
+            
+            // Compshape_t
+            var leftPix = BitConverter.ToUInt16(data.Take(sizeof(ushort)).ToArray());
+            var rightPix = BitConverter.ToUInt16(data.Skip(sizeof(ushort)).Take(sizeof(ushort)).ToArray());
+            ushort[] dataOffsets = Converters.ByteArrayToUInt16Array(data.Skip(sizeof(ushort) * 2).Take(sizeof(ushort)*64).ToArray());
+            var width = rightPix - leftPix+1;
+            byte[,] block = new byte[width, 64]; // TODO: height should be max resolution value
+            
+            block.Fill((byte)0xff);
+
+            var topOffset = int.MaxValue;
+            var bottomOffset = 0; // MinValue
+            
+            for (var x = leftPix; x <= rightPix; x++)
+            {
+                var dataOfs = dataOffsets[x-leftPix];
+                for (var end = BitConverter.ToInt16(data, dataOfs) >> 1; end != 0; end = BitConverter.ToInt16(data, dataOfs) >> 1)
+                {
+                    var top = BitConverter.ToInt16(data, dataOfs + 2);
+                    var start = BitConverter.ToInt16(data, dataOfs + 4) >> 1;
+                    
+                    for (; start < end; start++)
+                    {
+                        // draw vertical segment
+                        var color = data[start + top];
+                        // get x,y coords
+                        var y = start;
+                        block[x-leftPix,y] = color;
+                        
+                        // Calculate vertical offsets for cropping
+                        if (topOffset > y)
+                            topOffset = y;
+                        if (bottomOffset < y)
+                            bottomOffset = y;
+                    }
+                    dataOfs += 6;
+                }
+            }
+            
+            // TODO: Crop image (top/bottom) and get offset-top
+            // This would be top is left, and bottom is right (x)
+            // Create a new 2D array to store the cropped result
+            
+            var newHeight = bottomOffset-topOffset+1;
+            byte[,] croppedBlock = new byte[width, newHeight];
+
+             // Copy the cropped rows to the new array
+             for (var x = 0; x < width; x++)
+             {
+                 for (var y = 0; y < newHeight; y++)
+                 {
+                     croppedBlock[x, y] = block[x, y+topOffset];  // Adjust the row index after cropping
+                 }
+             }
+            
             assets.Add(new SpriteAsset
             {
-                Name = _assetReferences[i],// $"SPRITE{i:D5}", // TODO: Map this to an asset mapper
-                RawData = data,
-                Width = 64,
-                Height = 64
+                Name = _assetReferences[i],// $"SPRITE{i:D5}",
+                
+                //Pixels = block,
+                //Width = block.GetLength(0),
+                //Height = block.GetLength(1),
+                
+                Pixels = croppedBlock,
+                Width = croppedBlock.GetLength(0),
+                Height = croppedBlock.GetLength(1),
+                Offset = new Position(leftPix, topOffset)
             });
         }
 

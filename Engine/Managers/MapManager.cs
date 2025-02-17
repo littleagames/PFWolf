@@ -283,21 +283,21 @@ public class MapManager : IMapManager
                 {
                     new ActorState
                     {
-                        AssetFrame = "Unknown",
+                        AssetFrame = "GARDA1",
                         Ticks = 0
                     }
                 });
                 //if (actorAssets.ContainsKey("Unknown"))
                   //  continue; // already loaded
                     
-                var spriteAsset = (SpriteAsset?)_assetManager.FindAsset(AssetType.Sprite, "unknown");
+                var spriteAsset = (SpriteAsset?)_assetManager.FindAsset(AssetType.Sprite, "GARDA1");
 
                 if (spriteAsset != null)
                 {
-                    map.SpriteCache.TryAdd("Unknown", new SpriteData
+                    map.SpriteCache.TryAdd("GARDA1", new SpriteData
                     {
-                        Offset = new Position(0, 0),
-                        Data = spriteAsset.RawData.To2DArray(spriteAsset.Width, spriteAsset.Height),
+                        Offset = spriteAsset.Offset,
+                        Data = spriteAsset.Pixels//.RawData.To2DArray(spriteAsset.Width, spriteAsset.Height),
                     });
                 }
 
