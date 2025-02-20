@@ -9,6 +9,7 @@ public interface IAssetManager
     void AddAssembly(Assembly assembly);
     Asset? FindAsset(AssetType assetType, string assetName);
     T? FindAsset<T>(AssetType assetType, string assetName) where T : Asset;
+    IEnumerable<T> FindAssets<T>(AssetType assetType, IEnumerable<string> assetNames) where T : Asset;
     List<Asset> GetAssets(AssetType assetType);
     
     List<T> GetAssets<T>(AssetType assetType) where T : Asset;

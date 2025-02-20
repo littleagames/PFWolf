@@ -129,7 +129,10 @@ public record ActorMapDefinition
     /// Facing direction of the actor
     /// <default>None</default>
     /// </summary>
-    public string Direction { get; set; } = "None";
+    public string? Direction { get; set; } = "None";
+    
+    [JsonConverter(typeof(FloatOrStringConverter))]
+    public float? Angle { get; set; }
 
     /// <summary>
     /// Skills that this actor is spawned

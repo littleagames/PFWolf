@@ -392,7 +392,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
                 {
                     ViewX = transformed.ViewX,
                     ViewHeight = transformed.ViewHeight,
-                    AssetName = actor.ActorStates.GetCurrentState()?.AssetFrame ?? "Unknown", // TODO: Get rotated frame
+                    AssetName = $"{actor.ActorStates.GetCurrentState()?.AssetFrame}{GetDirectionFrame(actor, transformed.ViewX)}" ?? "Unknown", // TODO: Get rotated frame
                     TileX = actor.TileX,
                     TileY = actor.TileY,
                     //Flags = actor.Flags
@@ -415,6 +415,32 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         }
     }
 
+    // private int[] dirangle = [0,ANGLES/8,2*ANGLES/8,3*ANGLES/8,4*ANGLES/8,
+    //     5*ANGLES/8,6*ANGLES/8,7*ANGLES/8,ANGLES];
+    //
+    private int GetDirectionFrame(Actor actor, int viewX)
+    {
+        if (!actor.ActorStates.GetCurrentState()?.Directional ?? false)
+            return 0;
+        
+        int angle, viewangle;
+
+        // this isn't exactly correct, as it should vary by a trig value,
+        // but it is close enough with only eight rotations
+
+        viewangle = (int)( Camera.Angle + (CenterX - viewX) / (8 * Width / 320.0) );
+
+        angle = (viewangle - 180) - actor.Angle;//dirangle[ob->dir];
+
+        angle+=ANGLES/16;
+        while (angle>=ANGLES)
+            angle-=ANGLES;
+        while (angle<0)
+            angle+=ANGLES;
+
+        return (angle/(ANGLES/8)) + 1;
+    }
+    
     private void ScaleShape(VisibleObject visibleObject)
     {
         var scale = visibleObject.ViewHeight >> 3;
@@ -422,12 +448,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
         if (!_map.SpriteCache.TryGetValue(visibleObject.AssetName, out var sprite))
             return;
-
-        var shape = sprite.Data;
-        // Do I still have left pix/right pix?
-        // I believe offset will be leftpix, and toppix (currently 0)
-
-
+        
         var fracStep = FixedDiv(scale, TEXTURESIZE / 2);
         var frac = sprite.Offset.X * fracStep;
         var actX = visibleObject.ViewX - scale;
@@ -467,7 +488,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
                         line[j] = sprite.Data[w, j];
                     }
                     
-                    ScaleLine(x1, topPix+sprite.Offset.Y, fracStep, line);
+                    ScaleLine(x1, topPix, fracStep, line);
                 }
 
                 x1++;

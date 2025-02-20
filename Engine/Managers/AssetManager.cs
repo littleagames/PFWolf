@@ -61,4 +61,11 @@ public class AssetManager : IAssetManager
         return (T?)_assets.FirstOrDefault(a =>
             a.AssetType == assetType && a.Name.Equals(assetName, StringComparison.InvariantCultureIgnoreCase));
     }
+    
+    public IEnumerable<T> FindAssets<T>(AssetType assetType, IEnumerable<string> assetNames) where T : Asset
+    {
+        var found = _assets.Where(a =>
+            a.AssetType == assetType && assetNames.Contains(a.Name, StringComparer.InvariantCultureIgnoreCase));
+        return found.Select(x => x as T);
+    }
 }

@@ -2,7 +2,17 @@
 
 public class WolfensteinActor : Actor
 {
-	public WolfensteinActor(int x, int y) : base(x,y)
+	public WolfensteinActor(int x, int y) : base(x, y)
+	{
+	}
+	
+	public WolfensteinActor(int x, int y, float angle)
+		: base(x, y, angle)
+	{
+	}
+	
+	public WolfensteinActor(int x, int y, float angle, string beginningState)
+		: base(x, y, angle, beginningState)
 	{
 	}
 

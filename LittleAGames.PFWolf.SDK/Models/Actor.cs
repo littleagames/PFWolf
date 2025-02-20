@@ -13,15 +13,18 @@ public class Actor : MapComponent
         IsActive = true;
         ActorStates.CurrentState = "Spawn";
     }
-    
-    public Actor(int tileX, int tileY, float angle)
+
+    public Actor(int tileX, int tileY, float angle) 
+        : this(tileX, tileY)
     {
-        X = (tileX<<16)+(1<<16)/2;
-        Y = (tileY<<16)+(1<<16)/2;
         FineAngle = angle;
-        IsActive = true;
     }
 
+    public Actor(int tileX, int tileY, float angle, string beginningState) 
+        : this(tileX, tileY, angle)
+    {
+        ActorStates.CurrentState = beginningState;
+    }
 
     public float FineAngle
     {
@@ -112,7 +115,7 @@ public class ActorStates
 
     public int TickCount { get; set; } = 0;
     
-    public Dictionary<string, List<ActorState>> States { get; set; } = new();
+    public Dictionary<string, IList<ActorState>> States { get; set; } = new();
 
     public ActorState? GetCurrentState()
     {
@@ -158,4 +161,9 @@ public class ActorState
     /// Thinking action performed every frame
     /// </summary>
     public string Think { get; set; } = null!;
+
+    /// <summary>
+    /// Defines if actor has rotational frames
+    /// </summary>
+    public bool Directional { get; set; } = false;
 }

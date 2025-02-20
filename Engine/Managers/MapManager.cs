@@ -199,41 +199,8 @@ public class MapManager : IMapManager
 
             if (player.TryGetValue(objectNum, out var playerData))
             {
-                map.Children.Add(new Player(x, y, GetAngleFromParams(playerData),
+                map.Children.Add(new Player(x, y, GetAngleFromParams(playerData.Angle, playerData.Direction),
                     playerData.Health));
-
-                float GetAngleFromParams(PlayerMapDefinition? actorParams)
-                {
-                    if (actorParams == null)
-                        return 0;
-
-                    if (actorParams.Angle != null)
-                    {
-                        return (float)Convert.ToDouble(actorParams.Angle);
-                    }
-
-                    if (actorParams.Direction != null)
-                    {
-                        var dirString = actorParams.Direction.ToString()?.ToUpperInvariant();
-                        switch (dirString)
-                        {
-                            case "N":
-                            case "NORTH":
-                                return 90;
-                            case "E":
-                            case "EAST":
-                                return 0;
-                            case "S":
-                            case "SOUTH":
-                                return 270;
-                            case "W":
-                            case "WEST":
-                                return 180;
-                        }
-                    }
-
-                    throw new InvalidDataException("No valid direction parameters.");
-                }
             }
         }
         //var uniqueObjects = objectsPlane.GroupBy(x => x);
@@ -269,7 +236,8 @@ public class MapManager : IMapManager
             }
             else
             {
-                actorInstance = Activator.CreateInstance(script.Script, [x,y]) as Actor;
+                var angle = GetAngleFromParams(actor.Angle, actor.Direction);
+                actorInstance = Activator.CreateInstance(script.Script, [x,y, angle, actor.State]) as Actor;
             }
             
             // TODO: Look for actor in scripts, if exists, instantiate as that actor type
@@ -277,33 +245,79 @@ public class MapManager : IMapManager
 
             if (actorInstance != null)
             {
-                // TODO: Get definitions from actorDefinition
-                //actorDefinition.States
-                actorInstance.ActorStates.States.Add("Spawn", new List<ActorState>
-                {
-                    new ActorState
-                    {
-                        AssetFrame = "GARDA1",
-                        Ticks = 0
-                    }
-                });
-                //if (actorAssets.ContainsKey("Unknown"))
-                  //  continue; // already loaded
-                    
-                var spriteAsset = (SpriteAsset?)_assetManager.FindAsset(AssetType.Sprite, "GARDA1");
+                var mappedStates = actorDefinition.States
+                    .Select(def =>
+                        new KeyValuePair<string, IList<ActorState>>(def.Key, def.Value
+                            .Select(st => new ActorState
+                            {
+                                Directional = st.Directional,
+                                Action = st.Action,
+                                AssetFrame = st.Frame,
+                                Think = st.Think,
+                                Ticks = st.Tics
+                            }).ToList()))
+                    .ToDictionary(d => d.Key, d => d.Value);
+                actorInstance.ActorStates.States = mappedStates;
 
-                if (spriteAsset != null)
+                var current = actorInstance.ActorStates.States.SelectMany(s =>
+                    s.Value.SelectMany(f => GetAssetFrames(f.AssetFrame, f.Directional)));
+                var spriteAssets = _assetManager.FindAssets<SpriteAsset>(AssetType.Sprite, current);
+
+                foreach (var asset in spriteAssets)
                 {
-                    map.SpriteCache.TryAdd("GARDA1", new SpriteData
+                    map.SpriteCache.TryAdd(asset.Name, new SpriteData
                     {
-                        Offset = spriteAsset.Offset,
-                        Data = spriteAsset.Pixels//.RawData.To2DArray(spriteAsset.Width, spriteAsset.Height),
+                        Offset = asset.Offset,
+                        Data = asset.Pixels//.RawData.To2DArray(spriteAsset.Width, spriteAsset.Height),
                     });
                 }
-
+                
                 map.Actors.Add(actorInstance);
             }
         }
+    }
+
+    private static IEnumerable<string> GetAssetFrames(string partialFrame, bool directional)
+    {
+        if (directional)
+        {
+            for (var index = 1; index <= 8; index++)
+            {
+                yield return $"{partialFrame}{index}";
+            }
+        }
+
+        yield return $"{partialFrame}0";
+    }
+    
+    private static float GetAngleFromParams(float? angle, string? direction)
+    {
+        if (angle != null)
+        {
+            return (float)Convert.ToDouble(angle);
+        }
+
+        if (direction != null)
+        {
+            var dirString = direction.ToUpperInvariant();
+            switch (dirString)
+            {
+                case "N":
+                case "NORTH":
+                    return 90;
+                case "E":
+                case "EAST":
+                    return 0;
+                case "S":
+                case "SOUTH":
+                    return 270;
+                case "W":
+                case "WEST":
+                    return 180;
+            }
+        }
+
+        throw new InvalidDataException("No valid direction parameters.");
     }
     
     private void BuildFlats(MapAsset mapAsset)
