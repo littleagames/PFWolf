@@ -257,7 +257,7 @@ public class MapManager : IMapManager
                                 Ticks = st.Tics
                             }).ToList()))
                     .ToDictionary(d => d.Key, d => d.Value);
-                actorInstance.ActorStates.States = mappedStates;
+                actorInstance.ActorStates.CreateStates(mappedStates);
 
                 var current = actorInstance.ActorStates.States.SelectMany(s =>
                     s.Value.SelectMany(f => GetAssetFrames(f.AssetFrame, f.Directional)));

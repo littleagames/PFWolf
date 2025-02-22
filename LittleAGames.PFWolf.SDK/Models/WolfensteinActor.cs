@@ -19,7 +19,9 @@ public class WolfensteinActor : Actor
 	public virtual void A_DeathScream() {
     }
 	
-    public virtual void T_Stand() {
+    public virtual void T_Stand()
+    {
+	    return;
     }
 	
     public virtual void T_Path() {

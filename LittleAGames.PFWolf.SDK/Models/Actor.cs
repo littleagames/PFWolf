@@ -1,4 +1,5 @@
-﻿using LittleAGames.PFWolf.SDK.Components;
+﻿using System.Reflection;
+using LittleAGames.PFWolf.SDK.Components;
 
 namespace LittleAGames.PFWolf.SDK.Models;
 
@@ -23,7 +24,7 @@ public class Actor : MapComponent
     public Actor(int tileX, int tileY, float angle, string beginningState) 
         : this(tileX, tileY, angle)
     {
-        ActorStates.CurrentState = beginningState;
+        ActorStates.SetCurrentState(beginningState);
     }
 
     public float FineAngle
@@ -37,8 +38,8 @@ public class Actor : MapComponent
     public short TileY => (short)(Y >> 16);
     public bool IsActive { get; set; }
 
-    public ActorStates ActorStates { get; set; } = new();
-    
+    public ActorStates ActorStates { get; init; } = new();
+
     public void Rotate(float deltaAngle)
     {
         FineAngle += deltaAngle;
@@ -77,33 +78,49 @@ public class Actor : MapComponent
             
             if (state.Think != null)
             {
+                MethodInfo? info = this.GetType()?.GetMethod(state.Think);
+                info?.Invoke(this, null);
             }
+
+            return;
         }
         
         // Transitional object
         
         ActorStates.TickCount--;
-        //while (ActorStates.TickCount <= 0)
+        while (ActorStates.TickCount <= 0)
         {
             if (state.Action != null)
             {
                 //state.Action();
+                // if (state == null)
+                // {
+                //     //Remove();
+                //     return;
+                // }
             }
 
-            // var nextState = ActorStates.Next();
-            //
-            // if (nextState == null)
-            // {
-            //     //Remove();
-            //     return;
-            // }
+            state = ActorStates.Next();
             
-            // if (nextState.Ticks == 0)
-            // {
-            //     ActorStates.TickCount = 0;
-            // }
-            //
-            // ActorStates.TickCount += nextState.Ticks;
+            if (state == null)
+            {
+                //Remove();
+                return;
+            }
+            
+            if (state.Ticks == 0)
+            {
+                ActorStates.TickCount = 0;
+                break;
+            }
+            
+            ActorStates.TickCount += state.Ticks;
+        }
+        
+        // Think
+        if (state.Think != null)
+        {
+            // state.Think();
         }
     }
 }
@@ -115,7 +132,7 @@ public class ActorStates
 
     public int TickCount { get; set; } = 0;
     
-    public Dictionary<string, IList<ActorState>> States { get; set; } = new();
+    public Dictionary<string, IList<ActorState>> States { get; private set; } = new();
 
     public ActorState? GetCurrentState()
     {
@@ -124,9 +141,15 @@ public class ActorStates
 
         if (_currentStateIndex < 0)
             _currentStateIndex = 0;
-        
+
         if (_currentStateIndex >= result.Count)
-            _currentStateIndex = result.Count - 1;
+        {
+            if (TickCount == 0)
+                _currentStateIndex = 0;
+            else
+                _currentStateIndex = result.Count - 1;
+        }
+            
         
         return result[_currentStateIndex];
     }
@@ -134,9 +157,21 @@ public class ActorStates
     public ActorState? Next()
     {
         _currentStateIndex++;
-        //return CurrentState;
-        // Increments current state's index
-        throw new NotImplementedException();
+        var nextState = GetCurrentState();
+        TickCount = nextState?.Ticks ?? 0;
+        return nextState;
+    }
+
+    public void SetCurrentState(string state)
+    {
+        CurrentState = state;
+        TickCount = GetCurrentState()?.Ticks ?? 0;
+    }
+
+    public void CreateStates(Dictionary<string, IList<ActorState>> states)
+    {
+        States = states;
+        TickCount = GetCurrentState()?.Ticks ?? 0;
     }
 }
 

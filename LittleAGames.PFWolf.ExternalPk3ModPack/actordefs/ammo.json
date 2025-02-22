@@ -1,0 +1,10 @@
+﻿{
+  "Clip": {
+    "States": {
+      "Spawn": [{
+        "Frame": "CLIPA",
+        "Tics": 0
+      }]
+    }
+  }
+}
