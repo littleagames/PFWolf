@@ -53,11 +53,11 @@ public class Map : MapComponent
     /// </summary>
     public string Name { get; set; }
 
-    public override void OnUpdate()
+    public override void OnUpdate(float deltaTime)
     {
         foreach (var actor in Actors)
         {
-            actor.Think();
+            actor.Think(deltaTime);
             // TODO: Handle map things here, like actor behaviors   
         }
         // TODO: Map handling stuff?

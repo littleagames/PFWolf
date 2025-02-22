@@ -24,7 +24,7 @@ public class Actor : MapComponent
     public Actor(int tileX, int tileY, float angle, string beginningState) 
         : this(tileX, tileY, angle)
     {
-        ActorStates.SetCurrentState(beginningState);
+        ActorStates.CurrentState = beginningState;
     }
 
     public float FineAngle
@@ -36,6 +36,7 @@ public class Actor : MapComponent
     public short Angle => (short)FineAngle;
     public short TileX => (short)(X >> 16);
     public short TileY => (short)(Y >> 16);
+    public float Speed { get; init; } = 0;
     public bool IsActive { get; set; }
 
     public ActorStates ActorStates { get; init; } = new();
@@ -60,7 +61,7 @@ public class Actor : MapComponent
         Y += (int)(pdy * speed);
     }
 
-    public void Think()
+    public void Think(float deltaTime)
     {
         if (!IsActive)
             return;
@@ -79,7 +80,7 @@ public class Actor : MapComponent
             if (state.Think != null)
             {
                 MethodInfo? info = this.GetType()?.GetMethod(state.Think);
-                info?.Invoke(this, null);
+                info?.Invoke(this, [deltaTime]);
             }
 
             return;
@@ -87,12 +88,13 @@ public class Actor : MapComponent
         
         // Transitional object
         
-        ActorStates.TickCount--;
+        ActorStates.TickCount -= (deltaTime<1 ? 1 : (int)deltaTime);
         while (ActorStates.TickCount <= 0)
         {
             if (state.Action != null)
             {
-                //state.Action();
+                MethodInfo? info = this.GetType()?.GetMethod(state.Action);
+                info?.Invoke(this, [deltaTime]);
                 // if (state == null)
                 // {
                 //     //Remove();
@@ -120,7 +122,8 @@ public class Actor : MapComponent
         // Think
         if (state.Think != null)
         {
-            // state.Think();
+            MethodInfo? info = this.GetType()?.GetMethod(state.Think);
+            info?.Invoke(this, [deltaTime]);
         }
     }
 }
@@ -160,12 +163,6 @@ public class ActorStates
         var nextState = GetCurrentState();
         TickCount = nextState?.Ticks ?? 0;
         return nextState;
-    }
-
-    public void SetCurrentState(string state)
-    {
-        CurrentState = state;
-        TickCount = GetCurrentState()?.Ticks ?? 0;
     }
 
     public void CreateStates(Dictionary<string, IList<ActorState>> states)

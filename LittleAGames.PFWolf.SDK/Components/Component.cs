@@ -19,6 +19,11 @@ public abstract class Component : RunnableBase
         
     }
 
+    public virtual void OnUpdate(float deltaTime)
+    {
+        
+    }
+
     public virtual void OnDestroy()
     {
         

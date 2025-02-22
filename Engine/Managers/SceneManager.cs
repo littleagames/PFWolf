@@ -71,7 +71,7 @@ public class SceneManager
         
         foreach (var component in _currentScene.Components.GetComponents())
         {
-            ComponentUpdate(component);
+            ComponentUpdate(component, deltaTime);
         }
         
         _videoManager.UpdateScreen();
@@ -137,9 +137,10 @@ public class SceneManager
         }
     }
     
-    private void ComponentUpdate(Component component)
+    private void ComponentUpdate(Component component, float deltaTime)
     {
         component.OnUpdate();
+        component.OnUpdate(deltaTime);
         
         switch (component)
         {
@@ -159,7 +160,7 @@ public class SceneManager
 
         foreach (var innerComponent in component.Children.GetComponents())
         {
-            ComponentUpdate(innerComponent);
+            ComponentUpdate(innerComponent, deltaTime);
         }
     }
 }
