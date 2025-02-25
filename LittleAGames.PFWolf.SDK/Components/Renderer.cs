@@ -13,5 +13,5 @@ public abstract class Renderer : RenderComponent
         Height = height;
     }
 
-    public abstract byte[,] Render();
+    public abstract byte[] Render();
 }

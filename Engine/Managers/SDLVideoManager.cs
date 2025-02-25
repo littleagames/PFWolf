@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Engine.Extensions;
+using LittleAGames.PFWolf.SDK.Utilities;
 using SDL2;
 using static SDL2.SDL;
 
@@ -123,7 +124,8 @@ public class SDLVideoManager : IVideoManager
         switch (component)
         {
             case ViewPort viewPort:
-                MemToScreenFull(viewPort.Render(), viewPort.X, viewPort.Y);
+                //MemToScreenFull(viewPort.Render().To2DArray(viewPort.Width, viewPort.Height), viewPort.X, viewPort.Y, viewPort.Width, viewPort.Height);
+                MemToScreenFull(viewPort.Render(), viewPort.X, viewPort.Y, viewPort.Width, viewPort.Height);
                 break;
             case Rectangle rect:
                 DrawRectangle(rect.X, rect.Y, rect.Width, rect.Height, rect.Color);
@@ -351,7 +353,7 @@ public class SDLVideoManager : IVideoManager
         UnlockSurface(_screenBuffer);
     }
     
-    private void MemToScreenFull(byte[,] source, int x, int y)
+    private void MemToScreenFull(byte[] source, int x, int y, int width, int height)
     {
         int i, j;
 
@@ -362,19 +364,17 @@ public class SDLVideoManager : IVideoManager
 
             // Set each pixel to a red color (ARGB format)
 
-            for (j = 0; j < source.GetLength(1); j++)
+            for(j = 0; j < height; j++)
+            for (i = 0; i < width; i++)
             {
-                for (i = 0; i < source.GetLength(0); i++)
-                {
-                    byte col = source[i, j];
-                    if (col == 0xff) continue;
+                byte col = source[j * width + i];
+                if (col == 0xff) continue;
 
-                    var xlength = i + x;
-                    var ylength = j + y;
-                    if (ylength > _yLookup.Length ||
-                        (_yLookup[ylength] + xlength) > (_screenSize.Width * _screenSize.Height)) return;
-                    pixels[_yLookup[ylength] + xlength] = col;
-                }
+                var xlength = i + x;
+                var ylength = j + y;
+                if (ylength > _yLookup.Length ||
+                    (_yLookup[ylength] + xlength) > (_screenSize.Width * _screenSize.Height)) return;
+                pixels[_yLookup[ylength] + xlength] = col;
             }
         }
 

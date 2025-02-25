@@ -8,8 +8,8 @@ public class Wolf3DRaycastRenderer : Renderer
     public Wolf3DRaycastRenderer(Camera camera, Map map, int width, int height) : base(camera, width, height)
     {
         _map = map;
-        _result = new byte[Width, Height];
-        _spotVis = new bool[Width, Height];
+        _result = new byte[width*height];
+        _spotVis = new bool[64,64];//map.Width, map.Height]; // TODO: Map width/height not set yet at this time
 
         BuildTables();
 
@@ -84,7 +84,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
     private int     postx;
     private byte[] postsource;
 
-    private byte[,] _result;
+    private byte[] _result;
     
     private void BuildTables()
     {
@@ -162,9 +162,14 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
     public static Wolf3DRaycastRenderer Create(Camera camera, Map map, int width, int height)
         => new(camera, map, width, height);
 
-    public override byte[,] Render()
+    public override byte[] Render()
     {
-        _result.Fill((byte)0x19);
+        Array.Fill(_result, (byte)0x19);
+        for (var x = 0; x < Width*Height/2; x++)
+        {
+            _result[x] = 0x1d;
+        }
+        //return _result;
         Array.Clear(_spotVis);
 
         var focalLength = 0x5700;
@@ -463,7 +468,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
             // calculate edges of the shape
             //
             var x1 = x2;
-            if (x1 >= _result.GetLength(0))
+            if (x1 >= Width)
                 break;
 
             frac += fracStep;
@@ -475,8 +480,8 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
             if (x1 < 0)
                 x1 = 0;     // clip left boundary
 
-            if (x2 > _result.GetLength(0))
-                x2 = _result.GetLength(0); // clip right boundary
+            if (x2 > Width)
+                x2 = Width; // clip right boundary
 
             while (x1 < x2)
             {
@@ -536,7 +541,8 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
                 while (startPix < endPix)
                 {
-                    _result[x, startPix] = col;
+                    //_result[x, startPix] = col;
+                    _result[startPix*Width + x] = col;
                     startPix++;
                 }
             }
@@ -833,7 +839,8 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         //yendoffs = yendoffs * bufferPitch + postx;
         while(yoffs <= yendoffs)
         {
-            _result[postx, yendoffs] = col;
+            //_result[postx, yendoffs] = col;
+            _result[yendoffs * Width + postx] = col;
             //vbuf[yendoffs] = col;
             ywcount -= TEXTURESIZE/2;
             if(ywcount <= 0)

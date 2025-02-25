@@ -32,6 +32,40 @@ public class Actor : MapComponent
         get => _fineAngle;
         set => _fineAngle = AngleUtilities.FixAngle(value);
     }
+    
+    public Direction Direction {
+        get
+        {
+            switch (Angle)
+            {
+                case short a when a is >= 360 * 15 / 16 or < 360 * 1 / 16:
+                    return Direction.East;
+                // Northeast
+                case short a when a is >= 360 * 1 / 16 and < 360 * 3 / 16:
+                    return Direction.NorthEast;
+                // North
+                case short a when a is >= 360 * 3 / 16 and < 360 * 5 / 16:
+                    return Direction.North;
+                // Northwest
+                case short a when a is >= 360 * 5 / 16 and < 360 * 7 / 16:
+                    return Direction.NorthWest;
+                // West
+                case short a when a is >= 360 * 7 / 16 and < 360 * 9 / 16:
+                    return Direction.West;
+                // Southwest
+                case short a when a is >= 360 * 9 / 16 and < 360 * 11 / 16:
+                    return Direction.SouthWest;
+                // South
+                case short a when a is >= 360 * 11 / 16 and < 360 * 13 / 16:
+                    return Direction.South;
+                // Southeast
+                case short a when a is >= 360 * 13 / 16 and < 360 * 15 / 16:
+                    return Direction.SouthEast;
+                default:
+                    return Direction.NoDirection;
+            }
+        }
+    }
 
     public short Angle => (short)FineAngle;
     public short TileX => (short)(X >> 16);
@@ -87,8 +121,8 @@ public class Actor : MapComponent
         }
         
         // Transitional object
-        
-        ActorStates.TickCount -= (deltaTime<1 ? 1 : (int)deltaTime);
+
+        ActorStates.TickCount -= 1;//(deltaTime<1 ? 1 : (int)deltaTime);
         while (ActorStates.TickCount <= 0)
         {
             if (state.Action != null)
@@ -126,6 +160,19 @@ public class Actor : MapComponent
             info?.Invoke(this, [deltaTime]);
         }
     }
+}
+
+public enum Direction
+{
+    NoDirection = 0,
+    East = 1,
+    NorthEast = 2,
+    North = 3,
+    NorthWest = 4,
+    West = 5,
+    SouthWest = 6,
+    South = 7,
+    SouthEast = 8
 }
 
 public class ActorStates

@@ -20,7 +20,7 @@ public class ViewPort : RenderComponent
     public static ViewPort Create(int x, int y, int width, int height, Renderer renderer)
         => new(x, y, width, height, renderer);
 
-    public byte[,] Render()
+    public byte[] Render()
     {
         // Crop the render
         return Renderer.Render();

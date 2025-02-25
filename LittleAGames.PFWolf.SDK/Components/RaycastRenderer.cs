@@ -11,10 +11,10 @@ public class RaycastRenderer : Renderer
     public static RaycastRenderer Create(Camera camera, Map map, int width, int height)
         => new(camera, map, width, height);
     
-    public override byte[,] Render()
+    public override byte[] Render()
     {
-        var result = new byte[Width, Height];
-        result.Fill((byte)0x19);
+        var result = new byte[Width*Height];
+        Array.Fill(result, (byte)0x19);
 
         for (var pixx = 0; pixx < Width; pixx++)
         {
