@@ -22,14 +22,14 @@ public class WolfensteinActor : Actor
 	public virtual void A_DeathScream() {
     }
 	
-    public virtual void T_Stand(float deltaTime)
+    public virtual void T_Stand()
     {
 	    return;
     }
 
-    public virtual void T_Path(float deltaTime)
+    public virtual void T_Path()
     {
-	    var move = Speed * 1;//deltaTime;
+	    var move = Speed * 1;
 	    while (move > 0)
 	    {
 		    if (_distance < 0)
@@ -119,13 +119,13 @@ public class WolfensteinActor : Actor
 	    _distance -= move;
     }
 	
-    public virtual void T_Chase(float deltaTime) {
+    public virtual void T_Chase() {
     }
 	
-    public virtual void A_Shoot(float deltaTime) {
+    public virtual void A_Shoot() {
     }
 	
-    public virtual void T_Pain(float deltaTime) {
+    public virtual void T_Pain() {
         // TODO: This will determine whether or not to skip this frame, or change state
         // Doing one or the other action will run frame 1 or 2.
     }

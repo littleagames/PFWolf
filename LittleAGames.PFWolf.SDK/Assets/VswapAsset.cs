@@ -21,7 +21,7 @@ public class SpriteAsset : Asset
 
     public override string Name { get; set; }
     public override byte[] RawData { get; set; }
-    public byte[,] Pixels { get; set; }
+    public byte[] Pixels { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
     public Position Offset { get; set; } = new(0, 0);

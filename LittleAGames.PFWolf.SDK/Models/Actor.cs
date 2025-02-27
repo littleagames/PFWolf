@@ -95,7 +95,7 @@ public class Actor : MapComponent
         Y += (int)(pdy * speed);
     }
 
-    public void Think(float deltaTime)
+    public void Think()
     {
         if (!IsActive)
             return;
@@ -114,7 +114,7 @@ public class Actor : MapComponent
             if (state.Think != null)
             {
                 MethodInfo? info = this.GetType()?.GetMethod(state.Think);
-                info?.Invoke(this, [deltaTime]);
+                info?.Invoke(this, null);
             }
 
             return;
@@ -122,13 +122,13 @@ public class Actor : MapComponent
         
         // Transitional object
 
-        ActorStates.TickCount -= 1;//(deltaTime<1 ? 1 : (int)deltaTime);
+        ActorStates.TickCount -= 1;
         while (ActorStates.TickCount <= 0)
         {
             if (state.Action != null)
             {
                 MethodInfo? info = this.GetType()?.GetMethod(state.Action);
-                info?.Invoke(this, [deltaTime]);
+                info?.Invoke(this, null);
                 // if (state == null)
                 // {
                 //     //Remove();
@@ -157,7 +157,7 @@ public class Actor : MapComponent
         if (state.Think != null)
         {
             MethodInfo? info = this.GetType()?.GetMethod(state.Think);
-            info?.Invoke(this, [deltaTime]);
+            info?.Invoke(this, null);
         }
     }
 }

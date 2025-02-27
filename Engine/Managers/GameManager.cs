@@ -52,7 +52,10 @@ public class GameManager
             }
             
             // Handle rendering
+            var start2 = SDL.SDL_GetPerformanceCounter();
             sceneManager.OnUpdate(elapsedMs);
+            var end2 = SDL.SDL_GetPerformanceCounter();
+            var elapsedMs2 = (end2 - start2) / (float)SDL.SDL_GetPerformanceFrequency() * 1000.0f;
             sceneManager.OnPostUpdate();
         }
         

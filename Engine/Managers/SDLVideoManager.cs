@@ -275,11 +275,6 @@ public class SDLVideoManager : IVideoManager
     {
          MemToScreenScaledCoord(source, width, height, ScaleFactorX * x, ScaleFactorY * y);
     }
-    
-    private void MemToScreen(byte[,] source, int width, int height, int x, int y)
-    {
-        MemToScreenScaledCoord(source, width, height, ScaleFactorX * x, ScaleFactorY * y);
-    }
 
     private void MemToScreenScaledCoord(byte[] source, int width, int height, int destx, int desty)
     {

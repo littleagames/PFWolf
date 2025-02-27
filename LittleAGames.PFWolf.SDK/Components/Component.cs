@@ -19,11 +19,6 @@ public abstract class Component : RunnableBase
         
     }
 
-    public virtual void OnUpdate(float deltaTime)
-    {
-        
-    }
-
     public virtual void OnDestroy()
     {
         
@@ -67,9 +62,9 @@ public abstract class MapComponent : Component
 {
     public int X { get; protected set; }
     public int Y { get; protected set; }
-    public int Width => Data.GetLength(0);
-    public int Height => Data.GetLength(1);
-    public byte[,] Data { get; set; } = new byte[0,0];
+    public int Width { get; init; }
+    public int Height { get; init; }
+    public byte[] Data { get; init; } = [];
 }
 
 public class InputComponent : Component

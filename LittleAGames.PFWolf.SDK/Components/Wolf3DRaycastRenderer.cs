@@ -397,7 +397,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
                 {
                     ViewX = transformed.ViewX,
                     ViewHeight = transformed.ViewHeight,
-                    AssetName = $"{actor.ActorStates.GetCurrentState()?.AssetFrame}{GetDirectionFrame(actor, transformed.ViewX)}" ?? "Unknown", // TODO: Get rotated frame
+                    AssetName = $"{actor.ActorStates.GetCurrentState()?.AssetFrame}{GetDirectionFrame(actor, transformed.ViewX)}",
                     TileX = actor.TileX,
                     TileY = actor.TileY,
                     //Flags = actor.Flags
@@ -448,11 +448,12 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
     
     private void ScaleShape(VisibleObject visibleObject)
     {
-        var scale = visibleObject.ViewHeight >> 3;
-        if (scale == 0) return;
-
         if (!_map.SpriteCache.TryGetValue(visibleObject.AssetName, out var sprite))
             return;
+        
+        var scale = (visibleObject.ViewHeight >> 3);
+        if (scale == 0) return;
+
         
         var fracStep = FixedDiv(scale, TEXTURESIZE / 2);
         var frac = sprite.Offset.X * fracStep;
@@ -487,13 +488,13 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
             {
                 if (wallHeight[x1] < visibleObject.ViewHeight)
                 {
-                    var line = new byte[sprite.Data.GetLength(1)];
-                    for (int j = 0; j < sprite.Data.GetLength(1); j++)
+                    var line = new byte[sprite.Height];
+                    for (int j = 0; j < sprite.Height; j++)
                     {
-                        line[j] = sprite.Data[w, j];
+                        line[j] = sprite.Data[j*sprite.Width + w];
                     }
                     
-                    ScaleLine(x1, topPix, fracStep, line);
+                    ScaleLine(x1, topPix, fracStep, line, sprite.Offset.Y);
                 }
 
                 x1++;
@@ -501,12 +502,12 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         }
     }
 
-    private void ScaleLine(int x, int topPix, int fracStep, byte[] line)
+    private void ScaleLine(int x, int topPix, int fracStep, byte[] line, int offsetX)
     {
         byte    col;
         int startPix;
         
-        for (var end = 0; end < line.Length; end++)
+        for (var end = 0; end < line.Length+offsetX; end++)
         {
             var top = 0;
             var start = 0;
@@ -534,7 +535,10 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
                 if (endPix > Height)
                     endPix = Height;            // clip lower boundary
 
-                col = line[src];
+                if (start < offsetX)
+                    continue;
+                
+                col = line[src-offsetX];
                 
                 if (col == 0xff)
                     continue;

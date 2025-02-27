@@ -117,9 +117,9 @@ public class Wolf3DVswapFileLoader : BaseFileLoader
             var rightPix = BitConverter.ToUInt16(data.Skip(sizeof(ushort)).Take(sizeof(ushort)).ToArray());
             ushort[] dataOffsets = Converters.ByteArrayToUInt16Array(data.Skip(sizeof(ushort) * 2).Take(sizeof(ushort)*64).ToArray());
             var width = rightPix - leftPix+1;
-            byte[,] block = new byte[width, 64]; // TODO: height should be max resolution value
+            byte[] block = new byte[width* 64]; // TODO: height should be max resolution value
             
-            block.Fill((byte)0xff);
+            Array.Fill(block, (byte)0xff);
 
             var topOffset = int.MaxValue;
             var bottomOffset = 0; // MinValue
@@ -138,7 +138,7 @@ public class Wolf3DVswapFileLoader : BaseFileLoader
                         var color = data[start + top];
                         // get x,y coords
                         var y = start;
-                        block[x-leftPix,y] = color;
+                        block[y*width + (x-leftPix)] = color;
                         
                         // Calculate vertical offsets for cropping
                         if (topOffset > y)
@@ -155,28 +155,23 @@ public class Wolf3DVswapFileLoader : BaseFileLoader
             // Create a new 2D array to store the cropped result
             
             var newHeight = bottomOffset-topOffset+1;
-            byte[,] croppedBlock = new byte[width, newHeight];
-
+            byte[] croppedBlock = new byte[width * newHeight];
+            
              // Copy the cropped rows to the new array
              for (var x = 0; x < width; x++)
              {
                  for (var y = 0; y < newHeight; y++)
                  {
-                     croppedBlock[x, y] = block[x, y+topOffset];  // Adjust the row index after cropping
+                     croppedBlock[y*width + x] = block[(y+topOffset)*width + x];  // Adjust the row index after cropping
                  }
              }
             
             assets.Add(new SpriteAsset
             {
-                Name = _assetReferences[i],// $"SPRITE{i:D5}",
-                
-                //Pixels = block,
-                //Width = block.GetLength(0),
-                //Height = block.GetLength(1),
-                
+                Name = _assetReferences[i],
                 Pixels = croppedBlock,
-                Width = croppedBlock.GetLength(0),
-                Height = croppedBlock.GetLength(1),
+                Width = width,
+                Height = newHeight,
                 Offset = new Position(leftPix, topOffset)
             });
         }

@@ -268,7 +268,9 @@ public class MapManager : IMapManager
                     map.SpriteCache.TryAdd(asset.Name, new SpriteData
                     {
                         Offset = asset.Offset,
-                        Data = asset.Pixels//.RawData.To2DArray(spriteAsset.Width, spriteAsset.Height),
+                        Width = asset.Width,
+                        Height = asset.Height,
+                        Data = asset.Pixels
                     });
                 }
                 

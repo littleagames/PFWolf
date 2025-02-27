@@ -22,7 +22,7 @@ public class ComponentCollection
         Add(components.GetComponents());
     }
 
-    public HashSet<Component> GetComponents()
+    public IEnumerable<Component> GetComponents()
     {
         return _components;
     }

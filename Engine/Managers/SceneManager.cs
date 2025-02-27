@@ -1,4 +1,6 @@
-﻿namespace Engine.Managers;
+﻿using SDL2;
+
+namespace Engine.Managers;
 
 public class SceneManager
 {
@@ -69,10 +71,13 @@ public class SceneManager
 
         _currentScene.OnUpdate(deltaTime);
         
+        var start2 = SDL.SDL_GetPerformanceCounter();
         foreach (var component in _currentScene.Components.GetComponents())
         {
             ComponentUpdate(component, deltaTime);
         }
+        var end2 = SDL.SDL_GetPerformanceCounter();
+        var elapsedMs2 = (end2 - start2) / (float)SDL.SDL_GetPerformanceFrequency() * 1000.0f;
         
         _videoManager.UpdateScreen();
         
@@ -140,7 +145,6 @@ public class SceneManager
     private void ComponentUpdate(Component component, float deltaTime)
     {
         component.OnUpdate();
-        component.OnUpdate(deltaTime);
         
         switch (component)
         {
