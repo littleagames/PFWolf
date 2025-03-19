@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Numerics;
+using System.Reflection;
 using LittleAGames.PFWolf.SDK.Components;
 
 namespace LittleAGames.PFWolf.SDK.Models;
@@ -13,6 +14,7 @@ public class Actor : MapComponent
         Y = (tileY<<16)+(1<<16)/2;
         IsActive = true;
         ActorStates.CurrentState = "Spawn";
+        PhysicsBody = PhysicsBox.Create(X, Y, 0x5800, 0x5800);
     }
 
     public Actor(int tileX, int tileY, float angle) 
@@ -38,28 +40,28 @@ public class Actor : MapComponent
         {
             switch (Angle)
             {
-                case short a when a is >= 360 * 15 / 16 or < 360 * 1 / 16:
+                case var a when a is >= 360 * 15 / 16 or < 360 * 1 / 16:
                     return Direction.East;
                 // Northeast
-                case short a when a is >= 360 * 1 / 16 and < 360 * 3 / 16:
+                case var a when a is >= 360 * 1 / 16 and < 360 * 3 / 16:
                     return Direction.NorthEast;
                 // North
-                case short a when a is >= 360 * 3 / 16 and < 360 * 5 / 16:
+                case var a when a is >= 360 * 3 / 16 and < 360 * 5 / 16:
                     return Direction.North;
                 // Northwest
-                case short a when a is >= 360 * 5 / 16 and < 360 * 7 / 16:
+                case var a when a is >= 360 * 5 / 16 and < 360 * 7 / 16:
                     return Direction.NorthWest;
                 // West
-                case short a when a is >= 360 * 7 / 16 and < 360 * 9 / 16:
+                case var a when a is >= 360 * 7 / 16 and < 360 * 9 / 16:
                     return Direction.West;
                 // Southwest
-                case short a when a is >= 360 * 9 / 16 and < 360 * 11 / 16:
+                case var a when a is >= 360 * 9 / 16 and < 360 * 11 / 16:
                     return Direction.SouthWest;
                 // South
-                case short a when a is >= 360 * 11 / 16 and < 360 * 13 / 16:
+                case var a when a is >= 360 * 11 / 16 and < 360 * 13 / 16:
                     return Direction.South;
                 // Southeast
-                case short a when a is >= 360 * 13 / 16 and < 360 * 15 / 16:
+                case var a when a is >= 360 * 13 / 16 and < 360 * 15 / 16:
                     return Direction.SouthEast;
                 default:
                     return Direction.NoDirection;
@@ -74,6 +76,27 @@ public class Actor : MapComponent
     public bool IsActive { get; set; }
 
     public ActorStates ActorStates { get; init; } = new();
+
+    public override void OnStart()
+    {
+       // if (PhysicsBody != null)
+       //     PhysicsBody.OnMove += ActorMoved;
+    }
+
+    /// <summary>
+    /// Callback from the physics body after it has registered the move
+    /// </summary>
+    /// <param name="newPosition"></param>
+    // public void ActorMoved(PhysicsBox collider, Vector2 newPosition)
+    // {
+    //     X = (int)newPosition.X;
+    //     Y = (int)newPosition.Y;
+    // }
+    
+    public override void OnPreUpdate()
+    {
+        
+    }
 
     public void Rotate(float deltaAngle)
     {
@@ -91,8 +114,28 @@ public class Actor : MapComponent
         var pdx = (float)Math.Cos(pa.ToRadians());
         var pdy = (float)-Math.Sin(pa.ToRadians());
         
-        X += (int)(pdx * speed);
-        Y += (int)(pdy * speed);
+        // TODO: Physics will not just add to the X/Y, but add after all checks are valid
+        var nextX = X + (int)(pdx * speed);
+        var nextY = Y + (int)(pdy * speed);
+        PhysicsBody?.Move(new Vector2((pdx * speed), (pdy * speed)));
+        
+        // 1) Check move in front
+        // 2) Do I have space?
+        // 3) No, "hitwall"
+        // 4) Yes, add movement to X/Y
+
+        // TODO: Get tile of coordinates (this will be the "other"
+
+        // If there is no "PhysicsBox" that is not owned by the player
+        // Proceed, otherwise look
+
+        // PhysicsBody.AddForce(move);
+        // TODO: PhysicsBody could have collision behaviors? like bounce, or icy sliding?
+
+
+        X = nextX;
+        Y = nextY;
+        // TODO: Check physics here?
     }
 
     public void Think()

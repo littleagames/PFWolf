@@ -70,15 +70,15 @@ public class SceneManager
             return;
 
         _currentScene.OnUpdate(deltaTime);
-        
-        var start2 = SDL.SDL_GetPerformanceCounter();
+        //
+        // var start2 = SDL.SDL_GetPerformanceCounter();
         foreach (var component in _currentScene.Components.GetComponents())
         {
             ComponentUpdate(component, deltaTime);
         }
-        var end2 = SDL.SDL_GetPerformanceCounter();
-        var elapsedMs2 = (end2 - start2) / (float)SDL.SDL_GetPerformanceFrequency() * 1000.0f;
-        
+        // var end2 = SDL.SDL_GetPerformanceCounter();
+        // var elapsedMs2 = (end2 - start2) / (float)SDL.SDL_GetPerformanceFrequency() * 1000.0f;
+        //
         _videoManager.UpdateScreen();
         
         if (_currentScene.ChangeScene)
@@ -113,17 +113,17 @@ public class SceneManager
     
     private void ComponentStart(Component component)
     {
-        component.OnStart();
-        foreach (var innerComponent in component.Children.GetComponents())
-        {
-            ComponentStart(innerComponent);
-        }
-        
         if (component is InputComponent input)
             _inputManager.Initialize(input);
         
         if (component is MapComponent map)
             _mapManager.Initialize(map);
+        
+        component.OnStart();
+        foreach (var innerComponent in component.Children.GetComponents()) // TODO: Make these linear? Prioritized?
+        {
+            ComponentStart(innerComponent);
+        }
         
         // if (component is RenderComponent)
         //     _videoManager.Start((RenderComponent)component);

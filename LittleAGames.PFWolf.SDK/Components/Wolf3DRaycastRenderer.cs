@@ -559,7 +559,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 // #ifdef REVEALMAP
 //             mapseen[xtile][yinttile] = true;
 // #endif
-        tilehit2 = _map.TilePlane[yinttile, xtile];
+        tilehit2 = _map.TilePlane[yinttile][xtile];
         tilehit = _map.PlaneIds[0][yinttile, xtile]; // tilemap[xtile][yinttile];
 
         if (tilehit2 != null)
@@ -644,7 +644,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 //             mapseen[xinttile][ytile] = true;
 // #endif
         // TODO: Turn tilehit into a Wall vs Door MapComponent check
-        tilehit2 = _map.TilePlane[ytile, xinttile];
+        tilehit2 = _map.TilePlane[ytile][xinttile];
         tilehit = _map.PlaneIds[0][ytile, xinttile];//tilemap[xinttile][ytile];
         
         if (tilehit2 != null)
@@ -735,7 +735,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
         postx = pixx;
 
         var tex = ytilestep > 0 ? _map.TileCache[tilehit].North : _map.TileCache[tilehit].South;
-        if (_map.TilePlane[ytile-ytilestep, xinttile] is Door door)
+        if (_map.TilePlane[ytile-ytilestep][xinttile] is Door door)
         {
             tex = ytilestep > 0 ? _map.DoorCache[door.TileId].North : _map.DoorCache[door.TileId].South;
         }
@@ -773,7 +773,7 @@ private const int BIT_ALLTILES =   (1 << (WALLSHIFT + 2));
 
         var tex = xtilestep > 0 ? _map.TileCache[tilehit].East : _map.TileCache[tilehit].West;
         
-        if (_map.TilePlane[yinttile, xtile - xtilestep] is Door door)
+        if (_map.TilePlane[yinttile][xtile - xtilestep] is Door door)
         {
             tex = ytilestep > 0 ? _map.DoorCache[door.TileId].East : _map.DoorCache[door.TileId].West;
         }

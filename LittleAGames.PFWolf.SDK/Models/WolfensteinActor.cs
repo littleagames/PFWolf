@@ -29,6 +29,8 @@ public class WolfensteinActor : Actor
 
     public virtual void T_Path()
     {
+	    Move(Speed, Angle);
+	    return;
 	    var move = Speed * 1;
 	    while (move > 0)
 	    {

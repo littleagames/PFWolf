@@ -29,4 +29,9 @@ public class Player : Actor
     {
         Health -= damage;
     }
+
+    // public override void OnPreUpdate()
+    // {
+    //     
+    // }
 }

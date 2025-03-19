@@ -38,7 +38,15 @@ public class MapManager : IMapManager
             
             map.Width = mapAsset.Width;
             map.Height = mapAsset.Height;
-            map.TilePlane = new MapComponent[map.Height, map.Width];
+            map.TilePlane = new MapComponent[map.Height][];//map.Width];
+            map.PhysicsMap = new PhysicsBox[map.Height][];
+            for (var h = 0; h < map.Height; h++)
+            {
+                map.TilePlane[h] = new MapComponent[map.Width];
+                map.PhysicsMap[h] = new PhysicsBox[map.Width];
+            }
+            
+            // TODO: Fill each
             map.Name = mapAsset.Name;
             
             // TODO: Does this belong here?
@@ -89,7 +97,7 @@ public class MapManager : IMapManager
                 assetNames.Add(definition.East);
                 assetNames.Add(definition.West);
 
-                map.TilePlane[y, x] = new Wall
+                map.TilePlane[y][x] = new Wall
                 {
                     TileId = tileId,
                     North = definition.North,
@@ -142,7 +150,7 @@ public class MapManager : IMapManager
             // do same work but split to door asset cache
             if (doorDefinition != null)
             {
-                map.TilePlane[y, x] = new Door
+                map.TilePlane[y][x] = new Door
                 {
                     TileId = tileId,
                     North = doorDefinition.North,
@@ -199,8 +207,16 @@ public class MapManager : IMapManager
 
             if (player.TryGetValue(objectNum, out var playerData))
             {
-                map.Children.Add(new Player(x, y, GetAngleFromParams(playerData.Angle, playerData.Direction),
-                    playerData.Health));
+                var playerActor = new Player(x, y, GetAngleFromParams(playerData.Angle, playerData.Direction),
+                    playerData.Health);
+                //var playerPhysics = PhysicsBox.Create(x<<16, y<<16, 0x5800, 0x5800);
+                // Hoping that this is a reference, and both update
+                //map.PhysicsBodies.Add(playerPhysics);
+                //playerActor.PhysicsBody = playerPhysics;//Children.Add(playerPhysics);
+
+                map.Actors.Add(playerActor);
+                map.Children.Add(playerActor);
+
             }
         }
         //var uniqueObjects = objectsPlane.GroupBy(x => x);
@@ -239,9 +255,6 @@ public class MapManager : IMapManager
                 var angle = GetAngleFromParams(actor.Angle, actor.Direction);
                 actorInstance = Activator.CreateInstance(script.Script, [x,y, angle, actor.State]) as Actor;
             }
-            
-            // TODO: Look for actor in scripts, if exists, instantiate as that actor type
-            // TODO : If it doesn't exist, just instantiate as Actor
 
             if (actorInstance != null)
             {

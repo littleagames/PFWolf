@@ -65,6 +65,7 @@ public abstract class MapComponent : Component
     public int Width { get; init; }
     public int Height { get; init; }
     public byte[] Data { get; init; } = [];
+    public PhysicsBox? PhysicsBody = null;
 }
 
 public class InputComponent : Component

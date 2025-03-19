@@ -52,6 +52,7 @@ public class GameLoopScene : Scene
         return;
     }
     
+    [Obsolete("This is to move out of scene to add details to the player, and pk3")]
     private void MovePlayer(float deltaTime)
     {
         if (_player == null)
