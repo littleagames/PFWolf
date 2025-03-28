@@ -1,9 +1,8 @@
 ﻿using System.Reflection;
-using LittleAGames.PFWolf.Common;
 using LittleAGames.PFWolf.Common.FileLoaders;
 using LittleAGames.PFWolf.Common.Helpers;
 
-namespace Engine.Managers;
+namespace LittleAGames.PFWolf.Common.Managers;
 
 public class AssetManager : IAssetManager
 {

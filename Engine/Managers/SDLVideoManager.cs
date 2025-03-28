@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Engine.Extensions;
+using LittleAGames.PFWolf.Common.Managers;
 using LittleAGames.PFWolf.SDK.Utilities;
 using SDL2;
 using static SDL2.SDL;

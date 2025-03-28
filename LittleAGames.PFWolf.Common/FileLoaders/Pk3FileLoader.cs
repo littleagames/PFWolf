@@ -91,28 +91,30 @@ public class Pk3FileLoader : BaseFileLoader
             {
                 if (entry.Name.EndsWith(".png"))
                 {
-                    using Image<Rgba32> bmpImage = Image.Load<Rgba32>(rawData);
-                    var graphicData = new byte[bmpImage.Width * bmpImage.Height];
-                    
+                    // TODO: New custom PNG loader
+                    var graphicData = PngFileLoader.Load(rawData, CleanName(entry.Name));
+                    //using Image<Rgba32> bmpImage = Image.Load<Rgba32>(rawData);
+                    //var graphicData = new byte[bmpImage.Width * bmpImage.Height];
+
                     // TODO: This is VERY slow
                     // Get a span for the current row of pixels
-                    var pixelRowSpan = bmpImage.GetPixelMemoryGroup();
-                    var index = 0;
-                    foreach (var span in pixelRowSpan)
-                    {
-                        foreach (var pixel in span.Span)
-                        {
-                            graphicData[index++] =
-                                ImageSharpExtensions.FindNearestColor(pixel, GamePalette.BasePalette.ToRgba32().ToList());
-                        }
-                    }
+                    //var pixelRowSpan = bmpImage.GetPixelMemoryGroup();
+                    //var index = 0;
+                    // foreach (var span in pixelRowSpan)
+                    // {
+                    //     foreach (var pixel in span.Span)
+                    //     {
+                    //         graphicData[index++] =
+                    //             ImageSharpExtensions.FindNearestColor(pixel, GamePalette.BasePalette.ToRgba32().ToList());
+                    //     }
+                    // }
 
-                    assets.Add(new GraphicAsset
-                    {
-                        Name = CleanName(entry.Name),
-                        RawData = graphicData,
-                        Dimensions = new Dimension((ushort)bmpImage.Width, (ushort)bmpImage.Height)
-                    });
+                    // assets.Add(new GraphicAsset
+                    // {
+                    //     Name = CleanName(entry.Name),
+                    //     RawData = graphicData,
+                    //     Dimensions = new Dimension((ushort)bmpImage.Width, (ushort)bmpImage.Height)
+                    // });
                 }
                 continue;
             }

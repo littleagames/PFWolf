@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Engine.Managers;
+namespace LittleAGames.PFWolf.Common.Managers;
 
 public interface IAssetManager
 {
